@@ -1,0 +1,85 @@
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <section class="vh-100 bg_login">
+        <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                <div class="card-body p-5">
+
+                    <div class="text-center text-heading-login">
+                        <h1 class="font_logo">Paws<span class="font_logohalf">Pal</span></h1>
+                        <h3 class="mb-3 text_loginheader">Register</h3>
+                    </div>
+                    
+                    <div class="form-outline mb-3">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" class="form-control form-control-md" formControlName="username" name="username"/>
+                        <div *ngIf="registerForm.get('username')?.errors">
+                          <div *ngIf="registerForm.get('username')?.hasError('required')" class="error-message">Username is required.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-outline mb-3">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" class="form-control form-control-md" formControlName="email" name="email" />
+                        <div *ngIf="registerForm.get('email')?.errors">
+                            <div *ngIf="registerForm.get('email')?.hasError('required')" class="error-message">Email is required.</div>
+                            <div *ngIf="registerForm.get('email')?.hasError('email')" class="error-message">Please enter a valid email address.</div>
+                        </div>
+                    </div>
+        
+                    <div class="form-outline mb-3">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-control form-control-md" formControlName="password"  name="password"/>
+                        <div *ngIf="registerForm.get('password')?.errors">
+                            <div *ngIf="registerForm.get('password')?.hasError('required')" class="error-message">Password is required.</div>
+                            <div *ngIf="registerForm.get('password')?.hasError('minlength') && !registerForm.get('password')?.hasError('required')" class="error-message">
+                                Password must be at least 8 characters long.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-outline mb-3">
+                        <label class="form-label" for="repeatPassword">Repeat Password</label>
+                        <input type="password" id="repeatPassword" class="form-control form-control-md" formControlName="repeatPassword" />
+                        <div *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('repeatPassword')?.touched" class="error-message">
+                            Passwords do not match.
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button class="btn btn_login btn-lg btn-block" type="submit" [disabled]="registerForm.invalid">Register</button>
+                    </div>
+
+                    <!-- The Modal -->
+                    <div class="modal" id="myModal">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                        
+                                <!-- Modal Header -->
+                                <div class="modal-header">
+                                <h4 class="modal-title">Modal Heading</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                        
+                                <!-- Modal body -->
+                                <div class="modal-body">
+                                Modal body..
+                                </div>
+                        
+                                <!-- Modal footer -->
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" [routerLink]="['/login']">Close</button>
+                                </div>
+                        
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>  
+            </div>
+            </div>
+        </div>
+        </div>
+    </section>
+</form>

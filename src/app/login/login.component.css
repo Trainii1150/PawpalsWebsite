@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Angkor&family=IBM+Plex+Sans+Thai:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+body{
+    font-family: 'Poppins', sans-serif !important;
+}
+.bg_login{
+   margin: 0; /* Remove default margin */
+   padding: 0; /* Remove default padding */
+   background-image: url('../img/PawsPallogin.png'); /* Replace 'your-image.jpg' with the path to your image */
+   background-size: cover; /* Cover the entire container */
+   background-position: center; /* Center the background image */
+   background-repeat: no-repeat; /* Do not repeat the background image */
+   -webkit-background-size: cover;
+   -moz-background-size: cover;
+   -o-background-size: cover;
+}
+.btn_login{
+    background-color: #D9D9D9 !important;
+    color: #5a6167 !important;
+}
+.font_logo{
+    font-family: 'Angkor', serifc !important;
+    color: #FF5757;
+}
+.font_logohalf{
+    font-family: 'Angkor', serifc !important;
+    color: #56FFCC;
+}
+.text_loginheader{
+    font-weight: 600;
+    color: #5F5F5F;
+}
+.error-message{
+    color: #de3535;
+}
