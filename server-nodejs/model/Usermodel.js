@@ -10,6 +10,21 @@ const pool = new Pool({
     port: process.env.Pool_Port,
 });
 
+// Open the connection when your application starts
+pool.connect()
+  .then(() => {
+    console.log('Connected to PostgreSQL database!');
+  })
+  .catch((err) => {
+    console.error('Error connecting to PostgreSQL database:', err);
+  });
+
+// Close the pool when your application exits
+process.on('exit', () => {
+  pool.end();
+});
+
+
 const saltRounds = 10;
 
 const createUser = async (username, email, password) => {
@@ -17,7 +32,7 @@ const createUser = async (username, email, password) => {
 
     try {
         const result = await pool.query(
-            'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *',
+            'INSERT INTO user_table (username, email, password) VALUES ($1, $2, $3) RETURNING *',
             [username, email, hashedPassword]
         );
 
@@ -28,6 +43,17 @@ const createUser = async (username, email, password) => {
     }
 };
 
+const getUserEmail = async (email) => {
+    try {
+        const result = await pool.query('SELECT * FROM user_table WHERE email = $1', [email]);
+        return result.rows[0];
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error getting user by email');
+    }
+};
+
 module.exports = {
     createUser,
+    getUserEmail,
 };
