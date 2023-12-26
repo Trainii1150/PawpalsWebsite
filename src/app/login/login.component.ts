@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 export class LoginComponent {
   loginForm: FormGroup;
 
+
   constructor(private fb: FormBuilder ,private router: Router, private authService: AuthService) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -20,8 +21,9 @@ export class LoginComponent {
     });
   }
   ngOnInit():void {}
+  
   onSubmit(){
-    console.log(this.loginForm.value);
+    //console.log(this.loginForm.value);
     if(this.loginForm.value){
       const {email, password} = this.loginForm.value;
       this.authService.login(email,password).subscribe(
@@ -34,19 +36,24 @@ export class LoginComponent {
               icon: 'success',
               title: 'Login Successful!',
               text: 'You have successfully logged in.',
-            });
+              confirmButtonText: 'Ok',
+            }).then((result)=>{
+              if(result.isConfirmed){
+                this.router.navigate(['/home']);
+              }
+            })
 
-            this.router.navigate(['/home']);
+           
         },
         (error) => {
-            console.error('Registration failed', error);
+            //console.error('Registration failed', error);
             Swal.fire({
               icon: 'error',
               title: 'Login Failed',
               text: 'Invalid email or password. Please try again.',
             });
         }
-    );
+      );
     }
   }
 }

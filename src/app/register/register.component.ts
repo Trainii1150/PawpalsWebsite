@@ -32,7 +32,6 @@ export class RegisterComponent implements OnInit  {
 
   onSubmit() {
     if (this.registerForm.valid) {
-        const userData = this.registerForm.value;
         const { username,email ,password } = this.registerForm.value;
         this.authService.register(username,email,password).subscribe(
             (response) => {
@@ -44,10 +43,13 @@ export class RegisterComponent implements OnInit  {
                     icon: 'success',
                     title: 'Registration Successful!',
                     text: 'You have successfully registered.',
-                });
-
-                // Redirect to the login page
-                this.router.navigate(['/login']);
+                    confirmButtonText: 'Back to Login',
+                }).then((result)=>{
+                  if(result.isConfirmed){
+                    // Redirect to the login page
+                    this.router.navigate(['/login']);
+                  }
+                })
             },
             (error) => {
                 // Handle registration error
@@ -61,5 +63,12 @@ export class RegisterComponent implements OnInit  {
         );
         
     }
-}
+    else{
+      Swal.fire({
+        icon: 'warning',
+        title: 'Registration Failed',
+        text: 'Please enter all the required fields to register.',
+      });
+    }
+  }
 }
