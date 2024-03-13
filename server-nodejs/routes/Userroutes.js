@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controller/UserController')
-const Middleauth = require('../middleware/middleauth');
+const AuthMiddleware = require('../middleware/authmid');
 
 router.post('/register',UserController.registerUser)
 router.post('/login',UserController.loginUser)
-router.post('/testhome',Middleauth,(req,res)=>{
+router.get('/testhome',AuthMiddleware,(req,res)=>{
     res.status(200).send("Welcome to my pawpalsworld!");
 })
 
