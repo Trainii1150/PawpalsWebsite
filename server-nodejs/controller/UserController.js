@@ -32,7 +32,7 @@ const loginUser = async (req, res) => {
                 iat: new Date().getTime(),
 
             },process.env.Accesstoken,
-            {expiresIn:"5m"}
+            {expiresIn:"1h"}
         );
         res.json({ message: 'Login successful ',token });
     } catch (error) {
