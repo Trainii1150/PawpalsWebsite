@@ -14,5 +14,10 @@ export class AuthService {
   login(email: string,password: string) {
     return this.http.post(`${this.UrlApi}/login`, { email, password });
   }
-  
+  isloggedin(){
+    return !!localStorage.getItem('auth_key');
+  }
+  setLocalStorage(resObject:any){
+    localStorage.setItem('auth_key',resObject.token);
+  }
 }

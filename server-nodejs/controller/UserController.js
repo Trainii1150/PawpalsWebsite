@@ -29,7 +29,7 @@ const loginUser = async (req, res) => {
         }
         const token = jwt.sign({user : user.username},process.env.Accesstoken,{expiresIn:"5m"});
         //console.log(`Token Generated at:- ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
-        res.json({ message: 'Login successful ',token });
+        res.json({ user: user.username,token });
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });

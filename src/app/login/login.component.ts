@@ -29,8 +29,8 @@ export class LoginComponent {
       this.authService.login(email,password).subscribe(
         (response) => {
             // Handle successful registration
-            console.log('Registration successful', response);
-
+            console.log(response);
+            this.authService.setLocalStorage(response);
             // Show SweetAlert2 success message
             Swal.fire({
               icon: 'success',
