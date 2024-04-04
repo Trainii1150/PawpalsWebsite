@@ -9,16 +9,4 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent {
     constructor(private authService: AuthService,private router: Router){}
-    ngOnInit(){
-      this.checkcredentials();
-    }
-    checkcredentials(){
-      if(this.authService.isloggedin()){
-        console.log("Auth is access");
-      }
-      else{
-        //console.log("Failure");
-        this.router.navigate(['/login']);
-      }
-    }
 }

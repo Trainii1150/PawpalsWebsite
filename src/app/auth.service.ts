@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environments } from './environments/environments';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private UrlApi = 'http://localhost:3000/api/user'; //connect data api from server node
+  private UrlApi = environments.apiUrl; //connect data api from server node
   
   constructor(private http:HttpClient) {}
   register(username: string,email: string ,password: string) {
@@ -19,5 +20,8 @@ export class AuthService {
   }
   setLocalStorage(resObject:any){
     localStorage.setItem('auth_key',resObject.token);
+  }
+  logout(){
+    localStorage.removeItem('auth_key');
   }
 }
