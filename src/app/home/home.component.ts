@@ -9,4 +9,17 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent {
     constructor(private authService: AuthService,private router: Router){}
+    ngOnInit(){
+      this.getdata();
+    }
+    getdata(){
+      this.authService.fetchuserdata().subscribe(
+        (data)=>{
+          console.log(data);
+        },
+        (error)=>{
+          console.error(error);
+        }
+      )
+    }
 }

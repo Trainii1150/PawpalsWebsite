@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environments } from './environments/environments';
 
 @Injectable({
@@ -7,6 +7,12 @@ import { environments } from './environments/environments';
 })
 export class AuthService {
   private UrlApi = environments.apiUrl; //connect data api from server node
+  /*private httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('auth_key')}`
+    })
+  };*/
   
   constructor(private http:HttpClient) {}
   register(username: string,email: string ,password: string) {
@@ -23,5 +29,8 @@ export class AuthService {
   }
   logout(){
     localStorage.removeItem('auth_key');
+  }
+  fetchuserdata(){
+    return this.http.get(`${this.UrlApi}/data`);
   }
 }

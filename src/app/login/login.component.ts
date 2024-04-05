@@ -39,7 +39,7 @@ export class LoginComponent {
               confirmButtonText: 'Ok',
             }).then((result)=>{
               if(result.isConfirmed){
-                this.router.navigate(['/home']);
+                this.router.navigate(['/']);
               }
             })
 

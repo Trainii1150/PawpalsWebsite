@@ -53,7 +53,17 @@ const getUserEmail = async (email) => {
     }
 };
 
+const getUserByUserId = async () => {
+    try {
+        const result = await pool.query('SELECT * FROM user_table');
+        return result.rows;
+    } catch (error) {
+        console.error(error);
+    }
+};
+
 module.exports = {
     createUser,
     getUserEmail,
+    getUserByUserId,
 };

@@ -36,7 +36,18 @@ const loginUser = async (req, res) => {
     }
 }
 
+const dataUser = async (req, res) => {
+    try {
+        const data = await userModel.getUserByUserId();
+        res.json(data);
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
+    dataUser,
 };
