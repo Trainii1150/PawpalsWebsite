@@ -22,7 +22,7 @@ export class LoginComponent {
   }
   ngOnInit():void {}
   
-  onSubmit(){
+  onSubmit():void{
     //console.log(this.loginForm.value);
     if(this.loginForm.value){
       const {email, password} = this.loginForm.value;
@@ -31,19 +31,7 @@ export class LoginComponent {
             // Handle successful registration
             console.log(response);
             this.authService.setLocalStorage(response);
-            // Show SweetAlert2 success message
-            Swal.fire({
-              icon: 'success',
-              title: 'Login Successful!',
-              text: 'You have successfully logged in.',
-              confirmButtonText: 'Ok',
-            }).then((result)=>{
-              if(result.isConfirmed){
-                this.router.navigate(['/']);
-              }
-            })
-
-           
+            this.showLoginSuccess();          
         },
         (error) => {
             //console.error('Registration failed', error);
@@ -55,5 +43,19 @@ export class LoginComponent {
         }
       );
     }
+  }
+
+  showLoginSuccess(): void{
+    Swal.fire({
+      icon: 'success',
+      title: 'Login Successful!',
+      text: 'You have successfully logged in.',
+      confirmButtonText: 'Ok',
+    }).then((result)=>{
+      if(result.isConfirmed){
+        this.router.navigate(['/']);
+      }
+    })
+
   }
 }
