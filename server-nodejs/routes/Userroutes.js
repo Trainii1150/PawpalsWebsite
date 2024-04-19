@@ -12,7 +12,7 @@ router.get('/data',AuthMiddleware,UserController.dataUser) //to test auth
 
 
 //Route Verification Email
-router.get('/verifyemail',UserController.verifyEmail);
-router.post('/resend-verifyemail',UserController.resendverifyEmail);
+router.post('/verifyemail',UserController.verifyEmail);
+router.post('/send-verifyemail',UserController.sendVerifyEmail);
 
 module.exports = router;

@@ -9,9 +9,9 @@ const registerUser = async (req, res) => {
 
     try {
         const user = await userModel.createUser(username, email, password);
-        const token = tokenEmailVerificationGenerate(username,email);
-        sendVerifyEmail(email,token);
-        console.log(token);
+        const token = tokenEmailVerificationGenerate(email);
+        //sendVerifyEmail(email,token);
+        //console.log(token);
         res.json(user);
     } catch (error) {
         console.error(error);
@@ -31,6 +31,11 @@ const loginUser = async (req, res) => {
         if (!passwordMatch) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
+
+        if (!user.user_verify) {
+            return res.status(400).json({error: 'Email not verified. Please resend verification email.'});
+        }
+
         const token = jwt.sign({user : user.username},process.env.Accesstoken,{expiresIn:"5m"});
         //console.log(`Token Generated at:- ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
         res.json({ user: user.username,token });
@@ -41,22 +46,32 @@ const loginUser = async (req, res) => {
 };
 
 
-const tokenEmailVerificationGenerate = (user, email) => {
-    return jwt.sign({user,email},process.env.EmailVerificationToken,{expiresIn:"1h"});
+const tokenEmailVerificationGenerate = (email) => {
+    return jwt.sign({email},process.env.EmailVerificationToken,{expiresIn:"1h"});
 }
 
 const verifyEmail = async (req,res) => {
-    const token = req.query.token;
+    const { token } = req.body;
 
     if(!token){
-        return res.status(400).json({ error: 'Token is missing' });
+        return res.status(400).json({ error: 'Token is expired or missing' });
     }
     else{
+        try{
+            const decoded = jwt.verify(token,process.env.EmailVerificationToken)
+            const {username, email} = decoded;
 
+            await userModel.updateUserVerification(username,email)
+            
+            res.status(200).json({ message: 'Email verified successfully' });
+        }catch(error){
+            console.error('Error verifying email:', error);
+            res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        }
     }
 }
 
-const resendverifyEmail = async (req,res) => {
+const sendVerifyEmail = async (req,res) => {
     const { email } = req.body;
 
     try {
@@ -67,8 +82,8 @@ const resendverifyEmail = async (req,res) => {
         if (user.isVerified) {
             return res.status(400).json({ error: 'Email already verified' });
         }
-        const token = generateEmailVerificationToken(user.email);
-        sendVerifyEmail(user.email, token);
+        const token = tokenEmailVerificationGenerate(user.email);
+        sendEmail(user.email, token);
         res.json({ message: 'Verification email resent successfully' });
     } catch (error) {
         console.error('Failed to resend verification email:', error);
@@ -77,7 +92,7 @@ const resendverifyEmail = async (req,res) => {
 }
 
 
-const sendVerifyEmail = async (email, token) => {
+const sendEmail = async (email, token) => {
     try {
         const transporter = nodemailer.createTransport({
             host: 'smtp.office365.com',
@@ -120,6 +135,6 @@ module.exports = {
     loginUser,
     dataUser,
     verifyEmail,
-    resendverifyEmail,
     sendVerifyEmail,
+    sendEmail,
 };

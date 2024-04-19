@@ -30,45 +30,62 @@ export class RegisterComponent implements OnInit  {
     return password === repeatPassword ? null : { passwordMismatch: true };
   }
 
-  onSubmit() {
+  onSubmit():void {
     if (this.registerForm.valid) {
         const { username,email ,password } = this.registerForm.value;
         this.authService.register(username,email,password).subscribe(
-            (response) => {
-                // Handle successful registration
-                console.log('Registration successful', response);
-
-                // Show SweetAlert2 success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Registration Successful!',
-                    text: 'You have successfully registered.',
-                    confirmButtonText: 'Back to Login',
-                }).then((result)=>{
-                  if(result.isConfirmed){
-                    // Redirect to the login page
-                    this.router.navigate(['/login']);
-                  }
-                })
-            },
-            (error) => {
-                // Handle registration error
-                console.error('Registration failed', error);
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Registration Failed',
-                  text: 'An error occurred during registration. Please try again.',
-              });
-            }
+          () => { 
+            this.authService.sendVerifyEmail(email).subscribe(
+              () => {
+                  this.showRegisterSuccess();
+              },
+              (error) => {
+                // Handle verify registration error
+                console.error('Failed to send verification email:', error);
+                this.showRegisterError();
+              }
+            );           
+          },
+          (error) => {
+              // Handle registration error
+              console.error('Registration failed', error);
+              this.showRegisterError();
+          }
         );
         
     }
     else{
+      this.showFormValidationError();
+    }
+  }
+
+  showRegisterSuccess(): void{
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'You have successfully registered. Please check your email for verification.',
+        confirmButtonText: 'Back to Login',
+      }).then((result)=>{
+        if(result.isConfirmed){
+          // Redirect to the login page
+          this.router.navigate(['/login']);
+        }
+      })
+  };
+
+  showRegisterError(): void{
+      Swal.fire({
+        icon: 'error',
+        title: 'Registration Failed',
+        text: 'An error occurred during registration. Please try again.',
+    });
+  };
+
+  showFormValidationError(): void{
       Swal.fire({
         icon: 'warning',
         title: 'Registration Failed',
         text: 'Please enter all the required fields to register.',
-      });
-    }
-  }
+    });
+  };
 }

@@ -30,22 +30,26 @@ export class LoginComponent {
         (response) => {
             // Handle successful registration
             console.log(response);
-            this.authService.setLocalStorage(response);
-            this.showLoginSuccess();          
+            this.showLoginSuccess(response);          
         },
         (error) => {
             //console.error('Registration failed', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Login Failed',
-              text: 'Invalid email or password. Please try again.',
-            });
+            if (error.status === 400){
+              this.showResendEmailVerifyWarning(email)
+            } else {
+                Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: 'Invalid email or password. Please try again.',
+              });
+            }
+            
         }
       );
     }
   }
 
-  showLoginSuccess(): void{
+  showLoginSuccess(req: Object): void{
     Swal.fire({
       icon: 'success',
       title: 'Login Successful!',
@@ -53,9 +57,46 @@ export class LoginComponent {
       confirmButtonText: 'Ok',
     }).then((result)=>{
       if(result.isConfirmed){
+        this.authService.setLocalStorage(req);
         this.router.navigate(['/']);
       }
-    })
+    });
 
+  }
+
+  showResendEmailVerifyWarning(email: string): void{
+    Swal.fire({
+      icon: 'warning',
+      title: 'Email Not Verified',
+      text: 'Your email is not verified. Resend verification email?',
+      showCancelButton: true,
+      confirmButtonText: 'Resend Email',
+      cancelButtonText: 'Cancel',
+    }).then((result)=>{
+      if(result.isConfirmed){
+        this.showResendEmailVerify(email)
+      }
+    });
+  }
+
+  showResendEmailVerify(email : string) :void{
+    this.authService.sendVerifyEmail(email).subscribe(
+      (response) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Verification Email Resent',
+          text: 'Please check your email inbox for the verification email.',
+          confirmButtonText: 'Ok',
+        });
+      },
+      (error)=>{
+        console.error('Failed to resend verification email', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while resending the verification email. Please try again later.',
+        });
+      }
+    );
   }
 }

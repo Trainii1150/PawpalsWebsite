@@ -62,8 +62,20 @@ const getUserByUserId = async () => {
     }
 };
 
+const updateUserVerification = async (user,email) => {
+    try{
+        const result = await pool.query('UPDATE user_table SET user_verify = true WHERE email = $1',[email]);
+        console.log(`${user} of email : ${email} is now verified.`);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Failed to update user verification status');
+    }
+
+};
+
 module.exports = {
     createUser,
     getUserEmail,
     getUserByUserId,
+    updateUserVerification,
 };

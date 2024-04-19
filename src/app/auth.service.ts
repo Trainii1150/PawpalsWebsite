@@ -18,6 +18,12 @@ export class AuthService {
   register(username: string,email: string ,password: string) {
     return this.http.post(`${this.UrlApi}/register`, { username,email, password });
   }
+  sendVerifyEmail(email: string) {
+    return this.http.post(`${this.UrlApi}/send-verifyemail`, { email });
+  }
+  verifyEmail(token: string){
+    return this.http.post(`${this.UrlApi}/verifyemail`,{token});
+  }
   login(email: string,password: string) {
     return this.http.post(`${this.UrlApi}/login`, { email, password });
   }
