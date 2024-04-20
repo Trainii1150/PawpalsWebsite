@@ -31,11 +31,24 @@ export class VerifyEmailComponent implements OnInit {
             // Email verification failed
             console.error('Email verification failed', error);
             if (error.status === 401) {
-              // Token expired, prompt user to resend verification email
-              console.log('Token expired', error);
-              this.promptResendVerificationEmail(email);
-            } else {
-              // Other errors, display generic error message
+                // Token expired, prompt user to resend verification email
+                console.log('Token expired', error);
+                this.promptResendVerificationEmail(email);            
+            } 
+            else if (error.status === 200){
+                // Token expired, prompt user to resend verification email but Email is already verified
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Email Verification Failed',
+                  text: 'Email is already verified. Please return to the login page.',
+                  confirmButtonText: 'Ok',
+                }).then(() => {
+                  // Redirect to login page
+                  this.router.navigate(['/login']);
+                });
+            }
+            else {
+              // Other errors
               Swal.fire({
                 icon: 'error',
                 title: 'Email Verification Failed',
@@ -74,11 +87,23 @@ export class VerifyEmailComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         // Redirect to resend-verification-email page
-        this.authService.verifyEmail(email).subscribe()
+        this.authService.sendVerifyEmail(email).subscribe(
+          () =>{
+            this.showResendVerificationEmailSuccess();
+          },
+        )
       } else {
         // Redirect to login page
         this.router.navigate(['/login']);
       }
+    });
+  }
+
+  showResendVerificationEmailSuccess() :void {
+    Swal.fire({
+      icon: 'success',
+      title: 'Email Resent Successfully',
+      text: 'Please check your email for verification.',
     });
   }
     

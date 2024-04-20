@@ -60,13 +60,26 @@ const verifyEmail = async (req,res) => {
         try{
             const decoded = jwt.verify(token,process.env.EmailVerificationToken)
             const {username, email} = decoded;
-
-            await userModel.updateUserVerification(username,email)
+            const user = userModel.getUserEmail(email);
+            if(user.user_verify){
+                res.status(200).send("Email is already verified.");
+            }
+            else{
+                await userModel.updateUserVerification(username,email)
+                res.status(201).json({ message: 'Email verified successfully' });
+            }
             
-            res.status(200).json({ message: 'Email verified successfully' });
         }catch(error){
             if (error.name === 'TokenExpiredError') {
-                return res.status(401).json({ error: 'Token has expired' });
+                const { email } = jwt.decode(token);
+                const user = await userModel.getUserEmail(email);
+                if(user.user_verify){
+                    res.status(200).send("Email is already verified.");
+                }
+                else{
+                    return res.status(401).json({ error: 'Token has expired' });
+                }
+                
             }
             else{
                 console.error('Error verifying email:', error);
@@ -85,7 +98,7 @@ const sendVerifyEmail = async (req,res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        if (user.isVerified) {
+        if (user.user_verify) {
             return res.status(400).json({ error: 'Email already verified' });
         }
         const token = tokenEmailVerificationGenerate(user.email);
