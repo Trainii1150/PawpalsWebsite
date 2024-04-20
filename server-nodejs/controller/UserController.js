@@ -54,7 +54,7 @@ const verifyEmail = async (req,res) => {
     const { token } = req.body;
 
     if(!token){
-        return res.status(400).json({ error: 'Token is expired or missing' });
+        return res.status(400).json({ error: 'Token is missing' });
     }
     else{
         try{
@@ -65,8 +65,14 @@ const verifyEmail = async (req,res) => {
             
             res.status(200).json({ message: 'Email verified successfully' });
         }catch(error){
-            console.error('Error verifying email:', error);
-            res.status(500).json({ error: 'Internal Server Error', details: error.message });
+            if (error.name === 'TokenExpiredError') {
+                return res.status(401).json({ error: 'Token has expired' });
+            }
+            else{
+                console.error('Error verifying email:', error);
+                res.status(500).json({ error: 'Internal Server Error', details: error.message });
+            }
+            
         }
     }
 }
@@ -108,7 +114,7 @@ const sendEmail = async (email, token) => {
             from: process.env.Email_User,
             to: email, // Ensure that the 'email' parameter is correctly passed as the recipient's email address
             subject: 'Email Verification',
-            text: `Please click the following link to verify your email: http://localhost:4200/verify-email?token=${token}`,
+            text: `Please click the following link to verify your email: http://localhost:4200/verify-email?token=${token}&email=${email}`,
         };
 
         await transporter.sendMail(mailOptions);
