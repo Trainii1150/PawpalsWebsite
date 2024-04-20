@@ -13,6 +13,7 @@ export class VerifyEmailComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       const verifytoken = params['token'];
+      const email :string = params['email'];
       if(verifytoken){
         this.authService.verifyEmail(verifytoken).subscribe(
           (response) =>{
@@ -29,9 +30,10 @@ export class VerifyEmailComponent implements OnInit {
           (error) => {
             // Email verification failed
             console.error('Email verification failed', error);
-            if (error.status === 400 && error.error && error.error.error === 'Token is expired or missing') {
+            if (error.status === 401) {
               // Token expired, prompt user to resend verification email
-              this.promptResendVerificationEmail();
+              console.log('Token expired', error);
+              this.promptResendVerificationEmail(email);
             } else {
               // Other errors, display generic error message
               Swal.fire({
@@ -48,23 +50,31 @@ export class VerifyEmailComponent implements OnInit {
         )
       }
       else{
-        this.promptResendVerificationEmail();
+        Swal.fire({
+          icon: 'error',
+          title: 'Email Verification Failed',
+          text: 'No token was found in the URL. Please make sure you have accessed the verification link correctly.',
+          confirmButtonText: 'Ok',
+        }).then(() => {
+          // Redirect to login page
+          this.router.navigate(['/login']);
+        });
       }
     })
   }
 
-  promptResendVerificationEmail(): void {
+  promptResendVerificationEmail(email :string): void {
     Swal.fire({
-      icon: 'info',
-      title: 'Verification Token Resent',
-      text: 'The verification token has expired or not found. Would you like to resend the verification email?',
+      icon: 'warning',
+      title: 'Verification Token Expired',
+      text: 'The verification token has expired. Would you like to resend the verification email?',
       showCancelButton: true,
       confirmButtonText: 'Resend Email',
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
         // Redirect to resend-verification-email page
-        this.router.navigate(['/resend-verification-email']);
+        this.authService.verifyEmail(email).subscribe()
       } else {
         // Redirect to login page
         this.router.navigate(['/login']);
