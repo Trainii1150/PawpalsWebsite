@@ -81,7 +81,7 @@ export class LoginComponent {
 
   showResendEmailVerify(email : string) :void{
     this.authService.sendVerifyEmail(email).subscribe(
-      (response) => {
+      () => {
         Swal.fire({
           icon: 'success',
           title: 'Verification Email Resent',

@@ -103,7 +103,7 @@ export class VerifyEmailComponent implements OnInit {
     Swal.fire({
       icon: 'success',
       title: 'Email Resent Successfully',
-      text: 'Please check your email for verification.',
+      text: 'Please check your email inbox for the verification email.',
     });
   }
     

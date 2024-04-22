@@ -35,7 +35,7 @@ export class AuthInterceptor implements HttpInterceptor {
           // Log out the user or perform any other action
           this.authService.logout();
           // Redirect to the login page or show a message to the user
-          console.log('Token expired or invalid. Please log in again.');
+          console.log('Token expired or invalid.');
         }
         // Pass the error along to be handled by the calling code
         return throwError(error);
