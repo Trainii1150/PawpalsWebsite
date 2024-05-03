@@ -73,6 +73,7 @@ export class RegisterComponent implements OnInit  {
       })
   };
 
+
   showRegisterError(): void{
       Swal.fire({
         icon: 'error',

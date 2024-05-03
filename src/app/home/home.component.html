@@ -1,1 +1,231 @@
-<p>home works!</p>
+<section class="bg-white">
+  <div class="py-4 px-2 mx-auto max-w-screen-xl sm:py-4 lg:px-6">
+
+    <div class="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-4">
+      
+      <!-- Static Boxes -->
+      <div class="flex flex-col gap-4 md:flex-col lg:flex-col w-full md:w-auto">
+        <!-- Static Box 1 -->
+        <div class="p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
+          <dl class="space-y-2">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Today coding time</dt>
+            <dd class="text-5xl font-light md:text-xl dark:text-black">{{todayCodeTime}} Hours</dd>
+            <dd class="flex items-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
+              <span>{{todayTimeCompare}}% increase</span>
+              <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M17.25 15.25V6.75H8.75"></path>
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M17 7L6.75 17.25"></path>
+              </svg>
+            </dd>
+          </dl>
+        </div>
+
+        <!-- Static Box 2 -->
+        <div class="p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
+          <dl class="space-y-2">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly coding time</dt>
+            <dd class="text-5xl font-light md:text-xl dark:text-black">{{monthlyCodeTime}} Hours</dd>
+            <dd class="flex items-center space-x-1 text-sm font-medium text-red-500 dark:text-red-400">
+              <span>{{monthlyTimeCompare}}% increase</span>
+              <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M17.25 8.75V17.25H8.75"></path>
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M17 17L6.75 6.75"></path>
+              </svg>
+            </dd>
+          </dl>
+        </div>
+
+        <!-- Static Box 3 -->
+        <div class="p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
+          <dl class="space-y-2">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Coins</dt>
+            <dd class="text-5xl font-light md:text-xl dark:text-black">{{todayCoins}} coins</dd>
+            <dd class="flex items-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
+              <span>Total coins {{totalCoins}}</span>
+              <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M17.25 15.25V6.75H8.75"></path>
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M17 7L6.75 17.25"></path>
+              </svg>
+            </dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Donut Graph -->
+      <div class="flex flex-col flex-grow md:flex-none md:w-2/5 lg:w-3/5 bg-gray-50 rounded-lg h-auto md:h-full shadow">
+        <a href="" class="group relative flex flex-col overflow-hidden  px-4 pb-4 pt-4 flex-grow">
+          <div class="flex justify-between mb-3">
+            <div class="flex justify-center items-center">
+              <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-black pe-1">
+                Time in used
+              </h5>
+              <svg data-popover-target="chart-info" data-popover-placement="bottom"
+                class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1"
+                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm0 16a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm1-5.034V12a1 1 0 0 1-2 0v-1.418a1 1 0 0 1 1.038-.999 1.436 1.436 0 0 0 1.488-1.441 1.501 1.501 0 1 0-3-.116.986.986 0 0 1-1.037.961 1 1 0 0 1-.96-1.037A3.5 3.5 0 1 1 11 11.466Z" />
+              </svg>
+              <div data-popover id="chart-info" role="tooltip"
+                class="absolute z-10 invisible inline-block text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
+                <div class="p-3 space-y-2">
+                  <h3 class="font-semibold text-gray-900 dark:text-white">
+                    Activity growth - Incremental
+                  </h3>
+                  <p>
+                    Report helps navigate cumulative growth of community
+                    activities. Ideally, the chart should have a growing trend, as
+                    stagnating chart signifies a significant decrease of community
+                    activity.
+                  </p>
+                  <h3 class="font-semibold text-gray-900 dark:text-white">
+                    Calculation
+                  </h3>
+                  <p>
+                    For each date bucket, the all-time volume of activities is
+                    calculated. This means that activities in period n contain all
+                    activities up to period n, plus the activities generated by
+                    your community in period.
+                  </p>
+                  <a href="#"
+                    class="flex items-center font-medium text-blue-600 dark:text-blue-500 dark:hover:text-blue-600 hover:text-blue-700 hover:underline">Read
+                    more
+                    <svg class="w-2 h-2 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                      fill="none" viewBox="0 0 6 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m1 9 4-4-4-4" />
+                    </svg></a>
+                </div>
+                <div data-popper-arrow></div>
+              </div>
+            </div>
+            <div>
+              <button type="button" data-tooltip-target="data-tooltip" data-tooltip-placement="bottom"
+                class="hidden sm:inline-flex items-center justify-center text-gray-500 w-8 h-8 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm">
+                <svg class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 16 18">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 1v11m0 0 4-4m-4 4L4 8m11 4v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3" />
+                </svg><span class="sr-only">Download data</span>
+              </button>
+              <div id="data-tooltip" role="tooltip"
+                class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Download CSV
+                <div class="tooltip-arrow" data-popper-arrow></div>
+              </div>
+            </div>
+          </div>
+          <!-- Donut Chart -->
+          <div class="py-6 w-full" id="donut-chart"></div>
+          <div class="flex justify-center items-center pt-5">
+            <!-- Button -->
+            <button id="dropdownDefaultButton" data-dropdown-toggle="lastDaysdropdown" data-dropdown-placement="bottom"
+              class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white"
+              type="button">
+              Last 7 days
+              <svg class="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="m1 1 4 4 4-4" />
+              </svg>
+            </button>
+            <div id="lastDaysdropdown"
+              class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                <li>
+                  <a href="#"
+                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Yesterday</a>
+                </li>
+                <li>
+                  <a href="#"
+                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Today</a>
+                </li>
+                <li>
+                  <a href="#"
+                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 7
+                    days</a>
+                </li>
+                <li>
+                  <a href="#"
+                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 30
+                    days</a>
+                </li>
+                <li>
+                  <a href="#"
+                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 90
+                    days</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Pet Box -->
+      <div class="flex flex-col gap-4 md:flex-col lg:flex-col w-full md:w-auto ">
+        <div class="bg-yellow-100 rounded-2xl shadow flex flex-col justify-center items-center min-h-0">
+          <h5 class="mb-1 text-xl font-bold text-white">Trainny</h5>
+          <img class="w-100 h-40 mb-1"
+            src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/ce8b1e76965389.5c7945b0cffef.gif"
+            alt="Pet image" />
+          <div class="px-4 py-3 w-72">
+            <svg height="25px" width="25px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#ffffff"
+              stroke="#ffffff">
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+              <g id="SVGRepo_iconCarrier">
+                <style type="text/css">
+                  .st0 {
+                    fill: #ffffff;
+                  }
+                </style>
+                <g>
+                  <path class="st0"
+                    d="M224.087,0c-13.363,0-24.184,10.827-24.184,24.189c0,0.008,0,1.605,0,4.452c0,13.978,0,57.978,0,88.166 c0,11.51-9.338,20.849-20.855,20.849c-11.518,0-20.85-9.339-20.85-20.849c0-36.346,0-90.948,0-90.948 c0-13.355-10.834-24.19-24.197-24.19c-13.362,0-24.192,10.834-24.192,24.19c0,0.007,0,1.612,0,4.444c0,13.733,0,56.388,0,86.504 c0,11.51-9.332,20.849-20.854,20.849c-11.514,0-20.85-9.339-20.85-20.849c0-36.317,0-92.618,0-92.618 C68.106,10.827,57.276,0,43.919,0C30.56,0,19.726,10.827,19.726,24.189c0,0.008,0,1.605,0,4.452c0,19.876,0,100.359,0,115.69 c0.008,2.534,0.213,4.887,0.555,7.211c0.654,4.343,1.762,8.62,3.297,13.064c2.693,7.719,6.709,15.89,12.32,24.139 c4.209,6.172,9.316,12.352,15.445,18.206c9.182,8.758,20.709,16.753,34.6,22.49c4.615,1.91,9.506,3.529,14.615,4.887v264.166 c0,7.465,6.049,13.507,13.514,13.507h19.93h19.933c7.467,0,13.516-6.042,13.516-13.507V234.349 c6.39-1.699,12.426-3.848,18.045-6.398c10.967-4.96,20.377-11.328,28.228-18.307c11.793-10.494,20.108-22.229,25.692-33.281 c2.789-5.548,4.902-10.936,6.398-16.158c0.756-2.606,1.352-5.184,1.771-7.792c0.422-2.608,0.69-5.236,0.69-8.082 c0-17.516,0-120.142,0-120.142C248.274,10.827,237.44,0,224.087,0z">
+                  </path>
+                  <path class="st0"
+                    d="M481.489,4.028c-6.168-4.111-13.828-5.106-20.805-2.842c-0.644,0.2-1.285,0.4-1.914,0.661l-64.086,26.832 c-7.713,3.221-13.205,10.198-14.541,18.444l-16.545,194.122c-1.113,6.918,0.824,13.992,5.322,19.358 c4.498,5.382,54.971,49.552,54.971,49.552v188.03c0,7.63,6.191,13.814,13.812,13.814h22.98h17.77c7.631,0,13.82-6.183,13.82-13.814 V241.852V228.21v-5.456V211.76V24.144C492.274,16.053,488.224,8.504,481.489,4.028z">
+                  </path>
+                </g>
+              </g>
+            </svg>
+            <span class="mb-1 text-xl font-bold capitalize text-gray-900 dark:text-white">{{ foodStatus }}</span>
+
+
+            <div class="flex items-center">
+              <svg fill="#ffffff" height="25px" width="25px" version="1.1" id="Icon"
+                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24.00 24.00"
+                enable-background="new 0 0 24 24" xml:space="preserve" stroke="#ffffff"
+                stroke-width="0.24000000000000005">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                  <path
+                    d="M8.5,10.35c0,0.83-0.67,1.5-1.5,1.5s-1.5-0.67-1.5-1.5s0.67-1.5,1.5-1.5S8.5,9.52,8.5,10.35z M12,8.85 c-0.83,0-1.5,0.67-1.5,1.5s0.67,1.5,1.5,1.5s1.5-0.67,1.5-1.5S12.83,8.85,12,8.85z M17,8.85c-0.83,0-1.5,0.67-1.5,1.5 s0.67,1.5,1.5,1.5s1.5-0.67,1.5-1.5S17.83,8.85,17,8.85z M24,10.32c0,5.36-5.38,9.71-12,9.71c-1.06,0-2.11-0.11-3.12-0.33 l-6.59,3.69l1.84-5.73C1.5,15.82,0,13.18,0,10.32c0-5.36,5.38-9.71,12-9.71S24,4.96,24,10.32z M22,10.32c0-4.25-4.49-7.71-10-7.71 S2,6.07,2,10.32c0,2.38,1.4,4.59,3.84,6.07l0.67,0.41l-0.76,2.37l2.83-1.59l0.38,0.09c0.98,0.24,2,0.36,3.03,0.36 C17.51,18.03,22,14.57,22,10.32z">
+                  </path>
+                </g>
+              </svg>
+              <span class="mb-1 text-xl font-bold capitalize text-gray-900 dark:text-white"> {{ socialStatus }}</span>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <a class="mt-8 inline-flex items-center justify-center rounded-xl bg-green-100 py-3 px-6 font-dm text-base font-bold text-white shadow-xl shadow-green-400/75 transition-transform duration-200 ease-in-out hover:scale-[1.02]"
+        href="#">
+        Generate Token
+    </a>
+    <p>{{ token }}</p>
+    </div>
+    </div>
+    
+  </div>
+  
+</section>
