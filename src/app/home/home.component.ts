@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
-import jwtDecode from "jwt-decode"; 
 import { HttpClient } from '@angular/common/http';
 import ApexCharts from 'apexcharts';
-import jwt from 'jsonwebtoken';
+import { DataService } from '../service/data.service';
 
 
 @Component({
@@ -13,6 +12,10 @@ import jwt from 'jsonwebtoken';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+generateToken() {
+throw new Error('Method not implemented.');
+}
+  activityCoins: any[] = [];
   foodStatus: String | undefined = "I";
   socialStatus: String | undefined = "I";
   todayCodeTime: Number | undefined = 0;
@@ -20,15 +23,22 @@ export class HomeComponent implements OnInit {
   todayTimeCompare: Number | undefined = 0;
   monthlyTimeCompare: Number | undefined = 0;
   todayCoins: Number | undefined = 0;
-  totalCoins: Number | undefined = 0;
+  totalCoins: number[] | undefined;
   token: string | undefined;
 
-  constructor(private authService: AuthService, private router: Router, private http: HttpClient) { }
+  constructor(private authService: AuthService, private router: Router, private http: HttpClient, private dataService: DataService) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    // เรียกใช้งาน DataService เพื่อดึงข้อมูล Coins
+    this.dataService.getActivityCoins().subscribe(coins => {
+      // กำหนดค่าของ totalCoins จากข้อมูลที่ได้
+      this.totalCoins = coins as number[];
+    });
+    // เรียกใช้งานฟังก์ชันเพื่อดึงข้อมูลอื่นๆ
     this.getdata();
     // เรียกใช้งาน ApexCharts เมื่อคอมโพเนนต์ถูกโหลด
     this.initializeChart();
+    this.checkActivityCoins();
   }
 
   getdata() {
@@ -42,6 +52,13 @@ export class HomeComponent implements OnInit {
     );
   }
 
+  checkActivityCoins() {
+    this.http.get('/api/activity-coins').subscribe((data: any) => {
+      console.log('Activity coins:', data);
+    }, (error) => {
+      console.error('Error getting activity coins:', error);
+    });
+  }
   initializeChart() {
     if (document.getElementById("donut-chart") && typeof ApexCharts !== 'undefined') {
       const chart = new ApexCharts(document.getElementById("donut-chart"), this.getChartOptions());
@@ -132,5 +149,4 @@ export class HomeComponent implements OnInit {
       },
     };
   }
-
 }

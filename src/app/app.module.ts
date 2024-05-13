@@ -10,6 +10,7 @@ import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
 import { AuthInterceptor } from './helper/auth.interceptor';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
+import { GraphQLModule } from './graphql.module';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { VerifyEmailComponent } from './verify-email/verify-email.component';
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    GraphQLModule
   ],
   providers: [
     {
