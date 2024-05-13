@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { Apollo } from 'apollo-angular';
+import gql from 'graphql-tag';
 import ApexCharts from 'apexcharts';
-import { DataService } from '../service/data.service';
-
 
 @Component({
   selector: 'app-home',
@@ -23,25 +22,47 @@ throw new Error('Method not implemented.');
   todayTimeCompare: Number | undefined = 0;
   monthlyTimeCompare: Number | undefined = 0;
   todayCoins: Number | undefined = 0;
-  totalCoins: number[] | undefined;
+  totalCoins: number | undefined;
   token: string | undefined;
 
-  constructor(private authService: AuthService, private router: Router, private http: HttpClient, private dataService: DataService) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private apollo: Apollo
+  ) { }
 
   ngOnInit(): void {
-    // เรียกใช้งาน DataService เพื่อดึงข้อมูล Coins
-    this.dataService.getActivityCoins().subscribe(coins => {
-      // กำหนดค่าของ totalCoins จากข้อมูลที่ได้
-      this.totalCoins = coins as number[];
-    });
+    // ดึงข้อมูล totalCoins จาก GraphQL server
+    this.getTotalCoins();
+
     // เรียกใช้งานฟังก์ชันเพื่อดึงข้อมูลอื่นๆ
     this.getdata();
+
     // เรียกใช้งาน ApexCharts เมื่อคอมโพเนนต์ถูกโหลด
     this.initializeChart();
-    this.checkActivityCoins();
   }
 
-  getdata() {
+  getTotalCoins(): void {
+    this.apollo
+      .watchQuery({
+        query: gql`
+          {
+            totalCoins
+          }
+        `
+      })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          this.totalCoins = response.data.totalCoins;
+        },
+        error => {
+          console.error('Error getting total coins:', error);
+        }
+      );
+  }
+
+  getdata(): void {
     this.authService.fetchuserdata().subscribe(
       (data) => {
         console.log(data);
@@ -52,14 +73,7 @@ throw new Error('Method not implemented.');
     );
   }
 
-  checkActivityCoins() {
-    this.http.get('/api/activity-coins').subscribe((data: any) => {
-      console.log('Activity coins:', data);
-    }, (error) => {
-      console.error('Error getting activity coins:', error);
-    });
-  }
-  initializeChart() {
+  initializeChart(): void {
     if (document.getElementById("donut-chart") && typeof ApexCharts !== 'undefined') {
       const chart = new ApexCharts(document.getElementById("donut-chart"), this.getChartOptions());
       chart.render();
