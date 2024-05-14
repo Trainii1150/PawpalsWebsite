@@ -22,7 +22,7 @@ throw new Error('Method not implemented.');
   todayTimeCompare: Number | undefined = 0;
   monthlyTimeCompare: Number | undefined = 0;
   todayCoins: Number | undefined = 0;
-  totalCoins: number | undefined;
+  totalCoins: Number | undefined;
   token: string | undefined;
 
   constructor(
@@ -54,6 +54,8 @@ throw new Error('Method not implemented.');
       .valueChanges
       .subscribe(
         (response: any) => {
+          console.log(response); // ดู response ทั้งหมด
+          console.log(response.data.totalCoins); // ดูค่า totalCoins
           this.totalCoins = response.data.totalCoins;
         },
         error => {
@@ -61,6 +63,7 @@ throw new Error('Method not implemented.');
         }
       );
   }
+  
 
   getdata(): void {
     this.authService.fetchuserdata().subscribe(

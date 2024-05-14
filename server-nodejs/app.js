@@ -17,26 +17,35 @@ app.use('/api/user', authUser);
 // สร้าง schema สำหรับ GraphQL
 const typeDefs = gql`
   type Query {
-    totalCoins: Int
+    totalCoins: Float,
     Languages: String
   }
 `;
 
 // สร้าง resolver สำหรับ query totalCoins
 const resolvers = {
-  Query: {
-    totalCoins: async () => {
-      try {
-        const result = await pool.query('SELECT SUM(Coins) AS TotalCoins FROM ActivityCoding');
-        return result.rows[0].totalcoins; // ตรวจสอบว่าคีย์ตรงกับชื่อคอลัมน์ในฐานข้อมูล
-      } catch (error) {
-        console.error(error);
-        throw new Error('Error getting coins from database');
-      }
+    Query: {
+      totalCoins: async () => {
+        try {
+          const result = await pool.query('SELECT SUM(coins::Float) AS total_coins FROM ActivityCoding');
+          return result.rows[0].total_coins; // ตรวจสอบว่าคีย์ตรงกับชื่อคอลัมน์ในฐานข้อมูล
+        } catch (error) {
+          console.error(error);
+          throw new Error('Error getting coins from database');
+        }
+      },
+      Languages: async () => {
+        try {
+          const result = await pool.query('SELECT * FROM ActivityCoding ');
+          return result.rows[0].Languages; // ตรวจสอบว่าคีย์ตรงกับชื่อคอลัมน์ในฐานข้อมูล
+        } catch (error) {
+          console.error(error);
+          throw new Error('Error getting languages from database');
+        }
+      },
     },
-    Languages: () => "This is a placeholder for languages",
-  },
-};
+  };
+  
 
 async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });

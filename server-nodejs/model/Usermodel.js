@@ -78,4 +78,6 @@ module.exports = {
     getUserEmail,
     getUserByUserId,
     updateUserVerification,
+    pool,
 };
+
