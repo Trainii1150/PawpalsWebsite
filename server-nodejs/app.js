@@ -1,26 +1,53 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const authUser = require('./routes/Userroutes');
-//import { rateLimit } from 'express-rate-limit'
+const { ApolloServer, gql } = require('apollo-server-express');
+const authUser = require('./routes/Userroutes'); // Assuming you have this file
+const { pool } = require('./model/Usermodel'); // import pool จาก Usermodel
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-/*const limiter = rateLimit({ 
-    windowMs: 15 * 60 * 1000, // หน่วยเวลาเป็น มิลลิวินาที ในนี้คือ 15 นาที (1000 มิลลิวินาที = 1 วินาที)
-    max: 100, // จำนวนการเรียกใช้สูงสุดต่อ IP Address ต่อเวลาใน windowMS
-    standardHeaders: true, // คืน rate limit ไปยัง `RateLimit-*` ใน headers 
-    legacyHeaders: false, // ปิด `X-RateLimit-*` ใน headers 
-})*/
-
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(limiter);
 
 app.use('/api/user', authUser);
 
-app.listen(port, () => {
+// สร้าง schema สำหรับ GraphQL
+const typeDefs = gql`
+  type Query {
+    totalCoins: Int
+    Languages: String
+  }
+`;
+
+// สร้าง resolver สำหรับ query totalCoins
+const resolvers = {
+  Query: {
+    totalCoins: async () => {
+      try {
+        const result = await pool.query('SELECT SUM(Coins) AS TotalCoins FROM ActivityCoding');
+        return result.rows[0].totalcoins; // ตรวจสอบว่าคีย์ตรงกับชื่อคอลัมน์ในฐานข้อมูล
+      } catch (error) {
+        console.error(error);
+        throw new Error('Error getting coins from database');
+      }
+    },
+    Languages: () => "This is a placeholder for languages",
+  },
+};
+
+async function startServer() {
+  const server = new ApolloServer({ typeDefs, resolvers });
+  await server.start();
+  server.applyMiddleware({ app });
+
+  app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error('Error starting the server:', error);
 });
