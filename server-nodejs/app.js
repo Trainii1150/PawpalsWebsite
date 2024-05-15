@@ -85,6 +85,7 @@ async function startServer() {
     console.log(`Server is running on port ${port}`);
   });
 }
+app.use('/graphql', AuthMiddleware);
 
 startServer().catch((error) => {
   console.error('Error starting the server:', error);

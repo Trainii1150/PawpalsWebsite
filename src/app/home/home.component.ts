@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
 import ApexCharts from 'apexcharts';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-home',
@@ -11,9 +12,9 @@ import ApexCharts from 'apexcharts';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-generateToken() {
-throw new Error('Method not implemented.');
-}
+
+
+
   activityCoins: any[] = [];
   foodStatus: String | undefined = "I";
   socialStatus: String | undefined = "I";
@@ -23,7 +24,7 @@ throw new Error('Method not implemented.');
   monthlyTimeCompare: Number | undefined = 0;
   todayCoins: Number | undefined = 0;
   totalCoins: Number | undefined;
-  token: string | undefined;
+  //token = localStorage.getItem('auth_email');
 
   constructor(
     private authService: AuthService,
@@ -41,6 +42,46 @@ throw new Error('Method not implemented.');
     // เรียกใช้งาน ApexCharts เมื่อคอมโพเนนต์ถูกโหลด
     this.initializeChart();
   }
+
+  generateToken() {
+    const token: string | null = localStorage.getItem('auth_email');
+    if (token !== null) {
+      this.authService.setExtensionsToken(token).subscribe(
+        (response) => {
+          console.log(response);
+          const firstObject = Object.values(response)[0];
+          if (typeof firstObject === 'string') {
+            Swal.fire({
+              icon: 'info',
+              title: 'Your Extensions Token',
+              text: `${firstObject}`,
+            });
+          } else {
+            console.error('Unexpected response format:', response);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Unexpected response format. Please try again.',
+            });
+          }
+        },
+        (error) => {
+          console.log(error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to generate Extensions Token. Please try again.',
+          });
+        }
+      );
+    } else {
+      console.error('Token not found in localStorage');
+      // จัดการกรณีที่ไม่พบ token ใน localStorage
+    }
+  }
+  
+  
+  
 
   getTotalCoins(): void {
     this.apollo
@@ -166,4 +207,5 @@ throw new Error('Method not implemented.');
       },
     };
   }
+
 }

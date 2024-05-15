@@ -53,9 +53,19 @@ const tokenEmailVerificationGenerate = (email) => {
     return jwt.sign({email},process.env.EmailVerificationToken,{expiresIn:"1h"});
 }
 
-const tokenExtensionsGenerate = (user) => {
-    return jwt.sign({user: user.username},process.env.ExtensionsAccesstoken,{expiresIn:"5m"});
-}
+const tokenExtensionsGenerate = (req, res) => {
+    try {
+        const email = req.body.email; // Extract email from request body
+        const token = jwt.sign({ email },process.env.ExtensionsAccesstoken, { expiresIn: "5m" });
+        res.json({ token ,email}); // Send the generated token as JSON response
+    } catch (error) {
+        console.error('Error generating extension token:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+
+    }
+};
+
+
 
 const verifyEmail = async (req,res) => {
     const { token } = req.body;

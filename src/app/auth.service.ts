@@ -37,6 +37,12 @@ export class AuthService {
     localStorage.setItem('auth_key',resObject.token);
     localStorage.setItem('auth_email',resObject.user);
   }
+
+  setExtensionsToken(email: any) {
+    return this.http.post(`${this.UrlApi}/extensionsToken`, { email });
+    
+  }
+
   logout(){
     localStorage.removeItem('auth_key');
   }
