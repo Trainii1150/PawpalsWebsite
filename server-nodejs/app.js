@@ -4,7 +4,7 @@ const cors = require('cors');
 const { ApolloServer, gql } = require('apollo-server-express');
 const authUser = require('./routes/Userroutes'); // Assuming you have this file
 const { pool } = require('./model/Usermodel'); // import pool จาก Usermodel
-
+const AuthMiddleware = require('./middleware/authmid');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -46,6 +46,35 @@ const resolvers = {
     },
   };
   
+const SECRET_KEY = process.env.Accesstoken;
+
+app.use(bodyParser.json());
+
+app.post('/generate-token', (req, res) => {
+  const payload = {
+    username: user.username, // ข้อมูลที่ต้องการใส่ใน payload ของ token
+    exp: Math.floor(Date.now() / 1000) + (5 * 60) // กำหนดเวลาหมดอายุ 5 นาที
+  };
+
+  const token = jwt.sign(payload, SECRET_KEY, { algorithm: 'HS256' });
+
+  res.json({ token });
+});
+
+app.post('/save-token', (req, res) => {
+  const { token } = req.body; // รับ token ที่ส่งมาจากแอปพลิเคชัน Angular
+  const query = 'INSERT INTO token_used (extensions_token) VALUES ($1)';
+
+  client.query(query, [token], (err, result) => {
+    if (err) {
+      console.error('Error saving token:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      console.log('Token saved successfully:', token);
+      res.status(200).json({ message: 'Token saved successfully' });
+    }
+  });
+});
 
 async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });

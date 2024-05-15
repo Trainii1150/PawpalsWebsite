@@ -38,20 +38,24 @@ const loginUser = async (req, res) => {
 
         const token = tokenUserGenerate(user);
         //console.log(`Token Generated at:- ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
-        res.json({ user: user.username,token });
+        res.json({ user: String(user.email), token });
+
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 };
 const tokenUserGenerate = (user) => {
-    return jwt.sign({user: user.usernmae},process.env.Accesstoken,{expiresIn:"5m"});
+    return jwt.sign({user: user.username},process.env.Accesstoken,{expiresIn:"5m"});
 }
 
 const tokenEmailVerificationGenerate = (email) => {
     return jwt.sign({email},process.env.EmailVerificationToken,{expiresIn:"1h"});
 }
 
+const tokenExtensionsGenerate = (user) => {
+    return jwt.sign({user: user.username},process.env.ExtensionsAccesstoken,{expiresIn:"5m"});
+}
 
 const verifyEmail = async (req,res) => {
     const { token } = req.body;
@@ -159,4 +163,5 @@ module.exports = {
     verifyEmail,
     sendVerifyEmail,
     sendEmail,
+    tokenExtensionsGenerate,
 };

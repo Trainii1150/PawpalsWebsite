@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environments } from './environments/environments';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,8 @@ export class AuthService {
   };*/
   
   constructor(private http:HttpClient) {}
+
+
   register(username: string,email: string ,password: string) {
     return this.http.post(`${this.UrlApi}/register`, { username,email, password });
   }
@@ -32,6 +35,7 @@ export class AuthService {
   }
   setLocalStorage(resObject:any){
     localStorage.setItem('auth_key',resObject.token);
+    localStorage.setItem('auth_email',resObject.user);
   }
   logout(){
     localStorage.removeItem('auth_key');
