@@ -49,6 +49,10 @@ const tokenUserGenerate = (user) => {
     return jwt.sign({user: user.username},process.env.Accesstoken,{expiresIn:"5m"});
 }
 
+const tokenresetpassEmailGenerate = (email) =>{
+    return jwt.sign({email},process.env.ResetpassEmailtoken,{expiresIn:"10m"});
+}
+
 const tokenEmailVerificationGenerate = (email) => {
     return jwt.sign({email},process.env.EmailVerificationToken,{expiresIn:"1h"});
 }
@@ -65,7 +69,54 @@ const tokenExtensionsGenerate = (req, res) => {
     }
 };
 
+const resetpasswordemail = async (req, res) => {
+    const {email} = req.body.email;
+    //console.log(email);
+    try {
+        const user = await userModel.getResetpassemail(email);
+        if(!user){
+            return res.status(404).send('Email not found');
+        }
+        else{
+            const token = tokenresetpassEmailGenerate(user);
+            sendresetEmail(user.email, token);
+            res.json({ message: 'Verification email resent successfully' });
+        }
+    } catch (error) {
+        console.error(error);
+    }
 
+};
+
+const validateResetToken = async (req, res) => {
+    const { token } = req.body;
+    if(!token){
+        return res.status(400).json({ error: 'Token is missing' });
+    }
+    try {
+      const isTokenValid = jwt.verify(token,process.env.ResetpassEmailtoken)
+      res.json({ message: 'Token is valid' });
+    } catch (error) {
+        if (error.name === 'TokenExpiredError'){
+            res.status(401).json({ error: 'Token has expired' });
+        }
+        else{
+            res.status(500).json({ message: 'An error occurred' });
+        }
+    }
+};
+
+const resetpassword = async (req, res) => {
+    const {email , password} = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const result = await userModel.updatePassword(hashedPassword, email);
+        res.status(201).json({ message: 'Email Password has changed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
 
 const verifyEmail = async (req,res) => {
     const { token } = req.body;
@@ -128,6 +179,39 @@ const sendVerifyEmail = async (req,res) => {
 }
 
 
+const sendresetEmail = async (email, token) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.office365.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.Email_User,
+                pass: process.env.Email_Password
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.Email_User,
+            to: email,
+            subject: 'Password Reset',
+            html: `
+                <p>Hi,Form Pawpals</p>
+                <p>Forgot your password?</p>
+                <p>We received a request to reset the password for your account.</p>
+                <p>To reset your password, click on the button below:</p>
+                <a href="http://localhost:4200/reset-password?token=${token}&email=${email}" style="display:inline-block;padding:10px 20px;font-size:16px;color:white;background-color:#007bff;border-radius:5px;text-decoration:none;">Reset password</a>
+                <p>Or copy and paste the URL into your browser:</p>
+                <p><a href="http://localhost:4200/reset-password?token=${token}&email=${email}">http://localhost:4200/reset-password?token=${token}&email=${email}</a></p>
+                <p>This link will expire in 30 minutes.</p>
+            `
+        };
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Failed to send resetpassword to email:', error.message);
+    }
+};
+
 const sendEmail = async (email, token) => {
     try {
         const transporter = nodemailer.createTransport({
@@ -174,4 +258,7 @@ module.exports = {
     sendVerifyEmail,
     sendEmail,
     tokenExtensionsGenerate,
+    resetpasswordemail,
+    validateResetToken,
+    resetpassword,
 };

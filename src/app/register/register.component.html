@@ -8,7 +8,7 @@
 
                     <div class="text-center text-heading-login">
                         <h1 class="font_logo">Paws<span class="font_logohalf">Pal</span></h1>
-                        <h3 class="mb-3 text_loginheader">Register</h3>
+                        <h3 class="text_loginheader">Register</h3>
                     </div>
                     
                     <div class="form-outline mb-3">
@@ -39,7 +39,7 @@
                         </div>
                     </div>
 
-                    <div class="form-outline mb-3">
+                    <div class="form-outline mb-2">
                         <label class="form-label" for="repeatPassword">Repeat Password</label>
                         <input type="password" id="repeatPassword" class="form-control form-control-md" formControlName="repeatPassword" />
                         <div *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('repeatPassword')?.touched" class="error-message">
@@ -47,10 +47,11 @@
                         </div>
                     </div>
                     
-                    <div class="text-center">
+                    <div class="text-center mb-2">
                         <button class="btn btn_login btn-lg btn-block" type="submit">Register</button>
                     </div>
 
+                    <p class="text-center mb-0">Already have an account? <a [routerLink]="['/login']">Sign in</a></p>
                 </div>  
             </div>
             </div>

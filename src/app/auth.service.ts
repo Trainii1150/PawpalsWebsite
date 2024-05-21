@@ -30,6 +30,15 @@ export class AuthService {
   login(email: string,password: string) {
     return this.http.post(`${this.UrlApi}/login`, { email, password });
   }
+  forgetpassword(email: string){
+    return this.http.post(`${this.UrlApi}/sent-resetpassword`,{email});
+  }
+  validateResetToken(token: string) {
+    return this.http.post(`${this.UrlApi}/validate-resetpasstoken`, { token });
+  }
+  resetpassword(email: string, password: string) {
+    return this.http.post(`${this.UrlApi}/resetpassword`,{ email, password });
+  };
   isloggedin(){
     return !!localStorage.getItem('auth_key');
   }
@@ -40,7 +49,6 @@ export class AuthService {
 
   setExtensionsToken(email: any) {
     return this.http.post(`${this.UrlApi}/extensionsToken`, { email });
-    
   }
 
   logout(){

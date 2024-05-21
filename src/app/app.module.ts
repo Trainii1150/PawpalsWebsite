@@ -11,6 +11,8 @@ import { HomeComponent } from './home/home.component';
 import { AuthInterceptor } from './helper/auth.interceptor';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
 import { GraphQLModule } from './graphql.module';
+import { ForgetpasswordComponent } from './forgetpassword/forgetpassword.component';
+import { ResetpasswordComponent } from './resetpassword/resetpassword.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +21,8 @@ import { GraphQLModule } from './graphql.module';
     RegisterComponent,
     HomeComponent,
     VerifyEmailComponent,
+    ForgetpasswordComponent,
+    ResetpasswordComponent,
   ],
   imports: [
     BrowserModule,

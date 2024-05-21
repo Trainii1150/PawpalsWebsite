@@ -53,6 +53,17 @@ const getUserEmail = async (email) => {
     }
 };
 
+const getResetpassemail = async (email) => {
+    try {
+        const user = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
+        return user.rows[0];
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error getting user by email');
+    }
+    
+};
+
 const getUserByUserId = async () => {
     try {
         const result = await pool.query('SELECT * FROM user_table');
@@ -73,11 +84,22 @@ const updateUserVerification = async (user,email) => {
 
 };
 
+const updatePassword = async (password,email) => {
+    try {
+        const result = await pool.query('UPDATE user_table SET password = $1 WHERE email = $2',[password,email]);
+        console.log(`${email} is now reset password successfully.`);  
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 module.exports = {
     createUser,
     getUserEmail,
     getUserByUserId,
     updateUserVerification,
+    updatePassword,
+    getResetpassemail,
     pool,
 };
 

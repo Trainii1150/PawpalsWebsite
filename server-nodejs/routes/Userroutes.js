@@ -15,6 +15,12 @@ router.get('/data', AuthMiddleware, UserController.dataUser); //to test auth
 router.post('/verifyemail', UserController.verifyEmail);
 router.post('/send-verifyemail', UserController.sendVerifyEmail);
 
+
+//Route Reset Password
+router.post('/sent-resetpassword',UserController.resetpasswordemail);
+router.post('/validate-resetpasstoken', UserController.validateResetToken);
+router.post('/resetpassword', UserController.resetpassword);
+
 // Use the controller function for generating extension tokens
 router.post('/extensionsToken', UserController.tokenExtensionsGenerate);
 
