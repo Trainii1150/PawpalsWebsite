@@ -13,8 +13,6 @@ import Swal from 'sweetalert2';
 })
 export class HomeComponent implements OnInit {
 
-
-
   activityCoins: any[] = [];
   foodStatus: String | undefined = "I";
   socialStatus: String | undefined = "I";
@@ -24,7 +22,7 @@ export class HomeComponent implements OnInit {
   monthlyTimeCompare: Number | undefined = 0;
   todayCoins: Number | undefined = 0;
   totalCoins: Number | undefined;
-  //token = localStorage.getItem('auth_email');
+  hidden: any;
 
   constructor(
     private authService: AuthService,
@@ -33,13 +31,8 @@ export class HomeComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // ดึงข้อมูล totalCoins จาก GraphQL server
     this.getTotalCoins();
-
-    // เรียกใช้งานฟังก์ชันเพื่อดึงข้อมูลอื่นๆ
-    this.getdata();
-
-    // เรียกใช้งาน ApexCharts เมื่อคอมโพเนนต์ถูกโหลด
+    this.getTodayCoins();
     this.initializeChart();
   }
 
@@ -76,12 +69,8 @@ export class HomeComponent implements OnInit {
       );
     } else {
       console.error('Token not found in localStorage');
-      // จัดการกรณีที่ไม่พบ token ใน localStorage
     }
   }
-  
-  
-  
 
   getTotalCoins(): void {
     this.apollo
@@ -95,8 +84,6 @@ export class HomeComponent implements OnInit {
       .valueChanges
       .subscribe(
         (response: any) => {
-          console.log(response); // ดู response ทั้งหมด
-          console.log(response.data.totalCoins); // ดูค่า totalCoins
           this.totalCoins = response.data.totalCoins;
         },
         error => {
@@ -104,17 +91,53 @@ export class HomeComponent implements OnInit {
         }
       );
   }
-  
 
-  getdata(): void {
-    this.authService.fetchuserdata().subscribe(
-      (data) => {
-        console.log(data);
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+  getTodayCoins(): void {
+    const token: string | null = localStorage.getItem('auth_email');
+    if (token !== null) {
+      this.apollo
+        .watchQuery({
+          query: gql`
+            query GetExtensionToken($email: String!) {
+              extensionToken(email: $email)
+            }
+          `,
+          variables: {
+            email: token
+          }
+        })
+        .valueChanges
+        .subscribe(
+          (response: any) => {
+            const extensionToken = response.data.extensionToken;
+            this.apollo
+              .watchQuery({
+                query: gql`
+                  query GetCoins($extensionToken: String!) {
+                    coins(extensionToken: $extensionToken)
+                  }
+                `,
+                variables: {
+                  extensionToken: extensionToken
+                }
+              })
+              .valueChanges
+              .subscribe(
+                (coinsResponse: any) => {
+                  this.todayCoins = coinsResponse.data.coins;
+                },
+                error => {
+                  console.error('Error getting today coins:', error);
+                }
+              );
+          },
+          error => {
+            console.error('Error getting extension token:', error);
+          }
+        );
+    } else {
+      console.error('Token not found in localStorage');
+    }
   }
 
   initializeChart(): void {

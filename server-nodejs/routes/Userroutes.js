@@ -24,4 +24,5 @@ router.post('/resetpassword', UserController.resetpassword);
 // Use the controller function for generating extension tokens
 router.post('/extensionsToken', UserController.tokenExtensionsGenerate);
 
+
 module.exports = router;
