@@ -125,7 +125,7 @@ async function startServer() {
   });
 }
 
-app.use('/graphql', AuthMiddleware);
+app.use('/graphql');
 
 startServer().catch((error) => {
   console.error('Error starting the server:', error);
