@@ -57,4 +57,8 @@ export class AuthService {
   fetchuserdata(){
     return this.http.get(`${this.UrlApi}/data`);
   }
+
+  checkEmailNotTaken(email: string) {
+    return this.http.post<boolean>(`${this.UrlApi}/check-email`, { email });
+  }
 }

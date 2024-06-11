@@ -1,5 +1,5 @@
 <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-    <section class="vh-100 bg_login">
+    <section class="min-h-screen bg_login">
         <div class="container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12 col-md-8 col-lg-6 col-xl-5">
@@ -22,10 +22,18 @@
                     <div class="form-outline mb-3">
                         <label class="form-label" for="email">Email</label>
                         <input type="email" id="email" class="form-control form-control-md" formControlName="email" name="email" />
-                        <div *ngIf="registerForm.get('email')?.errors">
+                        <div *ngIf="registerForm.get('email')?.errors && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)">
                             <div *ngIf="registerForm.get('email')?.hasError('required')" class="error-message">Email is required.</div>
                             <div *ngIf="registerForm.get('email')?.hasError('email')" class="error-message">Please enter a valid email address.</div>
                         </div>
+                        <div *ngIf="isRegistered === true" class="error-message">
+                            Email is already registered.
+                        </div>
+                        <!--
+                            <div *ngIf="isRegistered === false" class="success-message">
+                                Email is available.
+                            </div>
+                        -->
                     </div>
         
                     <div class="form-outline mb-3">
@@ -35,6 +43,18 @@
                             <div *ngIf="registerForm.get('password')?.hasError('required')" class="error-message">Password is required.</div>
                             <div *ngIf="registerForm.get('password')?.hasError('minlength') && !registerForm.get('password')?.hasError('required')" class="error-message">
                                 Password must be at least 8 characters long.
+                            </div>
+                            <div *ngIf="registerForm.get('password')?.hasError('missingUpperCase')" class="error-message">
+                                At least one uppercase letter
+                            </div>
+                            <div *ngIf="registerForm.get('password')?.hasError('missingLowerCase')" class="error-message">
+                                At least one lowercase letter
+                            </div>
+                            <div *ngIf="registerForm.get('password')?.hasError('missingNumeric')" class="error-message">
+                                At least one numeric character
+                            </div>
+                            <div *ngIf="registerForm.get('password')?.hasError('missingSpecialCharacter')" class="error-message">
+                                At least one special character
                             </div>
                         </div>
                     </div>

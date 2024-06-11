@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+// Import the PasswordStrengthValidator function
+import { PasswordStrengthValidator } from './password-strength.validator';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -11,16 +14,36 @@ import Swal from 'sweetalert2';
 })
 export class RegisterComponent implements OnInit  {
   registerForm: FormGroup;
+  isRegistered: boolean = false;
 
   constructor(private fb: FormBuilder,  private authService: AuthService , private router: Router) {
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
       repeatPassword: ['', Validators.required],
     }, { validators: this.passwordMatchValidator });
   }
   ngOnInit(): void {
+    //Check if email is already registered
+    this.registerForm.get('email')?.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(value => {
+          if (this.registerForm.get('email')?.valid) {
+            //console.log(value);
+            return this.authService.checkEmailNotTaken(value);
+          } else {
+            return [null]; // Return a null observable if email is invalid
+          }
+        })
+    ).subscribe(response => {
+      if(response){
+        this.isRegistered = true;
+      }else{
+        this.isRegistered = false;
+      }
+    });
   }
   
   passwordMatchValidator(group: FormGroup) {

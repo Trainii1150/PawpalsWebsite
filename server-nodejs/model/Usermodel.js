@@ -27,9 +27,7 @@ process.on('exit', () => {
 
 const saltRounds = 10;
 
-const createUser = async (username, email, password) => {
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+const createUser = async (username, email, hashedPassword) => {
     try {
         const result = await pool.query(
             'INSERT INTO user_table (username, email, password) VALUES ($1, $2, $3) RETURNING *',
@@ -43,9 +41,9 @@ const createUser = async (username, email, password) => {
     }
 };
 
-const getUserEmail = async (email) => {
+const getUserData = async (email) => {
     try {
-        const result = await pool.query('SELECT * FROM user_table WHERE email = $1', [email]);
+        const result = await pool.query('SELECT username, email, password FROM user_table WHERE email = $1', [email]);
         return result.rows[0];
     } catch (error) {
         console.error(error);
@@ -63,6 +61,15 @@ const getResetpassemail = async (email) => {
     }
     
 };
+
+const findbyEmail = async (email) => {
+    try {
+        const result = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
+        return result.rows[0];
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 const getUserByUserId = async () => {
     try {
@@ -95,11 +102,12 @@ const updatePassword = async (password,email) => {
 
 module.exports = {
     createUser,
-    getUserEmail,
+    getUserData,
     getUserByUserId,
     updateUserVerification,
     updatePassword,
     getResetpassemail,
+    findbyEmail,
     pool,
 };
 

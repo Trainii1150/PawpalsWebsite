@@ -8,11 +8,16 @@ const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        const user = await userModel.createUser(username, email, password);
-        const token = tokenEmailVerificationGenerate(email);
-        //sendVerifyEmail(email,token);
-        //console.log(token);
-        res.json(user);
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        await userModel.createUser(username, email, hashedPassword);
+        /*  
+            const user = await userModel.createUser(username, email, password);
+            const token = tokenEmailVerificationGenerate(email);
+            sendVerifyEmail(email,token);
+            console.log(token);
+            res.json(user);
+        */
+        return res.status(200).send('User Email created successfully');
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -21,7 +26,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await userModel.getUserEmail(email);
+        const user = await userModel.getUserData(email);
         if (!user) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
@@ -45,6 +50,21 @@ const loginUser = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 };
+
+const checkEmail = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const isTaken = await userModel.findbyEmail(email);
+        // If the email is found, isTaken should be true, otherwise false
+        const emailExists = isTaken ? true : false; 
+        //console.log(emailExists);
+        res.json(emailExists);
+    } catch (error) {
+        console.error('Error checking email:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 const tokenUserGenerate = (user) => {
     return jwt.sign({user: user.username},process.env.Accesstoken,{expiresIn:"5m"});
 }
@@ -128,9 +148,10 @@ const verifyEmail = async (req,res) => {
         try{
             const decoded = jwt.verify(token,process.env.EmailVerificationToken)
             const {username, email} = decoded;
-            const user = userModel.getUserEmail(email);
+            const user = userModel.getUserData(email);
             if(user.user_verify){
-                res.status(200).send("Email is already verified.");
+                res.status(403).send("Email is already verified.");
+                //res.status(200).send("Email is already verified.");
             }
             else{
                 await userModel.updateUserVerification(username,email)
@@ -140,9 +161,9 @@ const verifyEmail = async (req,res) => {
         }catch(error){
             if (error.name === 'TokenExpiredError') {
                 const { email } = jwt.decode(token);
-                const user = await userModel.getUserEmail(email);
+                const user = await userModel.getUserData(email);
                 if(user.user_verify){
-                    res.status(200).send("Email is already verified.");
+                    res.status(403).send("Email is already verified.");
                 }
                 else{
                     return res.status(401).json({ error: 'Token has expired' });
@@ -162,7 +183,7 @@ const sendVerifyEmail = async (req,res) => {
     const { email } = req.body;
 
     try {
-        const user = await userModel.getUserEmail(email);
+        const user = await userModel.getUserData(email);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -261,4 +282,5 @@ module.exports = {
     resetpasswordemail,
     validateResetToken,
     resetpassword,
+    checkEmail,
 };

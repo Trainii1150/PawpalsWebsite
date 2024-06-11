@@ -15,6 +15,8 @@ router.get('/data', AuthMiddleware, UserController.dataUser); //to test auth
 router.post('/verifyemail', UserController.verifyEmail);
 router.post('/send-verifyemail', UserController.sendVerifyEmail);
 
+//Route Check Email is Taken
+router.post('/check-email', UserController.checkEmail);
 
 //Route Reset Password
 router.post('/sent-resetpassword',UserController.resetpasswordemail);

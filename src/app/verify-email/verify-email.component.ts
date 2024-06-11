@@ -35,7 +35,7 @@ export class VerifyEmailComponent implements OnInit {
                 console.log('Token expired', error);
                 this.promptResendVerificationEmail(email);            
             } 
-            else if (error.status === 200){
+            else if (error.status === 403){
                 // Token expired, prompt user to resend verification email but Email is already verified
                 Swal.fire({
                   icon: 'warning',
