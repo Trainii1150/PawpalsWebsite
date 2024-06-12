@@ -106,6 +106,25 @@ app.post('/save-token', async (req, res) => {
   }
 });
 
+// Middleware to handle JWT authentication
+// Keep later use to verify to query data from graphql server
+/*const verifytoken = (req, res, next) => {
+  const token = req.headers.authorization || '';
+  if (token) {
+    jwt.verify(token.replace('Bearer ', ''), SECRET_KEY, (err, decoded) => {
+      if (err) {
+        // Token expired or invalid
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+      req.user = decoded;
+      next();
+    });
+  } else {
+    // No token provided
+    res.status(401).json({ error: 'No token provided' });
+  }
+};*/
+
 async function startServer() {
   const server = new ApolloServer({ 
     typeDefs, 
@@ -114,7 +133,7 @@ async function startServer() {
       const token = req.headers.authorization || '';
       if (!token) throw new Error('No token provided');
       const decoded = jwt.verify(token.replace('Bearer ', ''), SECRET_KEY);
-      return { email: decoded.email };
+      return { user: decoded.email };
     },
   });
   await server.start();

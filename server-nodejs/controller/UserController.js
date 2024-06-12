@@ -8,16 +8,16 @@ const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const hashedPassword = await bcrypt.hash(password, 10);
         await userModel.createUser(username, email, hashedPassword);
         /*  
             const user = await userModel.createUser(username, email, password);
             const token = tokenEmailVerificationGenerate(email);
             sendVerifyEmail(email,token);
             console.log(token);
-            res.json(user);
-        */
-        return res.status(200).send('User Email created successfully');
+            
+        */res.json(username);
+        //return res.status(200).send('User Email created successfully');
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

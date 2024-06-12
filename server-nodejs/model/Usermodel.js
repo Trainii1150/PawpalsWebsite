@@ -43,7 +43,7 @@ const createUser = async (username, email, hashedPassword) => {
 
 const getUserData = async (email) => {
     try {
-        const result = await pool.query('SELECT username, email, password FROM user_table WHERE email = $1', [email]);
+        const result = await pool.query('SELECT username, email, password , user_verify FROM user_table WHERE email = $1', [email]);
         return result.rows[0];
     } catch (error) {
         console.error(error);

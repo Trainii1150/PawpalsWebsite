@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environments } from './environments/environments';
-import { Observable } from 'rxjs';
+import { CookieService } from 'ngx-cookie-service';
+import { jwtDecode } from "jwt-decode";
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AuthService {
     })
   };*/
   
-  constructor(private http:HttpClient) {}
+  constructor(private http:HttpClient,private cookieService:CookieService) {}
 
 
   register(username: string,email: string ,password: string) {
@@ -40,11 +41,17 @@ export class AuthService {
     return this.http.post(`${this.UrlApi}/resetpassword`,{ email, password });
   };
   isloggedin(){
-    return !!localStorage.getItem('auth_key');
+    return !!this.cookieService.get('auth_key');
+    //return !!localStorage.getItem('auth_key');
   }
   setLocalStorage(resObject:any){
-    localStorage.setItem('auth_key',resObject.token);
-    localStorage.setItem('auth_email',resObject.user);
+    const tokenPayload: any = jwtDecode(resObject.token);
+    const exp = tokenPayload.exp*1000;
+    console.log(exp.toString());
+    this.cookieService.set('auth_key',resObject.token,exp);
+    this.cookieService.set('email',resObject.user);
+    /*localStorage.setItem('auth_key',resObject.token);
+    localStorage.setItem('auth_email',resObject.user);*/
   }
 
   setExtensionsToken(email: any) {
@@ -52,7 +59,8 @@ export class AuthService {
   }
 
   logout(){
-    localStorage.removeItem('auth_key');
+    this.cookieService.deleteAll();
+    //localStorage.removeItem('auth_key');
   }
   fetchuserdata(){
     return this.http.get(`${this.UrlApi}/data`);

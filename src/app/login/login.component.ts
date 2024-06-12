@@ -26,6 +26,7 @@ export class LoginComponent {
     //console.log(this.loginForm.value);
     if(this.loginForm.value){
       const {email, password} = this.loginForm.value;
+      console.log(email, password);
       this.authService.login(email,password).subscribe(
         (response) => {
             // Handle successful registration

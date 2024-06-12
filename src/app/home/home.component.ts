@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
+import { CookieService } from 'ngx-cookie-service';
 import gql from 'graphql-tag';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
@@ -27,7 +28,8 @@ export class HomeComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private apollo: Apollo
+    private apollo: Apollo,
+    private cookieService:CookieService
   ) { }
 
   ngOnInit(): void {
@@ -37,7 +39,8 @@ export class HomeComponent implements OnInit {
   }
 
   generateToken() {
-    const token: string | null = localStorage.getItem('auth_email');
+    const token = this.cookieService.get('email'); // get token from cookie
+    //const token: string | null = localStorage.getItem('auth_email');
     if (token !== null) {
       this.authService.setExtensionsToken(token).subscribe(
         (response) => {
@@ -93,7 +96,8 @@ export class HomeComponent implements OnInit {
   }
 
   getTodayCoins(): void {
-    const token: string | null = localStorage.getItem('auth_email');
+    const token = this.cookieService.get('email'); // get token from cookie
+    //const token: string | null = localStorage.getItem('auth_email');
     if (token !== null) {
       this.apollo
         .watchQuery({
