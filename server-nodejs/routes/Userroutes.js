@@ -22,6 +22,7 @@ router.post('/check-email', UserController.checkEmail);
 router.post('/sent-resetpassword',UserController.resetpasswordemail);
 router.post('/validate-resetpasstoken', UserController.validateResetToken);
 router.post('/resetpassword', UserController.resetpassword);
+router.post('/validate-newpassword',UserController.checkOldPassword);
 
 // Use the controller function for generating extension tokens
 router.post('/extensionsToken', UserController.tokenExtensionsGenerate);

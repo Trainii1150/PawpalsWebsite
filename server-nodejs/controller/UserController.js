@@ -126,6 +126,24 @@ const validateResetToken = async (req, res) => {
     }
 };
 
+const checkOldPassword = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await userModel.getUserData(email);
+        if(!user){
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // Compare the oldPassword with the hashed password stored in the database
+        const IsPasswordMatch = await bcrypt.compare(password , user.password);
+        const PasswordExists = IsPasswordMatch ? true : false;
+        res.json(PasswordExists);
+
+    } catch (error) {
+        console.error('Error checking email:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 const resetpassword = async (req, res) => {
     const {email , password} = req.body;
     try {
@@ -281,6 +299,7 @@ module.exports = {
     tokenExtensionsGenerate,
     resetpasswordemail,
     validateResetToken,
+    checkOldPassword,
     resetpassword,
     checkEmail,
 };

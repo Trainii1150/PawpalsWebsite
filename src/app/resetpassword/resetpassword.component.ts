@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { PasswordStrengthValidator } from './password-strength.validator';
 import Swal from 'sweetalert2';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+
 
 @Component({
   selector: 'app-resetpassword',
@@ -13,11 +17,12 @@ export class ResetpasswordComponent implements OnInit {
   resetPasswordForm: FormGroup;
   email: string | null = null;
   token: string | null = null;
+  isPasswordOld: boolean = false;
 
   constructor(private fb: FormBuilder, private route: ActivatedRoute, private router: Router, private authService: AuthService){
     this.resetPasswordForm = this.fb.group({
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
-      password: ['',[Validators.required, Validators.minLength(8)]],
+      password: ['',[Validators.required, Validators.minLength(8),PasswordStrengthValidator]],
       repeatPassword: ['',[Validators.required]],
     },{validators :this.passwordMatchValidator});
   }
@@ -56,6 +61,24 @@ export class ResetpasswordComponent implements OnInit {
         }).then(() => {
           this.router.navigate(['/login']);
         });
+      }     
+    });
+
+    this.resetPasswordForm.get('password')?.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(value => {
+        if (this.resetPasswordForm.get('password')?.valid) {
+           return this.authService.validateNewpassword(this.email!, value)
+        } else {
+          return [null]; // Return a null observable if password is invalid
+        }
+      })
+    ).subscribe(response => {
+      if(response) {
+        this.isPasswordOld = true;
+      }else{
+        this.isPasswordOld = false;
       }
     });
   }

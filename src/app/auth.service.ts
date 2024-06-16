@@ -37,6 +37,9 @@ export class AuthService {
   validateResetToken(token: string) {
     return this.http.post(`${this.UrlApi}/validate-resetpasstoken`, { token });
   }
+  validateNewpassword(email : string ,password : string) {
+    return this.http.post<boolean>(`${this.UrlApi}/validate-newpassword`, { email, password });
+  }
   resetpassword(email: string, password: string) {
     return this.http.post(`${this.UrlApi}/resetpassword`,{ email, password });
   };
