@@ -267,7 +267,15 @@ const sendEmail = async (email, token) => {
             from: process.env.Email_User,
             to: email, // Ensure that the 'email' parameter is correctly passed as the recipient's email address
             subject: 'Email Verification',
-            text: `Please click the following link to verify your email: http://localhost:4200/verify-email?token=${token}&email=${email}`,
+            html: `
+            <p>Hi, Form Pawpals</p>
+            <p>Thank you for signing up!</p>
+            <p>Please verify your email address to activate your account.</p>
+            <p>To verify your email, click on the button below:</p>
+            <a href="http://localhost:4200/verify-email?token=${token}&email=${email}" style="display:inline-block;padding:10px 20px;font-size:16px;color:white;background-color:#007bff;border-radius:5px;text-decoration:none;">Verify Email</a>
+            <p>Or copy and paste the URL into your browser:</p>
+            <p><a href="http://localhost:4200/verify-email?token=${token}&email=${email}">http://localhost:4200/verify-email?token=${token}&email=${email}</a></p>
+            `,
         };
 
         await transporter.sendMail(mailOptions);
