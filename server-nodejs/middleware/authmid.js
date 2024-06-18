@@ -17,8 +17,10 @@ const AuthToken = (req, res,next) => {
         }
         else {
             //console.log(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
+            req.user = decoded;
             next();
             console.log("Token verifified successfully");
+            
         }
     });
     

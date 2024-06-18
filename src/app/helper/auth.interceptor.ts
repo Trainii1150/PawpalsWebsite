@@ -18,8 +18,7 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private router: Router,
     private authService: AuthService, 
-    private cookieService:CookieService
-    
+    private cookieService:CookieService,
     ) {}
 
   intercept(
@@ -45,11 +44,11 @@ export class AuthInterceptor implements HttpInterceptor {
         });
       }
 
-      /*request = request.clone({
+      request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
         },
-      });*/
+      });
     }
 
     return next.handle(request).pipe(

@@ -13,6 +13,9 @@ import Swal from 'sweetalert2';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+removeToken() {
+throw new Error('Method not implemented.');
+}
 
   activityCoins: any[] = [];
   foodStatus: String | undefined = "I";
@@ -29,18 +32,18 @@ export class HomeComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private apollo: Apollo,
-    private cookieService:CookieService
+    private cookieService: CookieService
   ) { }
 
   ngOnInit(): void {
     this.getTotalCoins();
     this.getTodayCoins();
     this.initializeChart();
+    this.getTime();
   }
 
   generateToken() {
     const token = this.cookieService.get('email'); // get token from cookie
-    //const token: string | null = localStorage.getItem('auth_email');
     if (token !== null) {
       this.authService.setExtensionsToken(token).subscribe(
         (response) => {
@@ -89,54 +92,82 @@ export class HomeComponent implements OnInit {
         (response: any) => {
           this.totalCoins = response.data.totalCoins;
         },
-        error => {
+        (error: any) => {
           console.error('Error getting total coins:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get total coins: ${error.message}`,
+          });
         }
       );
   }
 
   getTodayCoins(): void {
-    const token = this.cookieService.get('email'); // get token from cookie
-    //const token: string | null = localStorage.getItem('auth_email');
-    if (token !== null) {
+    const email = this.cookieService.get('email');
+    if (email) {
       this.apollo
         .watchQuery({
           query: gql`
-            query GetExtensionToken($email: String!) {
-              extensionToken(email: $email)
+            query GetCoins($email: String!) {
+              coins(email: $email)
             }
           `,
           variables: {
-            email: token
+            email: email
           }
         })
         .valueChanges
         .subscribe(
           (response: any) => {
-            const extensionToken = response.data.extensionToken;
-            this.apollo
-              .watchQuery({
-                query: gql`
-                  query GetCoins($extensionToken: String!) {
-                    coins(extensionToken: $extensionToken)
-                  }
-                `,
-                variables: {
-                  extensionToken: extensionToken
-                }
-              })
-              .valueChanges
-              .subscribe(
-                (coinsResponse: any) => {
-                  this.todayCoins = coinsResponse.data.coins;
-                },
-                error => {
-                  console.error('Error getting today coins:', error);
-                }
-              );
+            this.todayCoins = response.data.coins;
+          },
+          (error: any) => {
+            console.error('Error getting today coins:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: `Failed to get today coins: ${error.message}`,
+            });
+          }
+        );
+    } else {
+      console.error('Token not found in cookies');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Email token not found in cookies',
+      });
+    }
+  }
+
+  getTime(): void {
+    const email = this.cookieService.get('email');
+    if (email !== null) {
+      this.apollo
+        .watchQuery({
+          query: gql`
+            query GetTime($email: String!) {
+              time(email: $email)
+            }
+          `,
+          variables: {
+            email: email
+          }
+        })
+        .valueChanges
+        .subscribe(
+          (response: any) => {
+            const timeInUnits = response.data.time / 10000; // Divide by 10000
+            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2)); // Round to 2 decimal places
           },
           error => {
-            console.error('Error getting extension token:', error);
+            console.error('Error getting today time:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: `Failed to get today time: ${error.message}`,
+            });
           }
         );
     } else {
@@ -180,10 +211,8 @@ export class HomeComponent implements OnInit {
                 label: "Total hour",
                 fontFamily: "Inter, sans-serif",
                 formatter: function (w: { globals: { seriesTotals: any[]; }; }) {
-                  const sum = w.globals.seriesTotals.reduce((a: any, b: any) => {
-                    return a + b
-                  }, 0)
-                  return sum
+                  const sum = w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
+                  return sum;
                 },
               },
               value: {
@@ -191,7 +220,7 @@ export class HomeComponent implements OnInit {
                 fontFamily: "Inter, sans-serif",
                 offsetY: -20,
                 formatter: function (value: string) {
-                  return value + "k"
+                  return value + "k";
                 },
               },
             },
@@ -215,14 +244,14 @@ export class HomeComponent implements OnInit {
       yaxis: {
         labels: {
           formatter: function (value: string) {
-            return value + "k"
+            return value + "k";
           },
         },
       },
       xaxis: {
         labels: {
           formatter: function (value: string) {
-            return value + "k"
+            return value + "k";
           },
         },
         axisTicks: {
@@ -234,5 +263,4 @@ export class HomeComponent implements OnInit {
       },
     };
   }
-
 }

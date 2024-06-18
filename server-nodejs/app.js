@@ -4,7 +4,7 @@ const cors = require('cors');
 const { ApolloServer, gql } = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
 const authUser = require('./routes/Userroutes'); // Assuming you have this file
-const { pool } = require('./model/Usermodel'); // import pool จาก Usermodel
+const { pool } = require('./model/Usermodel'); // import pool from Usermodel
 const AuthMiddleware = require('./middleware/authmid');
 
 const app = express();
@@ -16,23 +16,25 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api/user', authUser);
 
-// สร้าง schema สำหรับ GraphQL
+// Define schema for GraphQL
 const typeDefs = gql`
   type Query {
     totalCoins: Float,
+    totalTime: Int,
     Languages: String,
     extensionToken(email: String!): String
-    coins(extensionToken: String!): Float
+    coins(email: String!): Float
+    time(email: String!): Float
   }
 `;
 
-// สร้าง resolver สำหรับ query totalCoins
+// Define resolvers for GraphQL queries
 const resolvers = {
   Query: {
     totalCoins: async () => {
       try {
-        const result = await pool.query('SELECT SUM(coins::Float) AS total_coins FROM ActivityCoding');
-        return result.rows[0].total_coins; // ตรวจสอบว่าคีย์ตรงกับชื่อคอลัมน์ในฐานข้อมูล
+        const result = await pool.query('SELECT SUM(coins::FLOAT) AS total_coins FROM ActivityCoding');
+        return result.rows[0].total_coins; // Check if the key matches the column name in the database
       } catch (error) {
         console.error(error);
         throw new Error('Error getting coins from database');
@@ -40,8 +42,8 @@ const resolvers = {
     },
     Languages: async () => {
       try {
-        const result = await pool.query('SELECT * FROM ActivityCoding ');
-        return result.rows[0].Languages; // ตรวจสอบว่าคีย์ตรงกับชื่อคอลัมน์ในฐานข้อมูล
+        const result = await pool.query('SELECT * FROM ActivityCoding');
+        return result.rows[0].Languages; // Check if the key matches the column name in the database
       } catch (error) {
         console.error(error);
         throw new Error('Error getting languages from database');
@@ -49,7 +51,7 @@ const resolvers = {
     },
     extensionToken: async (_, { email }) => {
       try {
-        const result = await pool.query('SELECT extensions_token FROM token_used WHERE email = $1', [email]);
+        const result = await pool.query('SELECT extensions_token FROM token_used WHERE email = $1 AND current_token = true', [email]);
         if (result.rows.length > 0) {
           return result.rows[0].extensions_token;
         } else {
@@ -60,17 +62,30 @@ const resolvers = {
         throw new Error('Error getting extension token from database');
       }
     },
-    coins: async (_, { extensionToken }) => {
+    coins: async (_, { email }) => {
       try {
-        const result = await pool.query('SELECT SUM(coins::Float) AS total_coins FROM ActivityCoding WHERE extensions_token = $1', [extensionToken]);
+        const result = await pool.query('SELECT SUM(coins::FLOAT) AS total_coins FROM ActivityCoding WHERE email = $1', [email]);
         if (result.rows.length > 0) {
           return result.rows[0].total_coins;
         } else {
-          throw new Error('Coins not found for this token');
+          throw new Error('Coins not found for this email');
         }
       } catch (error) {
         console.error(error);
         throw new Error('Error getting coins from database');
+      }
+    },
+    time: async (_, { email }) => {
+      try {
+        const result = await pool.query('SELECT SUM(time::FLOAT) AS total_time FROM ActivityCoding WHERE email = $1', [email]);
+        if (result.rows.length > 0) {
+          return result.rows[0].total_time;
+        } else {
+          return null; // Return 0 if no rows found
+        }
+      } catch (error) {
+        console.error(error);
+        throw new Error('Error getting time from database');
       }
     },
   },
@@ -86,7 +101,7 @@ app.post('/generate-token', (req, res) => {
 
   const payload = {
     email: email,
-    exp: Math.floor(Date.now() / 1000) + (5 * 60) // กำหนดเวลาหมดอายุ 5 นาที
+    exp: Math.floor(Date.now() / 1000) + (5 * 60) // Set expiration time to 5 minutes
   };
 
   const token = jwt.sign(payload, SECRET_KEY, { algorithm: 'HS256' });
@@ -94,7 +109,7 @@ app.post('/generate-token', (req, res) => {
 });
 
 app.post('/save-token', async (req, res) => {
-  const { token } = req.body; // รับ token ที่ส่งมาจากแอปพลิเคชัน Angular
+  const { token } = req.body; // Get token from request body
   const query = 'INSERT INTO token_used (extensions_token) VALUES ($1)';
 
   try {
@@ -106,36 +121,18 @@ app.post('/save-token', async (req, res) => {
   }
 });
 
-// Middleware to handle JWT authentication
-// Keep later use to verify to query data from graphql server
-/*const verifytoken = (req, res, next) => {
-  const token = req.headers.authorization || '';
-  if (token) {
-    jwt.verify(token.replace('Bearer ', ''), SECRET_KEY, (err, decoded) => {
-      if (err) {
-        // Token expired or invalid
-        return res.status(401).json({ error: 'Invalid token' });
-      }
-      req.user = decoded;
-      next();
-    });
-  } else {
-    // No token provided
-    res.status(401).json({ error: 'No token provided' });
-  }
-};*/
-
+// ตรวจสอบ Authorization header และถ้าไม่มีให้ throw error ออกไป
 async function startServer() {
-  const server = new ApolloServer({ 
-    typeDefs, 
+  const server = new ApolloServer({
+    typeDefs,
     resolvers,
+    introspection: true,
     context: ({ req }) => {
-      const token = req.headers.authorization || '';
-      if (!token) throw new Error('No token provided');
-      const decoded = jwt.verify(token.replace('Bearer ', ''), SECRET_KEY);
-      return { user: decoded.email };
+      const token = req.headers.authorization || ''; // สามารถใช้งาน req.cookies.extensionToken ในกรณีที่มีการส่ง cookie มาใน request
+      return { extensionToken: token.replace('Bearer ', '') };
     },
   });
+
   await server.start();
   server.applyMiddleware({ app });
 
@@ -144,7 +141,23 @@ async function startServer() {
   });
 }
 
-
 startServer().catch((error) => {
   console.error('Error starting the server:', error);
 });
+
+
+// JWT authentication middleware
+/*const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization || '';
+  if (token) {
+    jwt.verify(token.replace('Bearer ', ''), SECRET_KEY, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+      req.user = decoded;
+      next();
+    });
+  } else {
+    res.status(401).json({ error: 'No token provided' });
+  }
+};*/
