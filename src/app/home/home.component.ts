@@ -105,6 +105,7 @@ throw new Error('Method not implemented.');
 
   getTodayCoins(): void {
     const email = this.cookieService.get('email');
+
     if (email) {
       this.apollo
         .watchQuery({
@@ -143,6 +144,7 @@ throw new Error('Method not implemented.');
 
   getTime(): void {
     const email = this.cookieService.get('email');
+    console.log(email);
     if (email !== null) {
       this.apollo
         .watchQuery({

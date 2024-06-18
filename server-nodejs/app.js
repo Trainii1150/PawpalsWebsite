@@ -33,40 +33,36 @@ const resolvers = {
   Query: {
     totalCoins: async () => {
       try {
-        const result = await pool.query('SELECT SUM(coins::FLOAT) AS total_coins FROM ActivityCoding');
-        return result.rows[0].total_coins; // Check if the key matches the column name in the database
+        const result = await pool.query('SELECT SUM(coins::FLOAT) AS total_coins FROM "activitycoding"');
+        return result.rows[0].total_coins || 0; // Check if the key matches the column name in the database
       } catch (error) {
         console.error(error);
         throw new Error('Error getting coins from database');
       }
     },
+    totalTime: async () => {
+      try {
+        const result = await pool.query('SELECT SUM(time::FLOAT) AS total_time FROM "activitycoding"');
+        return result.rows[0].total_time || 0; // Check if the key matches the column name in the database
+      } catch (error) {
+        console.error(error);
+        throw new Error('Error getting time from database');
+      }
+    },
     Languages: async () => {
       try {
-        const result = await pool.query('SELECT * FROM ActivityCoding');
-        return result.rows[0].Languages; // Check if the key matches the column name in the database
+        const result = await pool.query('SELECT * FROM "ActivityCoding"');
+        return result.rows[0].languages; // Check if the key matches the column name in the database
       } catch (error) {
         console.error(error);
         throw new Error('Error getting languages from database');
       }
     },
-    extensionToken: async (_, { email }) => {
-      try {
-        const result = await pool.query('SELECT extensions_token FROM token_used WHERE email = $1 AND current_token = true', [email]);
-        if (result.rows.length > 0) {
-          return result.rows[0].extensions_token;
-        } else {
-          throw new Error('Extension token not found');
-        }
-      } catch (error) {
-        console.error(error);
-        throw new Error('Error getting extension token from database');
-      }
-    },
     coins: async (_, { email }) => {
       try {
-        const result = await pool.query('SELECT SUM(coins::FLOAT) AS total_coins FROM ActivityCoding WHERE email = $1', [email]);
+        const result = await pool.query('SELECT SUM(coins::FLOAT) AS total_coins FROM "activitycoding" WHERE email = $1', [email]);
         if (result.rows.length > 0) {
-          return result.rows[0].total_coins;
+          return result.rows[0].total_coins || 0;
         } else {
           throw new Error('Coins not found for this email');
         }
@@ -77,11 +73,11 @@ const resolvers = {
     },
     time: async (_, { email }) => {
       try {
-        const result = await pool.query('SELECT SUM(time::FLOAT) AS total_time FROM ActivityCoding WHERE email = $1', [email]);
+        const result = await pool.query('SELECT SUM(time::FLOAT) AS total_time FROM "activitycoding" WHERE email = $1', [email]);
         if (result.rows.length > 0) {
-          return result.rows[0].total_time;
+          return result.rows[0].total_time || 0;
         } else {
-          return null; // Return 0 if no rows found
+          return 0; // Return 0 if no rows found
         }
       } catch (error) {
         console.error(error);
@@ -90,6 +86,7 @@ const resolvers = {
     },
   },
 };
+
 
 const SECRET_KEY = process.env.Accesstoken;
 

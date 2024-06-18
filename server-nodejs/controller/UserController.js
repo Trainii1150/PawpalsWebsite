@@ -38,11 +38,10 @@ const loginUser = async (req, res) => {
         }
 
         if (!user.user_verify) {
-            return res.status(400).json({error: 'Email not verified. Please resend verification email.'});
+            return res.status(400).json({ error: 'Email not verified. Please resend verification email.' });
         }
 
         const token = tokenUserGenerate(user);
-        //console.log(`Token Generated at:- ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
         res.json({ user: String(user.email), token });
 
     } catch (error) {
@@ -50,6 +49,7 @@ const loginUser = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 };
+
 
 const checkEmail = async (req, res) => {
     const { email } = req.body;
@@ -66,8 +66,8 @@ const checkEmail = async (req, res) => {
 };
 
 const tokenUserGenerate = (user) => {
-    return jwt.sign({user: user.username},process.env.Accesstoken,{expiresIn:"5m"});
-}
+    return jwt.sign({ email: user.email, username: user.username }, process.env.Accesstoken, { expiresIn: "5m" });
+};
 
 const tokenresetpassEmailGenerate = (email) =>{
     return jwt.sign({email},process.env.ResetpassEmailtoken,{expiresIn:"10m"});
