@@ -5,17 +5,15 @@ import { AuthService } from '../auth.service';
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
+export class UnauthGuard implements CanActivate {
 
   constructor(private authService: AuthService, private router: Router) {}
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (this.authService.isloggedin()) {
-        return true;
-      } else {
-        this.router.navigate(['/login']);
-        return false;
-      }
+      this.router.navigate(['/']); // ถ้าเข้าสู่ระบบแล้วให้ redirect ไปที่หน้าหลัก
+      return false;
+    }
+    return true; // ยังไม่เข้าสู่ระบบ จึงอนุญาตให้เข้าถึง
   }
-
 }
