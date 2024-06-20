@@ -13,6 +13,10 @@ import Swal from 'sweetalert2';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+  logout(){
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 removeToken() {
 throw new Error('Method not implemented.');
 }
@@ -40,42 +44,6 @@ throw new Error('Method not implemented.');
     this.getTodayCoins();
     this.initializeChart();
     this.getTime();
-  }
-
-  generateToken() {
-    const token = this.cookieService.get('email'); // get token from cookie
-    if (token !== null) {
-      this.authService.setExtensionsToken(token).subscribe(
-        (response) => {
-          console.log(response);
-          const firstObject = Object.values(response)[0];
-          if (typeof firstObject === 'string') {
-            Swal.fire({
-              icon: 'info',
-              title: 'Your Extensions Token',
-              text: `${firstObject}`,
-            });
-          } else {
-            console.error('Unexpected response format:', response);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Unexpected response format. Please try again.',
-            });
-          }
-        },
-        (error) => {
-          console.log(error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to generate Extensions Token. Please try again.',
-          });
-        }
-      );
-    } else {
-      console.error('Token not found in localStorage');
-    }
   }
 
   getTotalCoins(): void {
@@ -144,7 +112,6 @@ throw new Error('Method not implemented.');
 
   getTime(): void {
     const email = this.cookieService.get('email');
-    console.log(email);
     if (email !== null) {
       this.apollo
         .watchQuery({
@@ -264,10 +231,5 @@ throw new Error('Method not implemented.');
         },
       },
     };
-  }
-
-  logout(){
-    this.authService.logout();
-    this.router.navigate(['/login']);
   }
 }
