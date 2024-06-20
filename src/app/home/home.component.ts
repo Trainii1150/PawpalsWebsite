@@ -13,13 +13,16 @@ import Swal from 'sweetalert2';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
+  genres = ['All', 'Dogs', 'Potions'];
+  selectedGenre = 'All';
+  
   logout(){
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-removeToken() {
-throw new Error('Method not implemented.');
-}
+  removeToken() {
+    throw new Error('Method not implemented.');
+  }
 
   activityCoins: any[] = [];
   foodStatus: String | undefined = "I";
@@ -252,5 +255,20 @@ throw new Error('Method not implemented.');
         },
       },
     };
+  }
+
+  selectGenre(genre: string) {
+    this.selectedGenre = genre;
+  }
+
+  get filteredItems() {
+    if (this.selectedGenre === 'All') {
+      return this.items;
+    }
+    return this.items.filter(item => item.genre === this.selectedGenre);
+  }
+
+  selectItem(item: any) {
+    console.log('Selected item:', item);
   }
 }
