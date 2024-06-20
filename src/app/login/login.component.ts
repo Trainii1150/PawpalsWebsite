@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-
+  //isDarkBackground: boolean = false;
 
   constructor(private fb: FormBuilder ,private router: Router, private authService: AuthService) {
     this.loginForm = this.fb.group({
@@ -20,7 +20,9 @@ export class LoginComponent {
       password: ['', Validators.required],
     });
   }
-  ngOnInit():void {}
+  ngOnInit():void {
+    //this.setDarkBackgroundBasedOnTime();
+  }
   
   onSubmit():void{
     //console.log(this.loginForm.value);
@@ -49,6 +51,13 @@ export class LoginComponent {
       );
     }
   }
+
+  /*private setDarkBackgroundBasedOnTime(): void {
+    const currentHour = new Date().getHours();
+    // Set isDarkBackground to true if it's night time (e.g., between 8 PM and 6 AM)
+    this.isDarkBackground = currentHour >= 18 || currentHour < 6;
+    console.log(this.isDarkBackground);
+  }*/
 
   showLoginSuccess(req: Object): void{
     Swal.fire({

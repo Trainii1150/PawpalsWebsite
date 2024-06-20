@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
   logout(){
@@ -31,6 +31,27 @@ throw new Error('Method not implemented.');
   todayCoins: Number | undefined = 0;
   totalCoins: Number | undefined;
   hidden: any;
+
+  items = [
+    { 
+      name: 'Golden Retriever', 
+      description: 'Friendly and intelligent breed.', 
+      image: '../assets/golden-retriever.jpg', 
+      genre: 'Dogs' 
+    },
+    { 
+      name: 'Labrador Retriever', 
+      description: 'Outgoing and even-tempered.', 
+      image: '../assets/golden-retriever.jpg',
+      genre: 'Dogs' 
+    },
+    { 
+      name: 'Healing Potion', 
+      description: 'Restores health over time.', 
+      image: '../assets/golden-retriever.jpg',
+      genre: 'Potions' 
+    }
+  ];
 
   constructor(
     private authService: AuthService,
