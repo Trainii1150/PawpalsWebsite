@@ -42,7 +42,7 @@ const loginUser = async (req, res) => {
         }
 
         const token = tokenUserGenerate(user);
-        res.json({ user: String(user.email), token });
+        res.json({ uid: String(user.user_id), token });
 
     } catch (error) {
         console.error('Error during login:', error);

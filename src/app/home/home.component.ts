@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { CookieService } from 'ngx-cookie-service';
+import { OwlOptions } from 'ngx-owl-carousel-o';
 import gql from 'graphql-tag';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
@@ -51,10 +52,71 @@ export class HomeComponent implements OnInit {
     { 
       name: 'Healing Potion', 
       description: 'Restores health over time.', 
+      image: '../assets/18_burrito.png',
+      genre: 'Potions' 
+    },
+    { 
+      name: 'Golden Retriever', 
+      description: 'Friendly and intelligent breed.', 
+      image: '../assets/golden-retriever.jpg', 
+      genre: 'Dogs' 
+    },
+    { 
+      name: 'Labrador Retriever', 
+      description: 'Outgoing and even-tempered.', 
       image: '../assets/golden-retriever.jpg',
+      genre: 'Dogs' 
+    },
+    { 
+      name: 'Healing Potion', 
+      description: 'Restores health over time.', 
+      image: '../assets/18_burrito.png',
+      genre: 'Potions' 
+    },
+    { 
+      name: 'Golden Retriever', 
+      description: 'Friendly and intelligent breed.', 
+      image: '../assets/golden-retriever.jpg', 
+      genre: 'Dogs' 
+    },
+    { 
+      name: 'Labrador Retriever', 
+      description: 'Outgoing and even-tempered.', 
+      image: '../assets/golden-retriever.jpg',
+      genre: 'Dogs' 
+    },
+    { 
+      name: 'Healing Potion', 
+      description: 'Restores health over time.', 
+      image: '../assets/18_burrito.png',
       genre: 'Potions' 
     }
   ];
+
+  customOptions: OwlOptions = {
+    loop: true,
+    mouseDrag: true,
+    touchDrag: false,
+    pullDrag: false,
+    dots: false,
+    navSpeed: 700,
+    navText: ['', ''],
+    responsive: {
+      0: {
+        items: 1
+      },
+      400: {
+        items: 2
+      },
+      740: {
+        items: 3
+      },
+      940: {
+        items: 4
+      }
+    },
+    nav: true
+  }
 
   constructor(
     private authService: AuthService,

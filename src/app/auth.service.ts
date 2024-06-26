@@ -52,7 +52,7 @@ export class AuthService {
     const exp = tokenPayload.exp*1000;
     console.log(exp.toString());
     this.cookieService.set('auth_key',resObject.token,exp);
-    this.cookieService.set('email',resObject.user);
+    this.cookieService.set('userid',resObject.uid);
     /*localStorage.setItem('auth_key',resObject.token);
     localStorage.setItem('auth_email',resObject.user);*/
   }

@@ -11,10 +11,12 @@ export class AuthGuard implements CanActivate {
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (this.authService.isloggedin()) {
-        return true;
+        //เข้าสู่ระบบแล้ว
+        return true; //อนุญาตให้เข้าถึง route หรือหน้า Home นี้
       } else {
-        this.router.navigate(['/login']);
-        return false;
+        // ยังไม่ได้เข้าสู่ระบบ
+        this.router.navigate(['/login']); // redirect ไปที่หน้า Login
+        return false;// ไม่อนุญาตให้เข้าถึง route หรือหน้า Home นี้
       }
   }
 

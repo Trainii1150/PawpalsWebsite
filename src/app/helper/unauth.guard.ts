@@ -10,10 +10,13 @@ export class UnauthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.authService.isloggedin()) {
-      this.router.navigate(['/']); // ถ้าเข้าสู่ระบบแล้วให้ redirect ไปที่หน้าหลัก
-      return false;
+    if (!this.authService.isloggedin()) {
+      // ยังไม่ได้เข้าสู่ระบบ
+      return true; // อนุญาตให้เข้าถึง route นี้ได้ แต่ไม่อนุญาตให้เข้าถึงหน้า Home
+    } else {
+      // เข้าสู่ระบบแล้ว
+      this.router.navigate(['/']); // Redirect ไปที่หน้า Home หรือหน้าอื่นที่เหมาะสม
+      return false; // ไม่อนุญาตให้เข้าถึง route นี้
     }
-    return true; // ยังไม่เข้าสู่ระบบ จึงอนุญาตให้เข้าถึง
   }
 }

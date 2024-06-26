@@ -262,7 +262,7 @@
 
     
     </div>
-    <div class="flex justify-center mt-4">
+    <div class="flex justify-start mt-4">
       <div class="space-x-4">
         <button 
           *ngFor="let genre of genres" 
@@ -275,7 +275,7 @@
       </div>
     </div>
     
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 mt-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 mt-2">
       <div *ngFor="let item of filteredItems" (click)="selectItem(item)" class="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer hover:bg-gray-100 transition duration-300">
         <img class="w-full" [src]="item.image" [alt]="item.name">
         <div class="px-6 py-4">
@@ -284,5 +284,21 @@
         </div>
       </div>
     </div>
+
+    <owl-carousel-o [options]="customOptions" class="grid grid-cols-1 gap-4 p-5 mt-2 mx-auto">
+        <ng-container *ngFor="let item of filteredItems">
+          <ng-template carouselSlide (click)="selectItem(item)">
+            <div class="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer hover:bg-gray-100 transition duration-300 item">
+              <img class="w-full" [src]="item.image" [alt]="item.name">
+              <div class="px-6 py-4">
+                <div class="font-bold text-xl mb-2">{{ item.name }}</div>
+                <p class="text-gray-700 text-base">{{ item.description }}</p>
+              </div>
+            </div>
+          </ng-template>
+        </ng-container>
+    </owl-carousel-o>
+
   </div>
+  
 </section>
