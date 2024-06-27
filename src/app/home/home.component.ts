@@ -18,6 +18,8 @@ export class HomeComponent implements OnInit {
   selectedGenre = 'All';
   
   logout(){
+
+  logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
@@ -159,17 +161,22 @@ export class HomeComponent implements OnInit {
 
   getTodayCoins(): void {
     const email = this.cookieService.get('email');
+    const uid = this.cookieService.get('uid');
 
     if (email) {
+    if (uid) {
       this.apollo
         .watchQuery({
           query: gql`
             query GetCoins($email: String!) {
               coins(email: $email)
+            query GetCoins($uid: String!) {
+              coins(uid: $uid)
             }
           `,
           variables: {
             email: email
+            uid: uid
           }
         })
         .valueChanges
@@ -192,6 +199,7 @@ export class HomeComponent implements OnInit {
         icon: 'error',
         title: 'Error',
         text: 'Email token not found in cookies',
+        text: 'User ID token not found in cookies',
       });
     }
   }
@@ -199,15 +207,20 @@ export class HomeComponent implements OnInit {
   getTime(): void {
     const email = this.cookieService.get('email');
     if (email !== null) {
+    const uid = this.cookieService.get('uid');
+    if (uid !== null) {
       this.apollo
         .watchQuery({
           query: gql`
             query GetTime($email: String!) {
               time(email: $email)
+            query GetTime($uid: String!) {
+              time(uid: $uid)
             }
           `,
           variables: {
             email: email
+            uid: uid
           }
         })
         .valueChanges
@@ -215,6 +228,8 @@ export class HomeComponent implements OnInit {
           (response: any) => {
             const timeInUnits = response.data.time / 10000; // Divide by 10000
             this.todayCodeTime = parseFloat(timeInUnits.toFixed(2)); // Round to 2 decimal places
+            const timeInUnits = response.data.time / 10000;
+            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2));
           },
           error => {
             console.error('Error getting today time:', error);
