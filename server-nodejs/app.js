@@ -3,8 +3,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { ApolloServer, gql } = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
+
+const itemRoutes = require('./routes/itemRoutes');
+const petRoutes = require('./routes/petRoutes');
 const authUser = require('./routes/Userroutes'); // Assuming you have this file
-const { pool } = require('./model/Usermodel'); // import pool from Usermodel
+
+const { pool } = require('./config/database'); // import pool from configuration database
 const AuthMiddleware = require('./middleware/authmid');
 
 const app = express();
@@ -14,6 +18,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use('/api/items',itemRoutes);
+app.use('/api/pets',petRoutes);
 app.use('/api/user', authUser);
 
 // Define schema for GraphQL

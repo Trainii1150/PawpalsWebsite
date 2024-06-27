@@ -1,29 +1,5 @@
-const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
-const dotenv = require('dotenv').config()
-
-const pool = new Pool({
-    user: process.env.Pool_Username,
-    host: process.env.Pool_Host,
-    database: process.env.Pool_Database,
-    password: process.env.Pool_Password,
-    port: process.env.Pool_Port,
-});
-
-// Open the connection when your application starts
-pool.connect()
-  .then(() => {
-    console.log('Connected to PostgreSQL database!');
-  })
-  .catch((err) => {
-    console.error('Error connecting to PostgreSQL database:', err);
-  });
-
-// Close the pool when your application exits
-process.on('exit', () => {
-  pool.end();
-});
-
+import { pool } from '../config/database';
 
 const saltRounds = 10;
 
