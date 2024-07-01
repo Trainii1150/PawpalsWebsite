@@ -41,8 +41,8 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ error: 'Email not verified. Please resend verification email.' });
         }
 
-        const token = tokenUserGenerate(user);
-        res.json({ uid: String(user.user_id), token });
+        const { accessToken, refreshToken } = tokenUserGenerate(user);
+        res.json({ uid: String(user.user_id), accessToken , refreshToken });
 
     } catch (error) {
         console.error('Error during login:', error);
@@ -66,7 +66,9 @@ const checkEmail = async (req, res) => {
 };
 
 const tokenUserGenerate = (user) => {
-    return jwt.sign({ email: user.email, username: user.username }, process.env.Accesstoken, { expiresIn: "5m" });
+    const accessToken = jwt.sign({ username: user.username, userId: user.user_id }, process.env.Accesstoken, { expiresIn: '5m' });
+    const refreshToken = jwt.sign({ username: user.username, userId: user.user_id }, process.env.RefreshToken, { expiresIn: '1d' });
+    return { accessToken, refreshToken };
 };
 
 const tokenresetpassEmailGenerate = (email) =>{

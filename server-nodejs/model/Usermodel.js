@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-import { pool } from '../config/database';
+const pool = require('../config/database'); // Use require instead of import
 
 const saltRounds = 10;
 

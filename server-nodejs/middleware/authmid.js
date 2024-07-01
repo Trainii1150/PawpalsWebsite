@@ -26,4 +26,23 @@ const AuthToken = (req, res,next) => {
     
 };
 
-module.exports = AuthToken;
+const refreshToken = (req, res, next) => {
+    const refreshToken = req.body.refreshToken;
+  
+    if (!refreshToken) {
+      return res.sendStatus(401);
+    }
+  
+    jwt.verify(refreshToken, secret.RefreshToken, (err, decoded) => {
+      if (err) {
+        return res.sendStatus(403);
+      }
+      console.log('acc token is expired');
+      // Optionally, check if decoded data is valid for refresh
+      const accessToken = jwt.sign({ username: decoded.username, userId: decoded.userId }, process.env.Accesstoken, { expiresIn: '5m' });
+      res.json({ accessToken });
+      //next();
+    });
+};
+
+  module.exports = { AuthToken, refreshToken };

@@ -1,4 +1,4 @@
-import { pool } from '../config/database';
+const pool = require('../config/database'); // Use require instead of import
 
 const createItem = async (item_name, description, item_type) => {
     const result = await pool.query(

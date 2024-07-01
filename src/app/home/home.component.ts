@@ -17,7 +17,6 @@ export class HomeComponent implements OnInit {
   genres = ['All', 'Dogs', 'Potions'];
   selectedGenre = 'All';
   
-  logout(){
 
   logout() {
     this.authService.logout();
@@ -159,25 +158,21 @@ export class HomeComponent implements OnInit {
       );
   }
 
-  getTodayCoins(): void {
+  getTodayCoins(): void { 
     const email = this.cookieService.get('email');
     const uid = this.cookieService.get('uid');
-
-    if (email) {
-    if (uid) {
-      this.apollo
+      if (uid){
+        this.apollo
         .watchQuery({
-          query: gql`
-            query GetCoins($email: String!) {
-              coins(email: $email)
+            query: gql`
             query GetCoins($uid: String!) {
               coins(uid: $uid)
             }
           `,
           variables: {
-            email: email
+            email: email,
             uid: uid
-          }
+          },
         })
         .valueChanges
         .subscribe(
@@ -192,55 +187,47 @@ export class HomeComponent implements OnInit {
               text: `Failed to get today coins: ${error.message}`,
             });
           }
-        );
-    } else {
+        )
+      }else{
       console.error('Token not found in cookies');
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Email token not found in cookies',
         text: 'User ID token not found in cookies',
       });
     }
   }
 
   getTime(): void {
-    const email = this.cookieService.get('email');
-    if (email !== null) {
     const uid = this.cookieService.get('uid');
-    if (uid !== null) {
+    if(uid !== null){
       this.apollo
-        .watchQuery({
-          query: gql`
-            query GetTime($email: String!) {
-              time(email: $email)
-            query GetTime($uid: String!) {
-              time(uid: $uid)
-            }
-          `,
-          variables: {
-            email: email
-            uid: uid
+      .watchQuery({
+        query: gql`
+          query GetTime($uid: String!) {
+            time(uid: $uid)
           }
-        })
-        .valueChanges
-        .subscribe(
-          (response: any) => {
-            const timeInUnits = response.data.time / 10000; // Divide by 10000
-            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2)); // Round to 2 decimal places
-            const timeInUnits = response.data.time / 10000;
-            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2));
-          },
-          error => {
-            console.error('Error getting today time:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: `Failed to get today time: ${error.message}`,
-            });
-          }
-        );
-    } else {
+        `,
+        variables: {
+          uid: uid,
+        }
+      })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          const timeInUnits = response.data.time / 10000; // Divide by 10000
+          this.todayCodeTime = parseFloat(timeInUnits.toFixed(2)); // Round to 2 decimal places
+        },
+        error => {
+          console.error('Error getting today time:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get today time: ${error.message}`,
+          });
+        }
+      );
+    } else{
       console.error('Token not found in localStorage');
     }
   }
@@ -251,6 +238,7 @@ export class HomeComponent implements OnInit {
       chart.render();
     }
   }
+
 
   getChartOptions() {
     return {

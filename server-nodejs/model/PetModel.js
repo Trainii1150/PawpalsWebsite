@@ -1,4 +1,4 @@
-import { pool } from '../config/database';
+const pool = require('../config/database'); // Use require instead of import
 
 const createPet = async (pet_name, description, pet_type) => {
     const result = await pool.query(

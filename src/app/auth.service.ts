@@ -48,11 +48,11 @@ export class AuthService {
     //return !!localStorage.getItem('auth_key');
   }
   setLocalStorage(resObject:any){
-    const tokenPayload: any = jwtDecode(resObject.token);
+    const tokenPayload: any = jwtDecode(resObject.accessToken);
     const exp = tokenPayload.exp*1000;
-    console.log(exp.toString());
-    this.cookieService.set('auth_key',resObject.token,exp);
-    this.cookieService.set('userid',resObject.uid);
+    this.cookieService.set('auth_key',resObject.accessToken,exp);
+    this.cookieService.set('refresh_token', resObject.refreshToken);
+    this.cookieService.set('uid',resObject.uid);
     /*localStorage.setItem('auth_key',resObject.token);
     localStorage.setItem('auth_email',resObject.user);*/
   }
@@ -60,6 +60,13 @@ export class AuthService {
   setExtensionsToken(email: any) {
     return this.http.post(`${this.UrlApi}/extensionsToken`, { email });
   }
+
+  refreshToken() {
+    return this.http.post<any>(`${this.UrlApi}/refresh-token`, {
+      refreshToken: this.cookieService.get('refresh_token')
+    });
+  }
+  
 
   logout(){
     this.cookieService.deleteAll();
