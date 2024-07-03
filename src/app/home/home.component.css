@@ -1,11 +1,182 @@
-
-#pet{
-    filter: drop-shadow(8px 8px 10px rgb(92, 41, 0));
-
-}
-.owl-carousel .item {
+.inventory-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .inventory-header {
+    background-color: #1ABC9C;
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .inventory-header h2 {
+    color: #fff;
+    margin: 0;
+  }
+  
+  .genres {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .genres button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007acc;
+    color: white;
+    font-size: 1em;
+  }
+  
+  .genres button.active {
+    background-color: #005f99;
+  }
+  
+  .inventory-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .inventory-slot {
+    position: relative;
+    width: 100px; /* ขยายขนาดช่องไอเท็ม */
+    height: 100px; /* ขยายขนาดช่องไอเท็ม */
+    background-color: #d1d5db;
+    border: 1px solid #6b7280;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .inventory-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+  }
+  
+  .inventory-item img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .inventory-item span {
+    margin-top: 10px;
+  }
+  
+  .pet-details {
+    background-color: #F39C12;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    width: 100%;
+  }
+  
+  .pet-details h3 {
+    color: #fff;
+    text-align: center;
+  }
+  
+  .pet-details img {
+    display: block;
+    margin: 0 auto;
+    width: 100px;
+    height: auto;
+  }
+  
+  .pet-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .pet-item-slot {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .pet-item-slot img {
+    width: 30px;
+    height: 30px;
+  }
+  .pet-image-container {
+    width: 100px; /* ปรับขนาดตามที่ต้องการ */
+    height: 100px; /* ปรับขนาดตามที่ต้องการ */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f3f4f6; /* สีพื้นหลังที่ต้องการ */
+    border-radius: 50%; /* ทำให้เป็นวงกลม */
+    overflow: hidden; /* ป้องกันภาพล้นออกจากขอบ */
+  }
+  
+  .pet-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ทำให้ภาพเต็มขนาดของ container */
+  }
+  
+  .pet-status-bars {
+    width: 100%;
+  }
+  
+  .status-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .status-bar span {
+    width: 100px;
+    color: #fff;
+  }
+  
+  .status-bar-fill {
+    height: 20px;
+    background-color: #1ABC9C;
+    border-radius: 10px;
+  }
+  
+  .food-carousel {
+    margin-top: 20px;
+  }
+  
+  .food-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+  }
+  
+  .food-item img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .food-item span {
+    margin-top: 10px;
   }
   

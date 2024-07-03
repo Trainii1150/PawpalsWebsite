@@ -26,5 +26,5 @@ module.exports = {
     extend: {},
   },
   darkMode: false, // ตรวจสอบให้แน่ใจว่า dark mode ถูกปิดอยู่
-  plugins: [],
+  plugins: [require('daisyui'),],
 };

@@ -9,12 +9,23 @@ import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-inventory',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  genres = ['All', 'Dogs', 'Potions'];
+
+toggleActivity() {
+  this.showActivity = !this.showActivity;
+throw new Error('Method not implemented.');
+}
+
+toggleShop() {
+throw new Error('Method not implemented.');
+}
+  showActivity = false;
+  showInventory = false;
+  genres = ['All', 'Foods', 'Decoration'];
   selectedGenre = 'All';
   
 
@@ -26,9 +37,10 @@ export class HomeComponent implements OnInit {
     throw new Error('Method not implemented.');
   }
 
+  petName: String | undefined = "David";
   activityCoins: any[] = [];
-  foodStatus: String | undefined = "I";
-  socialStatus: String | undefined = "I";
+  foodStatus: Number | undefined = 20;
+  happynessStatus: Number | undefined = 40;
   todayCodeTime: Number | undefined = 0;
   monthlyCodeTime: Number | undefined = 0;
   todayTimeCompare: Number | undefined = 0;
@@ -39,61 +51,38 @@ export class HomeComponent implements OnInit {
 
   items = [
     { 
-      name: 'Golden Retriever', 
-      description: 'Friendly and intelligent breed.', 
-      image: '../assets/golden-retriever.jpg', 
-      genre: 'Dogs' 
+      name: 'Bread', 
+      description: 'Just ordinary bread.', 
+      image: '../assets/foods/07_bread.png', 
+      genre: 'Foods',
+      count: 10 
     },
     { 
-      name: 'Labrador Retriever', 
-      description: 'Outgoing and even-tempered.', 
-      image: '../assets/golden-retriever.jpg',
-      genre: 'Dogs' 
+      name: 'Burger', 
+      description: 'Burger.', 
+      image: '../assets/foods/15_burger.png',
+      genre: 'Foods',
+      count: 5 
     },
     { 
-      name: 'Healing Potion', 
-      description: 'Restores health over time.', 
-      image: '../assets/18_burrito.png',
-      genre: 'Potions' 
+      name: 'Burrito', 
+      description: 'Mexican time amigos.', 
+      image: '../assets/foods/18_burrito.png',
+      genre: 'Foods',
+      count: 3 
     },
     { 
-      name: 'Golden Retriever', 
-      description: 'Friendly and intelligent breed.', 
-      image: '../assets/golden-retriever.jpg', 
-      genre: 'Dogs' 
-    },
-    { 
-      name: 'Labrador Retriever', 
-      description: 'Outgoing and even-tempered.', 
-      image: '../assets/golden-retriever.jpg',
-      genre: 'Dogs' 
-    },
-    { 
-      name: 'Healing Potion', 
-      description: 'Restores health over time.', 
-      image: '../assets/18_burrito.png',
-      genre: 'Potions' 
-    },
-    { 
-      name: 'Golden Retriever', 
-      description: 'Friendly and intelligent breed.', 
-      image: '../assets/golden-retriever.jpg', 
-      genre: 'Dogs' 
-    },
-    { 
-      name: 'Labrador Retriever', 
-      description: 'Outgoing and even-tempered.', 
-      image: '../assets/golden-retriever.jpg',
-      genre: 'Dogs' 
-    },
-    { 
-      name: 'Healing Potion', 
-      description: 'Restores health over time.', 
-      image: '../assets/18_burrito.png',
-      genre: 'Potions' 
+      name: 'Above the Clouds', 
+      description: 'Background for your Extenios', 
+      image: '../assets/backgrounds/sofia-ritter-day-gif.gif',
+      genre: 'Decoration',
+      count: 1
     }
+ 
   ];
-
+  toggleInventory() {
+    this.showInventory = !this.showInventory;
+  }
   customOptions: OwlOptions = {
     loop: true,
     mouseDrag: true,
