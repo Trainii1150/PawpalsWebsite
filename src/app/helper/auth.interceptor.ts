@@ -7,10 +7,9 @@ import {
   HttpErrorResponse
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 import { CookieService } from 'ngx-cookie-service';
-import { jwtDecode } from "jwt-decode";
 import { Router } from '@angular/router';
 
 @Injectable()
@@ -25,28 +24,13 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const token = this.cookieService.get('auth_key');
-    if (token) {
-      const tokenPayload: any = jwtDecode(token);
-      const expdate = new Date(tokenPayload.exp*1000);
-       // Check if the token has expired
-      if(expdate <= new Date()){
-        // Token has expired, log out the user
-        this.authService.logout();
-        this.router.navigate(['/login']);
-        console.log('Token expired');
-      } else {
-        console.log('Token has been retrieved');
-        request = request.clone({
-          setHeaders: {
-            Authorization: `Bearer ${token}`,  
-          },
-        });
-      }
-
+    const accessToken = this.cookieService.get('auth_key');
+    //const token = this.cookieService.get('auth_key');
+    if(accessToken){
+      console.log('Token has been retrieved');
       request = request.clone({
         setHeaders: {
-          Authorization: `Bearer ${token}`,
+          Authorization:`Bearer ${accessToken}`,
         },
       });
     }
@@ -54,15 +38,45 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 || error.status === 403) {
-          // Unauthorized error (token expired or invalid)
-          // Log out the user or perform any other action
-          this.authService.logout();
-          // Redirect to the login page or show a message to the user
-          this.router.navigate(['/login']);
-          console.log('Token expired or invalid.');
+          // Token expired, attempt to refresh
+          console.log('Access token expired');
+          const refreshToken = this.cookieService.get('refresh_token');
+          if(refreshToken){
+            return this.authService.refreshToken(refreshToken).pipe(
+              switchMap((newTokens: any) => {
+                if (newTokens) {
+                  this.cookieService.set('auth_key', newTokens.accessToken);
+  
+                  // Console log the new access token
+                  console.log('New access token:', newTokens.accessToken);
+                  
+                  request = request.clone({
+                    setHeaders: {
+                      Authorization: `Bearer ${newTokens.accessToken}`
+                    }
+                  });
+                  return next.handle(request);
+                }
+                return throwError(error);
+              }),
+              catchError(error => {
+                //when refresh has expired
+                this.authService.logout();
+                this.router.navigate(['/login']);
+                return throwError(error);
+              })
+            )
+          }else{
+            //refresh not found
+            this.authService.logout();
+            this.router.navigate(['/login']);
+            return throwError(error);
+          }
+        } else{
+          // Pass the error along to be handled by the calling code
+          return throwError(error);
         }
-        // Pass the error along to be handled by the calling code
-        return throwError(error);
+        
       })
     );
   }

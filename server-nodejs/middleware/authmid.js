@@ -23,7 +23,6 @@ const AuthToken = (req, res, next) => {
 
 const refreshToken = (req, res, next) => {
   const refreshToken = req.body.refreshToken;
-
   if (!refreshToken) {
     return res.sendStatus(401);
   }

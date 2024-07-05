@@ -61,10 +61,8 @@ export class AuthService {
     return this.http.post(`${this.UrlApi}/extensionsToken`, { email });
   }
 
-  refreshToken() {
-    return this.http.post<any>(`${this.UrlApi}/refresh-token`, {
-      refreshToken: this.cookieService.get('refresh_token')
-    });
+  refreshToken(refreshToken: any){
+    return this.http.post(`${this.UrlApi}/refresh-token`, { refreshToken });
   }
   
 

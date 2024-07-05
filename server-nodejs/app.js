@@ -6,6 +6,7 @@ const cors = require('cors');
 const { ApolloServer, gql } = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
 const authUser = require('./routes/Userroutes'); // Assuming you have this file
+const TokenRoutes = require('./routes/TokenRoutes')
 const { pool } = require('./model/Usermodel'); // import pool จาก Usermodel
 const { AuthToken, refreshToken } = require('./middleware/authmid'); // Import the middleware functions
 const app = express();
@@ -16,6 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api/user', authUser);
+app.use('/api/user',  TokenRoutes);
 
 // สร้าง schema สำหรับ GraphQL
 const typeDefs = gql`
