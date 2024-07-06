@@ -1,4 +1,5 @@
 const userModel = require('../model/Usermodel');
+const StorageItemModel = require('../model/storageItemModel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
@@ -299,6 +300,43 @@ const dataUser = async (req, res) => {
     }
 };
 
+
+const buyItem = async (req, res) => {
+    const { userId, itemId, quantity } = req.body;
+
+    try {
+        const IsexistingItem = await StorageItemModel.checkItemInStorageItem(userId, itemId);
+
+        if(IsexistingItem){
+            const updatedItem = await StorageItemModel.updateStorageItem(existingItem.storage_id, userId, itemId, IsexistingItem.quantity + quantity);
+            return res.status(200).json({message: 'Item updated successfully'})
+        }
+        else{
+            const newItem = await StorageItemModel.createStorageItem(userId, itemId, quantity);
+            return res.status(201).json({message: 'Item buy successfully'})
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+const deleteItemfromStorage = async (req, res) => {
+    const { storageId, userId, itemId } = req.body;
+    try {
+        const existingItem = await StorageItemModel.checkItemInStorageItem(userId, itemId);
+
+            if (!existingItem || existingItem.storage_id !== storageId) {
+                return res.status(404).json({ message: 'Item not found in storage' });
+            }
+            else{
+                const deletedItem = await StorageItemModel.deleteStorageItem(storageId, userId, itemId);
+                return res.status(200).json({message: 'Item deleted successfully'})
+            }
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
@@ -312,4 +350,6 @@ module.exports = {
     checkOldPassword,
     resetpassword,
     checkEmail,
+    buyItem,
+    deleteItemfromStorage,
 };

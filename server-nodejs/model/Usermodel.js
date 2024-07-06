@@ -74,7 +74,15 @@ const updatePassword = async (password,email) => {
     } catch (error) {
         console.error(error);
     }
-}
+};
+
+const deleteUserById = async (userId) => {
+    const result = await pool.query(
+        'DELETE FROM user_table WHERE user_id = $1 RETURNING *',
+        [userId]
+    );
+    return result.rows[0];
+};
 
 module.exports = {
     createUser,
@@ -84,6 +92,7 @@ module.exports = {
     updatePassword,
     getResetpassemail,
     findbyEmail,
+    deleteUserById,
     pool,
 };
 

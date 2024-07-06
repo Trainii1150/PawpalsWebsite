@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controller/UserController')
-const AuthMiddleware = require('../middleware/authmid');
+const { AuthToken } = require('../middleware/authmid'); // Import the auth middleware functions
 
-//router.get('/data', AuthMiddleware, UserController.dataUser); //to test auth
 
 //Route Login & Register
 router.post('/register', UserController.registerUser);
@@ -25,5 +24,9 @@ router.post('/validate-newpassword',UserController.checkOldPassword);
 // Use the controller function for generating extension tokens
 router.post('/extensionsToken', UserController.tokenExtensionsGenerate);
 
+
+//Route Item user
+router.post('/buy-item',AuthToken ,UserController.buyItem);
+router.delete('/delete-item',AuthToken, UserController.deleteItemfromStorage);
 
 module.exports = router;
