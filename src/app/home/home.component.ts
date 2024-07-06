@@ -7,82 +7,38 @@ import { OwlOptions } from 'ngx-owl-carousel-o';
 import gql from 'graphql-tag';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
+import moment from 'moment';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-inventory',
+  selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-
-toggleActivity() {
-  this.showActivity = !this.showActivity;
-throw new Error('Method not implemented.');
-}
-
-toggleShop() {
-throw new Error('Method not implemented.');
-}
   showActivity = false;
   showInventory = false;
+  showStore = false;
   genres = ['All', 'Foods', 'Decoration'];
   selectedGenre = 'All';
-  
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-  removeToken() {
-    throw new Error('Method not implemented.');
-  }
-
   petName: String | undefined = "David";
-  activityCoins: any[] = [];
   foodStatus: Number | undefined = 20;
   happynessStatus: Number | undefined = 40;
   todayCodeTime: Number | undefined = 0;
   monthlyCodeTime: Number | undefined = 0;
   todayTimeCompare: Number | undefined = 0;
   monthlyTimeCompare: Number | undefined = 0;
-  todayCoins: Number | undefined = 0;
-  totalCoins: Number | undefined;
-  hidden: any;
-
+  activityData: any[] = [];
+  storeItems: any[] = [];
+  userStorageItems: any[] = [];
+  userCoins: Number | undefined = 0;
   items = [
-    { 
-      name: 'Bread', 
-      description: 'Just ordinary bread.', 
-      image: '../assets/foods/07_bread.png', 
-      genre: 'Foods',
-      count: 10 
-    },
-    { 
-      name: 'Burger', 
-      description: 'Burger.', 
-      image: '../assets/foods/15_burger.png',
-      genre: 'Foods',
-      count: 5 
-    },
-    { 
-      name: 'Burrito', 
-      description: 'Mexican time amigos.', 
-      image: '../assets/foods/18_burrito.png',
-      genre: 'Foods',
-      count: 3 
-    },
-    { 
-      name: 'Above the Clouds', 
-      description: 'Background for your Extenios', 
-      image: '../assets/backgrounds/sofia-ritter-day-gif.gif',
-      genre: 'Decoration',
-      count: 1
-    }
- 
+    { name: 'Bread', description: 'Just ordinary bread.', image: '../assets/foods/07_bread_dish.png', genre: 'Foods', count: 10 },
+    { name: 'Burger', description: 'Burger.', image: '../assets/foods/16_burger_dish.png', genre: 'Foods', count: 5 },
+    { name: 'Burrito', description: 'Mexican time amigos.', image: '../assets/foods/18_burrito_dish.png', genre: 'Foods', count: 3 },
+    { name: 'Above the Clouds', description: 'Background for your Extenios', image: '../assets/backgrounds/sofia-ritter-day-gif.gif', genre: 'Decoration', count: 1 }
   ];
-  toggleInventory() {
-    this.showInventory = !this.showInventory;
-  }
+
   customOptions: OwlOptions = {
     loop: true,
     mouseDrag: true,
@@ -92,106 +48,59 @@ throw new Error('Method not implemented.');
     navSpeed: 700,
     navText: ['', ''],
     responsive: {
-      0: {
-        items: 1
-      },
-      400: {
-        items: 2
-      },
-      740: {
-        items: 3
-      },
-      940: {
-        items: 4
-      }
+      0: { items: 1 },
+      400: { items: 2 },
+      740: { items: 3 },
+      940: { items: 4 }
     },
     nav: true
   }
+  
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private apollo: Apollo,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private http: HttpClient 
   ) { }
 
   ngOnInit(): void {
-    this.getTotalCoins();
-    this.getTodayCoins();
     this.initializeChart();
     this.getTime();
+    this.getActivityData(); // Fetch activity data on component initialization
+    this.getStoreItems();
+    this.getUserCoins();
+    this.getUserStorageItems();
   }
 
-  getTotalCoins(): void {
-    this.apollo
-      .watchQuery({
-        query: gql`
-          {
-            totalCoins
-          }
-        `
-      })
-      .valueChanges
-      .subscribe(
-        (response: any) => {
-          this.totalCoins = response.data.totalCoins;
-        },
-        (error: any) => {
-          console.error('Error getting total coins:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Failed to get total coins: ${error.message}`,
-          });
-        }
-      );
+  toggleActivity() {
+    this.showActivity = !this.showActivity;
+    this.showInventory = false;
+    this.showStore = false;
   }
 
-  getTodayCoins(): void { 
-    const email = this.cookieService.get('email');
-    const uid = this.cookieService.get('uid');
-      if (uid){
-        this.apollo
-        .watchQuery({
-            query: gql`
-            query GetCoins($uid: String!) {
-              coins(uid: $uid)
-            }
-          `,
-          variables: {
-            email: email,
-            uid: uid
-          },
-        })
-        .valueChanges
-        .subscribe(
-          (response: any) => {
-            this.todayCoins = response.data.coins;
-          },
-          (error: any) => {
-            console.error('Error getting today coins:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: `Failed to get today coins: ${error.message}`,
-            });
-          }
-        )
-      }else{
-      console.error('Token not found in cookies');
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'User ID token not found in cookies',
-      });
-    }
+  toggleInventory() {
+    this.showInventory = !this.showInventory;
+    this.showActivity = false;
+    this.showStore = false;
+  }
+
+  toggleStore() {
+    this.showStore = !this.showStore;
+    this.showInventory = false;
+    this.showActivity = false;
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   getTime(): void {
     const uid = this.cookieService.get('uid');
-    if(uid !== null){
-      this.apollo
-      .watchQuery({
+    if (uid !== null) {
+      this.apollo.watchQuery({
         query: gql`
           query GetTime($uid: String!) {
             time(uid: $uid)
@@ -201,25 +110,242 @@ throw new Error('Method not implemented.');
           uid: uid,
         }
       })
-      .valueChanges
-      .subscribe(
-        (response: any) => {
-          const timeInUnits = response.data.time / 10000; // Divide by 10000
-          this.todayCodeTime = parseFloat(timeInUnits.toFixed(2)); // Round to 2 decimal places
-        },
-        error => {
-          console.error('Error getting today time:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Failed to get today time: ${error.message}`,
-          });
-        }
-      );
-    } else{
+        .valueChanges
+        .subscribe(
+          (response: any) => {
+            const timeInUnits = response.data.time / 10000; // Divide by 10000
+            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2)); // Round to 2 decimal places
+          },
+          error => {
+            console.error('Error getting today time:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: `Failed to get today time: ${error.message}`,
+            });
+          }
+        );
+    } else {
       console.error('Token not found in localStorage');
     }
   }
+
+  getStoreItems(): void {
+    this.apollo
+      .watchQuery({
+        query: gql`
+          {
+            storeItems {
+              store_item_id
+              item_id
+              item_name
+              description
+              path
+              price
+              food_value
+              created_at
+            }
+          }
+        `
+      })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          this.storeItems = response.data.storeItems;
+        },
+        (error: any) => {
+          console.error('Error getting store items:', error);
+          
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get store items: ${error.message}`,
+          });
+        }
+      );
+  }
+
+  getUserStorageItems(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+      this.apollo.watchQuery({
+        query: gql`
+          query GetUserStorageItems($uid: ID!) {
+            userStorageItems(uid: $uid) {
+              storage_id
+              item_name
+              description
+              path
+              food_value
+              created_at
+            }
+          }
+        `,
+        variables: {
+          uid: uid
+        },
+      })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          this.userStorageItems = response.data.userStorageItems;
+        },
+        (error: any) => {
+          console.error('Error getting user storage items:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get user storage items: ${error.message}`,
+          });
+        }
+      );
+    } else {
+      console.error('Token not found in cookies');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'User ID token not found in cookies',
+      });
+    }
+  }
+
+  getActivityData(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+        this.apollo.watchQuery({
+            query: gql`
+                query GetActivity($uid: ID!) {
+                    activity(uid: $uid) {
+                        Languages
+                        wordcount
+                        coins
+                        time
+                        Timestamp
+                    }
+                }
+            `,
+            variables: {
+                uid: uid
+            },
+        })
+        .valueChanges
+        .subscribe(
+            (response: any) => {
+                this.activityData = response.data.activity.map((activity: any) => {
+                    return {
+                        ...activity,
+                        Timestamp: this.formatTimestamp(activity.Timestamp),
+                    };
+                });
+            },
+            (error: any) => {
+                console.error('Error getting activity data:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: `Failed to get activity data: ${error.message}`,
+                });
+            }
+        );
+    } else {
+        console.error('Token not found in cookies');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'User ID token not found in cookies',
+        });
+    }
+}
+
+formatTimestamp(timestamp: string | null | undefined): string {
+  if (!timestamp) {
+    return 'Invalid Date';
+  }
+
+  // แปลง timestamp ให้เป็นรูปแบบที่ Date สามารถเข้าใจได้
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date';
+  }
+
+  // ใช้ moment.js เพื่อจัดรูปแบบวันที่
+  return moment(date).format('h:mm:ss a, MMMM Do YYYY');
+}
+
+buyItem(item: any): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.http.post('http://localhost:3000/api/buy-item', { uid, item_id: item.item_id })
+      .subscribe(
+        (response: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Item bought successfully!',
+          });
+          // อัปเดตจำนวนเหรียญโดยตรงหลังการซื้อ
+          const itemPrice = item.price; // สมมติว่า item มีฟิลด์ราคา
+          if (this.userCoins !== undefined && itemPrice !== undefined) {
+            this.userCoins = (this.userCoins as number) - itemPrice;
+          }
+        },
+        (error: any) => {
+          console.error('Error buying item:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to buy item: ${error.message}`,
+          });
+        }
+      );
+  } else {
+    console.error('User ID not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID not found in cookies',
+    });
+  }
+}
+
+getUserCoins(): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.apollo.watchQuery({
+      query: gql`
+        query GetUserCoins($uid: String!) {
+          userCoins(uid: $uid) {
+            coins
+          }
+        }
+      `,
+      variables: {
+        uid: uid
+      },
+    })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          this.userCoins = response.data.userCoins.coins;
+        },
+        (error: any) => {
+          console.error('Error getting user coins:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get user coins: ${error.message}`,
+          });
+        }
+      );
+  } else {
+    console.error('Token not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID token not found in cookies',
+    });
+  }
+}
 
   initializeChart(): void {
     if (document.getElementById("donut-chart") && typeof ApexCharts !== 'undefined') {
@@ -227,7 +353,6 @@ throw new Error('Method not implemented.');
       chart.render();
     }
   }
-
 
   getChartOptions() {
     return {
