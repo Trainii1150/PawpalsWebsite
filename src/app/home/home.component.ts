@@ -55,7 +55,6 @@ export class HomeComponent implements OnInit {
     },
     nav: true
   }
-  
 
   constructor(
     private authService: AuthService,
@@ -68,7 +67,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.initializeChart();
     this.getTime();
-    this.getActivityData(); // Fetch activity data on component initialization
+    this.getActivityData();
     this.getStoreItems();
     this.getUserCoins();
     this.getUserStorageItems();
@@ -307,6 +306,7 @@ buyItem(item: any): void {
     });
   }
 }
+
 
 getUserCoins(): void {
   const uid = this.cookieService.get('uid');

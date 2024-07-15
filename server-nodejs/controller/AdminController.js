@@ -1,4 +1,4 @@
-const StorageItemModel = require('../model/storageItemModel');
+const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
 
 // Adds an item to storage or updates the quantity if it already exists.
