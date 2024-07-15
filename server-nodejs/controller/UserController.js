@@ -309,6 +309,43 @@ const deleteItemfromStorage = async (req, res) => {
     }
 };
 
+const createUserPet = async (req, res) => {
+    const { userId, petId, petName } = req.body;
+
+    try {
+        const newPet = await UserPetsModel.createUserPet(userId, petId, petName);
+        return res.status(201).json({ message: 'Pet added successfully', pet: newPet });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+const updateUserPet = async (req, res) => {
+    const { userPetId, petId, petName, hungerLevel } = req.body;
+
+    try {
+        const updatedPet = await UserPetsModel.updateUserPet(userPetId, petId, petName, hungerLevel);
+        if (!updatedPet) {
+            return res.status(404).json({ message: 'Pet not found' });
+        }
+        return res.status(200).json({ message: 'Pet updated successfully', pet: updatedPet });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+const deleteUserPet = async (req, res) => {
+    const { userPetId, userId, petId } = req.body;
+
+    try {
+        const deletedPet = await UserPetsModel.deleteUserPet(userPetId, userId, petId);
+        return res.status(200).json({ message: 'Pet deleted successfully', userPetId: deletedPet.user_pet_id });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+
 module.exports = {
     registerUser,
     loginUser,
@@ -324,4 +361,7 @@ module.exports = {
     checkEmail,
     buyItem,
     deleteItemfromStorage,
+    createUserPet,
+    updateUserPet,
+    deleteUserPet,
 };

@@ -1,5 +1,7 @@
 const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
+const UserPetsModel = require('../model/userPetsModel');
+const PetModel = require('../model/PetModel');
 
 // Adds an item to storage or updates the quantity if it already exists.
 const addItemToStorage = async (req, res) => {
@@ -88,6 +90,83 @@ const deleteItem = async (req, res) => {
     }
 };
 
+// Create a new pet for a user
+const createUserPet = async (req, res) => {
+    const { userId, petId, petName } = req.body;
+
+    try {
+        const newPet = await UserPetsModel.createUserPet(userId, petId, petName);
+        return res.status(201).json({ message: 'Pet added successfully', pet: newPet });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+
+// Update an existing pet for a user
+const updateUserPet = async (req, res) => {
+    const { userPetId, petId, petName, hungerLevel } = req.body;
+
+    try {
+        const updatedPet = await UserPetsModel.updateUserPet(userPetId, petId, petName, hungerLevel);
+        if (!updatedPet) {
+            return res.status(404).json({ message: 'Pet not found' });
+        }
+        return res.status(200).json({ message: 'Pet updated successfully', pet: updatedPet });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+// Delete a pet for a user
+const deleteUserPet = async (req, res) => {
+    const { userPetId, userId, petId } = req.body;
+
+    try {
+        await UserPetsModel.deleteUserPet(userPetId, userId, petId);
+        return res.status(200).json({ message: 'Pet deleted successfully', userPetId: deletedPet.user_pet_id });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+
+// Create a new pet
+const addPet = async (req, res) => {
+    const { petName, description, petType } = req.body;
+    
+    try {
+        const newPet = await PetModel.createPet(petName, description, petType);
+        return res.status(201).json({ message: 'Pet created successfully', pet: newPet });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+// Update an existing pet
+const updatePet = async (req, res) => {
+    const { petId, petName, description, petType } = req.body;
+    
+    try {
+        const updatedPet = await PetModel.updatePet(petId, petName, description, petType);
+        return res.status(200).json({ message: 'Pet updated successfully', pet: updatedPet });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+// Delete a pet
+const deletePet = async (req, res) => {
+    const { petId } = req.body;
+    
+    try {
+        await PetModel.deletePet(petId);
+        return res.status(200).json({ message: 'Pet deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
 
 module.exports = {
     addItemToStorage,
@@ -96,4 +175,10 @@ module.exports = {
     createItem,
     updateItem,
     deleteItem,
+    createUserPet,
+    updateUserPet,
+    deleteUserPet,
+    addPet,
+    updatePet,
+    deletePet,
 };
