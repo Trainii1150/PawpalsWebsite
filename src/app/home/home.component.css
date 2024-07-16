@@ -253,4 +253,30 @@
     height: auto;
     border-radius: 50%;
   }
-  
+  /* Donut Chart Specific Styles */
+#donut-chart {
+  width: 100%;
+  height: 320px; /* หรือขนาดตามที่คุณต้องการ */
+}
+
+/* Update Progress Bar Color */
+progress {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #e0e0e0;
+}
+#donut-chart {
+  height: 320px; /* กำหนดความสูงให้กับกราฟ */
+}
+progress::-webkit-progress-value {
+  background-color: #1ABC9C; /* เปลี่ยนเป็นสีเขียว */
+  border-radius: 10px;
+}
+
+progress::-moz-progress-bar {
+  background-color: #1ABC9C; /* เปลี่ยนเป็นสีเขียว */
+  border-radius: 10px;
+}

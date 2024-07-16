@@ -37,8 +37,22 @@ const deletePet = async (pets_id) => {
     }
 };
 
+const updateHungerLevel = async (uid, foodValue) => {
+    try {
+        await pool.query(`
+            UPDATE public.user_pets
+            SET hunger_level = hunger_level + $1, last_fed = NOW()
+            WHERE pet_id = $2
+        `, [foodValue, uid]);
+    } catch (error) {
+        console.error('Error updating hunger level:', error);
+        throw new Error('Error updating hunger level');
+    }
+};
+
 module.exports = {
     createPet,
     updatePet,
-    deletePet
+    deletePet,
+    updateHungerLevel,
 };

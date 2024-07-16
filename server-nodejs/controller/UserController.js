@@ -1,9 +1,11 @@
 const userModel = require('../model/UserModel');
-const ItemStorageModel = require('../model/ItemstorageModel');
 const CoinsModel = require('../model/CoinsModel'); // Ensure this is imported
+const { getTimeByLanguage } = require('../model/UserModel');
+const UserModel = require('../model/UserModel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
+const ItemStorageModel = require('../model/ItemstorageModel');
 
 const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
@@ -290,10 +292,6 @@ const buyItem = async (req, res) => {
     }
   };
   
-
-
-
-
 const deleteItemfromStorage = async (req, res) => {
     const { storageId, userId, itemId } = req.body;
     try {
@@ -345,7 +343,42 @@ const deleteUserPet = async (req, res) => {
     }
 };
 
+const getTimeByLanguageController = async (req, res) => {
+    const { uid } = req.params;
+  
+    try {
+      const data = await getTimeByLanguage(uid);
+      res.json(data);
+    } catch (error) {
+      console.error('Error getting time by language:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
 
+  const randomizePet = async (req, res) => {
+    const { uid } = req.body;
+  
+    try {
+      const result = await UserModel.randomizePet(uid);
+      res.status(200).json(result);
+    } catch (error) {
+      console.error('Error randomizing pet:', error.message);
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+  const feedPet = async (req, res) => {
+    const { uid, petId, foodValue, itemId } = req.body;
+  
+    try {
+      await UserModel.feedPet(uid, petId, foodValue, itemId);
+      res.status(200).json({ message: 'Pet fed successfully' });
+    } catch (error) {
+      console.error('Error feeding pet:', error);
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
 module.exports = {
     registerUser,
     loginUser,
@@ -364,4 +397,7 @@ module.exports = {
     createUserPet,
     updateUserPet,
     deleteUserPet,
+    getTimeByLanguageController,
+    feedPet,
+    randomizePet,
 };

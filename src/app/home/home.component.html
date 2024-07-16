@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css" />
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 </head>
 
 <body class="bg-gray-100">
@@ -66,7 +67,7 @@
       </div>
 
       <!-- Donut Graph -->
-      <div class="col-span-3 lg:col-span-2 bg-white shadow rounded-2xl p-6">
+      <div class="col-span-3 lg:col-span-2 bg-white shadow rounded-2xl p-6" style="position: relative;">
         <div class="flex flex-col">
           <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">Time in used</h5>
           <div class="py-6 w-full" id="donut-chart"></div>
@@ -115,7 +116,7 @@
           </div>
         </div>
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
-          <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">1 Coupon</h5>
+          <button (click)="randomizePet()">Randomize Pet</button>
           <div class="flex items-center justify-center">
             <img class="w-16 h-16 object-contain" src="./assets/Treasure_Chest_(item).png" alt="Coupon image" />
           </div>
@@ -185,8 +186,9 @@
         <div *ngFor="let item of userStorageItems" class="inventory-item">
           <img [src]="item.path" [alt]="item.item_name">
           <h3>{{ item.item_name }}</h3>
-          <p>{{ item.quantity }} pcs</p>
+          <p>Quantity: {{ item.quantity }}</p>
           <p>{{ item.description }}</p>
+          <button (click)="selectFoodItem(item)">Feed Pet</button> <!-- เพิ่มปุ่มสำหรับให้อาหารสัตว์เลี้ยง -->
         </div>
       </div>
     </div>

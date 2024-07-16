@@ -24,6 +24,13 @@ const deleteStorageItem = async (storageId, userId, itemId) => {
     return result.rows[0];
 };
 
+const deleteFoodItem = async (storageId) => {
+  await pool.query(`
+    DELETE FROM user_storage
+    WHERE storage_id = $1
+  `, [storageId]);
+};
+
 const checkItemInStorageItem = async (userId, itemId) => {
     const result = await pool.query(
         'SELECT * FROM user_storage WHERE user_id = $1 AND item_id = $2',
@@ -40,10 +47,32 @@ const getItemPrice = async (itemId) => {
     return result.rows[0].price;
 };
 
+const getFoodItem = async (uid, foodValue) => {
+  const result = await pool.query(`
+    SELECT us.storage_id, us.quantity 
+    FROM user_storage us
+    JOIN items i ON us.item_id = i.item_id
+    WHERE us.user_id = $1 AND i.food_value = $2 AND us.quantity > 0
+  `, [uid, foodValue]);
+
+  return result.rows[0];
+};
+
+const updateFoodQuantity = async (storageId, newQuantity) => {
+  await pool.query(`
+    UPDATE user_storage
+    SET quantity = $1
+    WHERE storage_id = $2
+  `, [newQuantity, storageId]);
+};
+
 module.exports = {
     createStorageItem,
     updateStorageItem,
     deleteStorageItem,
     checkItemInStorageItem,
     getItemPrice,
+    getFoodItem,
+    deleteFoodItem,
+    updateFoodQuantity,
 };

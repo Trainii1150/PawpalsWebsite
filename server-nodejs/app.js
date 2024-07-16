@@ -22,6 +22,11 @@ app.use('/api/user', TokenRoutes);
 app.use('/api/user', authUser);
 
 const typeDefs = gql`
+  type TimeByLanguage {
+    language: String
+    total_time: Float
+  }
+
   type CodingActivity {
     Languages: String
     wordcount: Int
@@ -37,6 +42,7 @@ const typeDefs = gql`
     path: String
     food_value: Int
     created_at: String
+    quantity: Int
   }
 
   type StoreItem {
@@ -49,7 +55,12 @@ const typeDefs = gql`
     food_value: Int
     created_at: String
   }
-
+  type Pet {
+    pet_id: Int
+    pet_name: String
+    hunger_level: Int
+    last_fed: String
+  }
   type UserCoins {
     coins: Float
   }
@@ -60,10 +71,10 @@ const typeDefs = gql`
     storeItems: [StoreItem]
     userCoins(uid: String!): UserCoins
     userStorageItems(uid: ID!): [UserStorageItem]
+    timeByLanguage(uid: String!): [TimeByLanguage]
+    userPet(uid: String!): Pet
   }
 `;
-
-const { getUserStorageItems, getUserCoins, getUserActivity, getUserActivityTime, getStoreItems } = require('./model/UserModel');
 
 const resolvers = {
   Query: {
@@ -81,6 +92,12 @@ const resolvers = {
     },
     userStorageItems: async (_, { uid }) => {
       return UserModel.getUserStorageItems(uid);
+    },
+    timeByLanguage: async (_, { uid }) => {
+      return UserModel.getTimeByLanguage(uid);
+    },
+    userPet: async (_, { uid }) => {
+      return UserModel.getUserPet(uid);
     }
   },
 };
@@ -113,12 +130,15 @@ app.post('/save-token', (req, res) => {
     }
   });
 });
+app.post('/api/feed-pet', AuthToken, UserController.feedPet);
+
+app.post('/api/randomize-pet', AuthToken, UserController.randomizePet);
 
 app.post('/api/update-user-coins', AuthToken, async (req, res) => {
   const { uid } = req.body;
 
   try {
-    await UserController.updateUserCoins(uid);
+    await UserModel.updateUserCoins(uid);
     res.status(200).json({ message: 'User coins updated successfully' });
   } catch (error) {
     console.error('Error updating user coins:', error);
@@ -127,16 +147,6 @@ app.post('/api/update-user-coins', AuthToken, async (req, res) => {
 });
 
 app.post('/api/buy-item', AuthToken, UserController.buyItem);
-
-async function startServer() {
-  const server = new ApolloServer({ typeDefs, resolvers });
-  await server.start();
-  server.applyMiddleware({ app });
-
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
-}
 
 async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });

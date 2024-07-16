@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, HostListener  } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
@@ -15,14 +15,15 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
+
   showActivity = false;
   showInventory = false;
   showStore = false;
   genres = ['All', 'Foods', 'Decoration'];
   selectedGenre = 'All';
   petName: String | undefined = "David";
-  foodStatus: Number | undefined = 20;
+  foodStatus: Number | undefined ;
   happynessStatus: Number | undefined = 40;
   todayCodeTime: Number | undefined = 0;
   monthlyCodeTime: Number | undefined = 0;
@@ -32,6 +33,8 @@ export class HomeComponent implements OnInit {
   storeItems: any[] = [];
   userStorageItems: any[] = [];
   userCoins: Number | undefined = 0;
+  timeByLanguage: any[] = [];
+
   items = [
     { name: 'Bread', description: 'Just ordinary bread.', image: '../assets/foods/07_bread_dish.png', genre: 'Foods', count: 10 },
     { name: 'Burger', description: 'Burger.', image: '../assets/foods/16_burger_dish.png', genre: 'Foods', count: 5 },
@@ -64,6 +67,15 @@ export class HomeComponent implements OnInit {
     private http: HttpClient 
   ) { }
 
+  ngAfterViewInit(): void {
+    this.initializeChart();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any): void {
+    this.initializeChart();
+  }
+
   ngOnInit(): void {
     this.initializeChart();
     this.getTime();
@@ -71,6 +83,8 @@ export class HomeComponent implements OnInit {
     this.getStoreItems();
     this.getUserCoins();
     this.getUserStorageItems();
+    this.getTimeByLanguage();
+    this.getPetHungerLevel();
   }
 
   toggleActivity() {
@@ -112,8 +126,8 @@ export class HomeComponent implements OnInit {
         .valueChanges
         .subscribe(
           (response: any) => {
-            const timeInUnits = response.data.time / 10000; // Divide by 10000
-            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2)); // Round to 2 decimal places
+            const timeInUnits = response.data.time / 10000;
+            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2));
           },
           error => {
             console.error('Error getting today time:', error);
@@ -126,6 +140,47 @@ export class HomeComponent implements OnInit {
         );
     } else {
       console.error('Token not found in localStorage');
+    }
+  }
+
+  getTimeByLanguage(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+      this.apollo.watchQuery({
+        query: gql`
+          query GetTimeByLanguage($uid: String!) {
+            timeByLanguage(uid: $uid) {
+              language
+              total_time
+            }
+          }
+        `,
+        variables: {
+          uid: uid
+        }
+      })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          this.timeByLanguage = response.data.timeByLanguage;
+          this.initializeChart();
+        },
+        (error: any) => {
+          console.error('Error getting time by language:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get time by language: ${error.message}`,
+          });
+        }
+      );
+    } else {
+      console.error('Token not found in cookies');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'User ID token not found in cookies',
+      });
     }
   }
 
@@ -177,6 +232,7 @@ export class HomeComponent implements OnInit {
               path
               food_value
               created_at
+              quantity 
             }
           }
         `,
@@ -188,6 +244,7 @@ export class HomeComponent implements OnInit {
       .subscribe(
         (response: any) => {
           this.userStorageItems = response.data.userStorageItems;
+          console.log(this.userStorageItems);
         },
         (error: any) => {
           console.error('Error getting user storage items:', error);
@@ -261,13 +318,11 @@ formatTimestamp(timestamp: string | null | undefined): string {
     return 'Invalid Date';
   }
 
-  // แปลง timestamp ให้เป็นรูปแบบที่ Date สามารถเข้าใจได้
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) {
     return 'Invalid Date';
   }
 
-  // ใช้ moment.js เพื่อจัดรูปแบบวันที่
   return moment(date).format('h:mm:ss a, MMMM Do YYYY');
 }
 
@@ -282,8 +337,8 @@ buyItem(item: any): void {
             title: 'Success',
             text: 'Item bought successfully!',
           });
-          // อัปเดตจำนวนเหรียญโดยตรงหลังการซื้อ
-          const itemPrice = item.price; // สมมติว่า item มีฟิลด์ราคา
+          this.getUserStorageItems();
+          const itemPrice = item.price;
           if (this.userCoins !== undefined && itemPrice !== undefined) {
             this.userCoins = (this.userCoins as number) - itemPrice;
           }
@@ -306,7 +361,6 @@ buyItem(item: any): void {
     });
   }
 }
-
 
 getUserCoins(): void {
   const uid = this.cookieService.get('uid');
@@ -346,95 +400,249 @@ getUserCoins(): void {
     });
   }
 }
-
-  initializeChart(): void {
-    if (document.getElementById("donut-chart") && typeof ApexCharts !== 'undefined') {
-      const chart = new ApexCharts(document.getElementById("donut-chart"), this.getChartOptions());
-      chart.render();
-    }
+getUserPet(): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.apollo.watchQuery({
+      query: gql`
+        query GetUserPet($uid: String!) {
+          userPet(uid: $uid) {
+            pet_id
+            pet_name
+            hunger_level
+            last_fed
+          }
+        }
+      `,
+      variables: {
+        uid: uid
+      },
+    })
+    .valueChanges
+    .subscribe(
+      (response: any) => {
+        const pet = response.data.userPet;
+        this.petName = pet.pet_name;
+        this.foodStatus = pet.hunger_level;
+      },
+      (error: any) => {
+        console.error('Error getting user pet:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Failed to get user pet: ${error.message}`,
+        });
+      }
+    );
+  } else {
+    console.error('Token not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID token not found in cookies',
+    });
   }
+}
+selectFoodItem(item: any) {
+  const petId = 1; // ตัวอย่าง petId
+  this.feedPet(petId, item.food_value, item.item_id);
+}
 
-  getChartOptions() {
-    return {
-      series: [35.1, 23.5, 2.4, 5.4],
-      colors: ["#1C64F2", "#16BDCA", "#FDBA8C", "#E74694"],
-      chart: {
-        height: 320,
-        width: "100%",
-        type: "donut",
+feedPet(petId: number, foodValue: number, itemId: number): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.http.post('http://localhost:3000/api/feed-pet', { uid, petId, foodValue, itemId })
+      .subscribe(
+        (response: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Pet fed successfully!',
+          });
+          this.getUserStorageItems();
+        },
+        (error: any) => {
+          console.error('Error feeding pet:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to feed pet: ${error.message}`,
+          });
+        }
+      );
+  } else {
+    console.error('User ID not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID not found in cookies',
+    });
+  }
+}
+
+getPetHungerLevel(): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.apollo.watchQuery({
+      query: gql`
+        query GetUserPet($uid: String!) {
+          userPet(uid: $uid) {
+            hunger_level
+          }
+        }
+      `,
+      variables: {
+        uid: uid
+      }
+    })
+    .valueChanges
+    .subscribe(
+      (response: any) => {
+        this.foodStatus = response.data.userPet.hunger_level;
       },
-      stroke: {
-        colors: ["transparent"],
-        lineCap: "",
-      },
-      plotOptions: {
-        pie: {
-          donut: {
-            labels: {
+      (error: any) => {
+        console.error('Error getting pet hunger level:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Failed to get pet hunger level: ${error.message}`,
+        });
+      }
+    );
+  } else {
+    console.error('Token not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID token not found in cookies',
+    });
+  }
+}
+randomizePet(): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.http.post('http://localhost:3000/api/randomize-pet', { uid })
+      .subscribe(
+        (response: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Pet randomized successfully!',
+          });
+        },
+        (error: any) => {
+          console.error('Error randomizing pet:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to randomize pet: ${error.message}`,
+          });
+        }
+      );
+  } else {
+    console.error('User ID not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID not found in cookies',
+    });
+  }
+}
+
+initializeChart(): void {
+  const chartContainer = document.getElementById("donut-chart");
+  if (chartContainer && typeof ApexCharts !== 'undefined') {
+    // ลบกราฟเดิมก่อนที่จะสร้างใหม่
+    while (chartContainer.firstChild) {
+      chartContainer.removeChild(chartContainer.firstChild);
+    }
+    
+    const chart = new ApexCharts(chartContainer, this.getChartOptions());
+    chart.render();
+  }
+}
+
+getChartOptions() {
+  return {
+    series: this.timeByLanguage.map((data: any) => data.total_time),
+    labels: this.timeByLanguage.map((data: any) => data.language),
+    colors: ["#1C64F2", "#16BDCA", "#FDBA8C", "#E74694"],
+    chart: {
+      height: 320,
+      width: "100%",
+      type: "donut",
+    },
+    stroke: {
+      colors: ["transparent"],
+      lineCap: "",
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          labels: {
+            show: true,
+            name: {
               show: true,
-              name: {
-                show: true,
-                fontFamily: "Inter, sans-serif",
-                offsetY: 20,
-              },
-              total: {
-                showAlways: true,
-                show: true,
-                label: "Total hour",
-                fontFamily: "Inter, sans-serif",
-                formatter: function (w: { globals: { seriesTotals: any[]; }; }) {
-                  const sum = w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
-                  return sum;
-                },
-              },
-              value: {
-                show: true,
-                fontFamily: "Inter, sans-serif",
-                offsetY: -20,
-                formatter: function (value: string) {
-                  return value + "k";
-                },
+              fontFamily: "Inter, sans-serif",
+              offsetY: 20,
+            },
+            total: {
+              showAlways: true,
+              show: true,
+              label: "Total hour",
+              fontFamily: "Inter, sans-serif",
+              formatter: function (w: { globals: { seriesTotals: any[]; }; }) {
+                const sum = w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
+                return sum;
               },
             },
-            size: "80%",
+            value: {
+              show: true,
+              fontFamily: "Inter, sans-serif",
+              offsetY: -20,
+              formatter: function (value: string) {
+                return value + "h";
+              },
+            },
           },
+          size: "80%",
         },
       },
-      grid: {
-        padding: {
-          top: -2,
+    },
+    grid: {
+      padding: {
+        top: -2,
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    legend: {
+      position: "bottom",
+      fontFamily: "Inter, sans-serif",
+    },
+    yaxis: {
+      labels: {
+        formatter: function (value: string) {
+          return value + "h";
         },
       },
-      labels: ["Python", "Java", "Typescript", "CSS"],
-      dataLabels: {
-        enabled: false,
-      },
-      legend: {
-        position: "bottom",
-        fontFamily: "Inter, sans-serif",
-      },
-      yaxis: {
-        labels: {
-          formatter: function (value: string) {
-            return value + "k";
-          },
+    },
+    xaxis: {
+      labels: {
+        formatter: function (value: string) {
+          return value + "h";
         },
       },
-      xaxis: {
-        labels: {
-          formatter: function (value: string) {
-            return value + "k";
-          },
-        },
-        axisTicks: {
-          show: false,
-        },
-        axisBorder: {
-          show: false,
-        },
+      axisTicks: {
+        show: false,
       },
-    };
-  }
+      axisBorder: {
+        show: false,
+      },
+    },
+  };
+}
 
   selectGenre(genre: string) {
     this.selectedGenre = genre;
