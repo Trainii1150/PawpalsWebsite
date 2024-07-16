@@ -12,6 +12,29 @@ const createPet = async (pet_name, description, pet_type) => {
    }
 };
 
+const getPet = async (pet_id) => {
+    try {
+      const result = await pool.query(
+        'SELECT * FROM pets WHERE pet_id = $1',
+        [pet_id]
+      );
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error getting pet:', error);
+      throw error;
+    }
+};
+
+const getAllPets = async () => {
+    try {
+      const result = await pool.query('SELECT * FROM pets');
+      return result.rows;
+    } catch (error) {
+      console.error('Error getting all pets:', error);
+      throw error;
+    }
+};
+
 const updatePet = async (pets_id, pet_name, description, pet_type) => {
     try {
         const result = await pool.query(
@@ -52,6 +75,8 @@ const updateHungerLevel = async (uid, foodValue) => {
 
 module.exports = {
     createPet,
+    getPet,
+    getAllPets,
     updatePet,
     deletePet,
     updateHungerLevel,

@@ -2,6 +2,8 @@ const userModel = require('../model/UserModel');
 const CoinsModel = require('../model/CoinsModel'); // Ensure this is imported
 const { getTimeByLanguage } = require('../model/UserModel');
 const UserModel = require('../model/UserModel');
+const PetModel = require('../model/PetModel');
+const UserPetsModel = require('../model/userPetsModel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
@@ -355,29 +357,53 @@ const getTimeByLanguageController = async (req, res) => {
     }
   };
 
-  const randomizePet = async (req, res) => {
+const randomizePet = async (req, res) => {
     const { uid } = req.body;
   
     try {
-      const result = await UserModel.randomizePet(uid);
-      res.status(200).json(result);
+      const pets = PetModel.getAllPets();
+      if (pets.length === 0) {
+        return res.status(400).json({ error: 'No pets available' });
+      } 
+      // Select a random pet
+      const randomPet = pets[Math.floor(Math.random() * pets.length)];
+      const newuserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name);
+      res.status(200).json(newuserPet);
+
     } catch (error) {
       console.error('Error randomizing pet:', error.message);
       res.status(500).json({ error: error.message });
     }
-  };
+};
   
-  const feedPet = async (req, res) => {
-    const { uid, petId, foodValue, itemId } = req.body;
+const feedPet = async (req, res) => {
+    const { uid, petId, foodValue} = req.body;
   
     try {
-      await UserModel.feedPet(uid, petId, foodValue, itemId);
+      // Check if the food item exists in the user's storage
+      const foodItem = await ItemStorageModel.getFoodItem(uid, foodValue);
+      if (!foodItem || foodItem.quantity === 0) {
+        return res.status(400).json({ error: 'Food item not found or quantity is zero' });
+      }
+  
+      // Update the pet's hunger level
+      await PetModel.updateHungerLevel(petId, foodValue);
+  
+      // Update the quantity of food in storage
+      const newQuantity = foodItem.quantity - 1;
+      await ItemStorageModel.updateFoodQuantity(foodItem.storage_id, newQuantity);
+  
+      // Delete the food item if the quantity is zero
+      if (newQuantity === 0) {
+        await ItemStorageModel.deleteFoodItem(foodItem.storage_id);
+      }
+  
       res.status(200).json({ message: 'Pet fed successfully' });
     } catch (error) {
       console.error('Error feeding pet:', error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: 'An error occurred while feeding the pet' });
     }
-  };
+};
   
 module.exports = {
     registerUser,

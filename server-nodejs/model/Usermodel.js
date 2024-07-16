@@ -110,6 +110,7 @@ const getUserStorageItems = async (uid) => {
       throw new Error('Error getting user storage items from database');
     }
 };
+
 const getUserActivity = async (userId) => {
     try {
         const result = await pool.query(`
@@ -125,6 +126,7 @@ const getUserActivity = async (userId) => {
         throw new Error('Error getting activity data');
     }
 };
+
 const getUserActivityTime = async (uid) => {
     try {
       const result = await pool.query('SELECT SUM(time::FLOAT) AS total_time FROM "coding_activity" WHERE user_id = $1', [uid]);
@@ -134,6 +136,7 @@ const getUserActivityTime = async (uid) => {
       throw new Error('Error getting time from database');
     }
 };
+
 const getUserCoins = async (uid) => {
     try {
       const result = await pool.query(`
@@ -166,7 +169,8 @@ const getUserCoins = async (uid) => {
       console.error('Error getting user coins from database:', error);
       throw new Error('Error getting user coins from database');
     }
-  };
+};
+
 const deductUserCoins = async (uid, amount) => {
     const client = await pool.connect();
     try {
@@ -194,7 +198,8 @@ const deductUserCoins = async (uid, amount) => {
     } finally {
       client.release();
     }
-  };
+};
+
 const getTimeByLanguage = async (uid) => {
     try {
       const result = await pool.query(`
@@ -209,96 +214,71 @@ const getTimeByLanguage = async (uid) => {
       console.error('Error getting time by language:', error);
       throw new Error('Error getting time by language');
     }
-  };
+};
 
-  const getUserPet = async (uid) => {
-    try {
-      const result = await pool.query(`
-        SELECT p.pet_id, p.pet_name, up.hunger_level, up.last_fed 
-        FROM user_pets up 
-        JOIN pets p ON up.pet_id = p.pet_id 
-        WHERE up.user_id = $1
-      `, [uid]);
-  
-      if (result.rows.length === 0) {
-        throw new Error('Pet not found for this user');
-      }
-  
-      const pet = result.rows[0];
-      const now = new Date();
-      const lastFed = new Date(pet.last_fed);
-      const hoursPassed = Math.floor((now - lastFed) / (1000 * 60 * 60));
-      const newHungerLevel = Math.max(pet.hunger_level - hoursPassed, 0);
-  
-      // อัปเดต hunger_level และ last_fed ในฐานข้อมูล
-      await pool.query(`
-        UPDATE user_pets
-        SET hunger_level = $1, last_fed = $2
-        WHERE user_id = $3 AND pet_id = $4
-      `, [newHungerLevel, now, uid, pet.pet_id]);
-  
-      return { ...pet, hunger_level: newHungerLevel };
-    } catch (error) {
-      console.error('Error getting user pet:', error);
-      throw error;
+const getUserPet = async (uid) => {
+  try {
+    const result = await pool.query(`
+      SELECT p.pet_id, p.pet_name, up.hunger_level, up.last_fed 
+      FROM user_pets up 
+      JOIN pets p ON up.pet_id = p.pet_id 
+      WHERE up.user_id = $1
+    `, [uid]);
+
+    if (result.rows.length === 0) {
+      throw new Error('Pet not found for this user');
     }
-  };
+
+    const pet = result.rows[0];
+    const now = new Date();
+    const lastFed = new Date(pet.last_fed);
+    const hoursPassed = Math.floor((now - lastFed) / (1000 * 60 * 60));
+    const newHungerLevel = Math.max(pet.hunger_level - hoursPassed, 0);
+
+    // อัปเดต hunger_level และ last_fed ในฐานข้อมูล
+    await pool.query(`
+      UPDATE user_pets
+      SET hunger_level = $1, last_fed = $2
+      WHERE user_id = $3 AND pet_id = $4
+    `, [newHungerLevel, now, uid, pet.pet_id]);
+
+    return { ...pet, hunger_level: newHungerLevel };
+  } catch (error) {
+    console.error('Error getting user pet:', error);
+    throw error;
+  }
+};
   
-  const randomizePet = async (userId) => {
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-  
-      const petsResult = await client.query('SELECT * FROM pets');
-      const pets = petsResult.rows;
-  
-      if (pets.length === 0) {
-        throw new Error('No pets available');
-      }
-  
-      const randomPet = pets[Math.floor(Math.random() * pets.length)];
-  
-      const result = await client.query(
-        'INSERT INTO user_pets (user_id, pet_id, pet_name) VALUES ($1, $2, $3) RETURNING *',
-        [userId, randomPet.pet_id, randomPet.pet_name]
-      );
-  
-      await client.query('COMMIT');
-      return result.rows[0];
-    } catch (error) {
-      await client.query('ROLLBACK');
-      console.error('Error randomizing pet:', error);
-      throw error;
-    } finally {
-      client.release();
+const randomizePet = async (userId) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const petsResult = await client.query('SELECT * FROM pets');
+    const pets = petsResult.rows;
+
+    if (pets.length === 0) {
+      throw new Error('No pets available');
     }
-  };
+
+    const randomPet = pets[Math.floor(Math.random() * pets.length)];
+
+    const result = await client.query(
+      'INSERT INTO user_pets (user_id, pet_id, pet_name) VALUES ($1, $2, $3) RETURNING *',
+      [userId, randomPet.pet_id, randomPet.pet_name]
+    );
+
+    await client.query('COMMIT');
+    return result.rows[0];
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error randomizing pet:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
   
-  const feedPet = async (uid, petId, foodValue, itemId) => {
-    try {
-      // ตรวจสอบการมีอยู่ของอาหารในช่องเก็บของผู้ใช้
-      const foodItem = await ItemStorageModel.getFoodItem(uid, foodValue);
-      if (!foodItem || foodItem.quantity === 0) {
-        throw new Error('Food item not found or quantity is zero');
-      }
-  
-      // อัปเดตระดับความหิวของสัตว์เลี้ยง
-      await PetModel.updateHungerLevel(petId, foodValue);
-  
-      // ลดจำนวนอาหารในช่องเก็บของ
-      await ItemStorageModel.updateFoodQuantity(foodItem.storage_id, foodItem.quantity - 1);
-  
-      // ถ้าจำนวนอาหารเหลือ 0 ลบรายการออกจากช่องเก็บของ
-      if (foodItem.quantity - 1 === 0) {
-        await ItemStorageModel.deleteFoodItem(foodItem.storage_id);
-      }
-  
-      return { message: 'Pet fed successfully' };
-    } catch (error) {
-      console.error('Error feeding pet:', error);
-      throw error;
-    }
-  };
   
 module.exports = {
     createUser,
@@ -315,7 +295,6 @@ module.exports = {
     getUserCoins,
     deductUserCoins,
     getTimeByLanguage,
-    feedPet,
     getUserPet,
     randomizePet,
 };
