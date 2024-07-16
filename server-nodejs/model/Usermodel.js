@@ -249,36 +249,6 @@ const getUserPet = async (uid) => {
   }
 };
   
-const randomizePet = async (userId) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
-    const petsResult = await client.query('SELECT * FROM pets');
-    const pets = petsResult.rows;
-
-    if (pets.length === 0) {
-      throw new Error('No pets available');
-    }
-
-    const randomPet = pets[Math.floor(Math.random() * pets.length)];
-
-    const result = await client.query(
-      'INSERT INTO user_pets (user_id, pet_id, pet_name) VALUES ($1, $2, $3) RETURNING *',
-      [userId, randomPet.pet_id, randomPet.pet_name]
-    );
-
-    await client.query('COMMIT');
-    return result.rows[0];
-  } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error randomizing pet:', error);
-    throw error;
-  } finally {
-    client.release();
-  }
-};
-  
   
 module.exports = {
     createUser,
