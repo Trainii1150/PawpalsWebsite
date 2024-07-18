@@ -105,13 +105,22 @@ const validateResetToken = async (req, res) => {
         return res.status(400).json({ error: 'Token is missing' });
     }
     try {
-        jwt.verify(token, process.env.ResetpassEmailtoken);
+        const decoded = jwt.verify(token, process.env.ResetpassEmailtoken);
+        const user = await userModel.getUserData(decoded.email);
+        if (!user) {
+            return res.status(404).json({ error: 'Email not found' });
+        }
         res.json({ message: 'Token is valid' });
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
+            const decoded = jwt.decode(token);
+            const user = await userModel.getUserData(decoded.email);
+            if (!user) {
+                return res.status(404).json({ error: 'Email not found' });
+            }
             res.status(401).json({ error: 'Token has expired' });
         } else {
-            res.status(500).json({ message: 'An error occurred' });
+            res.status(500).json({ message: 'An error occurred', details: error.message });
         }
     }
 };
@@ -127,7 +136,7 @@ const checkOldPassword = async (req, res) => {
         res.json(isPasswordMatch);
     } catch (error) {
         console.error('Error checking email:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ message: 'An error occurred', details: error.message });
     }
 };
 
@@ -257,7 +266,7 @@ const sendEmail = async (email, token) => {
     }
 };
 
-const dataUser = async (req, res) => {
+/*const dataUser = async (req, res) => {
     try {
         const data = await userModel.getUserByUserId();
         res.json(data);
@@ -265,7 +274,7 @@ const dataUser = async (req, res) => {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
-};
+};*/
 
 const buyItem = async (req, res) => {
     const { uid, item_id } = req.body;
@@ -408,7 +417,7 @@ const feedPet = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
-    dataUser,
+    /*dataUser,*/
     verifyEmail,
     sendVerifyEmail,
     sendEmail,

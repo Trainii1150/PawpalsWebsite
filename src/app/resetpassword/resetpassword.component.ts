@@ -38,12 +38,12 @@ export class ResetpasswordComponent implements OnInit {
               console.log(response);
             },
             (error)=>{
-              if (error.status === 400 || error.status === 401) {
-                console.log(error,'dsdasdsads');
+              if (error.status === 400 || error.status === 401 || error.status === 404) {
+                //console.log(error,'dsdasdsads');
                 Swal.fire({
                   icon: 'error',
                   title: 'Token Expired',
-                  text: 'The reset token has expired or not found. Please request a new password reset link.',
+                  text: 'The reset token or email has expired, is invalid, or not found. Please request a new password reset link.',
                   confirmButtonText: 'Ok'
                 }).then(() => {
                   this.router.navigate(['/login']);

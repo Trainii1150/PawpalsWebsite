@@ -27,7 +27,6 @@ const getUserData = async (email) => {
         throw new Error('Error getting user by email');
     }
 };
-
 const getResetpassemail = async (email) => {
     try {
         const user = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
@@ -48,19 +47,19 @@ const findbyEmail = async (email) => {
     }
 }
 
-const getUserByUserId = async () => {
+/*const getUserByUserId = async () => {
     try {
         const result = await pool.query('SELECT * FROM user_table');
         return result.rows;
     } catch (error) {
         console.error(error);
     }
-};
+};*/
 
-const updateUserVerification = async (user,email) => {
+const updateUserVerification = async (userid) => {
     try{
-        const result = await pool.query('UPDATE user_table SET user_verify = true WHERE email = $1',[email]);
-        console.log(`${user} of email : ${email} is now verified.`);
+        const result = await pool.query('UPDATE user_table SET user_verify = true WHERE user_id = $1',[userid]);
+        console.log(`this account is now verified.`);
     } catch (error) {
         console.error(error);
         throw new Error('Failed to update user verification status');
