@@ -23,6 +23,13 @@ const deleteStorageItem = async (storageId, userId, itemId) => {
     );
     return result.rows[0];
 };
+const deleteStorageItembyUserid = async (userId) => {
+  const result = await pool.query(
+      'DELETE FROM user_storage WHERE user_id = $1 RETURNING *',
+      [userId]
+  );
+  return result.rows[0];
+};
 
 const deleteFoodItem = async (storageId) => {
   await pool.query(`
@@ -70,6 +77,7 @@ module.exports = {
     createStorageItem,
     updateStorageItem,
     deleteStorageItem,
+    deleteStorageItembyUserid,
     checkItemInStorageItem,
     getItemPrice,
     getFoodItem,

@@ -36,9 +36,22 @@ const deleteUserPet = async (userPetId, userId, petId) => {
     }
 };
 
+const deleteUserPetbyUserid = async (userId) => {
+    try {
+        const result = await db.query(
+            'DELETE FROM user_pets WHERE user_id = $1 RETURNING *',
+            [userId]
+        );
+        return result.rows[0]; // Return the deleted pet's ID if it exists
+    } catch (error) {
+        console.error(error);
+    }
+};
+
 
 module.exports = {
     createUserPet,
     updateUserPet,
     deleteUserPet,
+    deleteUserPetbyUserid,
 };

@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, HostListener  } from '@angular/core';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../service/auth.service';
+import { UserService } from '../service/user.service';
 import { Router } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { CookieService } from 'ngx-cookie-service';
@@ -61,6 +62,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   constructor(
     private authService: AuthService,
+    private userService: UserService,
     private router: Router,
     private apollo: Apollo,
     private cookieService: CookieService,
@@ -329,7 +331,7 @@ formatTimestamp(timestamp: string | null | undefined): string {
 buyItem(item: any): void {
   const uid = this.cookieService.get('uid');
   if (uid) {
-    this.http.post('http://localhost:3000/api/buy-item', { uid, item_id: item.item_id })
+    this.userService.buyItem(uid, item.id)
       .subscribe(
         (response: any) => {
           Swal.fire({
@@ -451,7 +453,7 @@ selectFoodItem(item: any) {
 feedPet(petId: number, foodValue: number, itemId: number): void {
   const uid = this.cookieService.get('uid');
   if (uid) {
-    this.http.post('http://localhost:3000/api/feed-pet', { uid, petId, foodValue, itemId })
+    this.userService.feedPet(uid, petId, foodValue, itemId)
       .subscribe(
         (response: any) => {
           Swal.fire({
@@ -521,7 +523,7 @@ getPetHungerLevel(): void {
 randomizePet(): void {
   const uid = this.cookieService.get('uid');
   if (uid) {
-    this.http.post('http://localhost:3000/api/randomize-pet', { uid })
+    this.userService.randomizePet(uid)
       .subscribe(
         (response: any) => {
           Swal.fire({

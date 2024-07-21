@@ -113,6 +113,31 @@ const addCoins = async (uid, amount) => {
   }
 };
 
+const setCoins = async (uid, amount) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Check if the user exists
+    const userCoinsResult = await client.query('SELECT coins FROM user_coins WHERE user_id = $1', [uid]);
+    if (userCoinsResult.rows.length === 0) {
+      throw new Error('User not found');
+    }
+
+    // Update the coins
+    await client.query('UPDATE user_coins SET coins = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2', [amount, uid]);
+
+    await client.query('COMMIT');
+    return amount;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+
 const deleteCoins = async (uid) => {
   try {
     const result = await pool.query('DELETE FROM user_coins WHERE user_id = $1 RETURNING *', [uid]);
@@ -128,5 +153,6 @@ module.exports = {
   updateUserCoins,
   deductUserCoins,
   addCoins,
+  setCoins,
   deleteCoins
 };

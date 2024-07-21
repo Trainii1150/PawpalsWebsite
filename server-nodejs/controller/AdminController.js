@@ -2,6 +2,8 @@ const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
 const UserPetsModel = require('../model/userPetsModel');
 const PetModel = require('../model/PetModel');
+const UserCoinModel = require('../model/CoinsModel');
+const userModel = require('../model/UserModel');
 
 // Adds an item to storage or updates the quantity if it already exists.
 const addItemToStorage = async (req, res) => {
@@ -167,6 +169,33 @@ const deletePet = async (req, res) => {
     }
 };
 
+const updateUser = async (req, res) => {
+    const { userId, newUsername, newPassword, newRole, newAmountcoins } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await userModel.updateUserInfo(userId, newUsername, hashedPassword, newRole);
+        await UserCoinModel.setCoins(userId, newAmountcoins);
+        res.status(200).json({message: 'User updated successfully'});
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+const deleteUser = async (req, res) => {
+    const { userid } = req.body;
+    try {
+        await StorageItemModel.deleteStorageItembyUserid(userid);
+        await UserPetsModel.deleteUserPetbyUserid(userid);
+        await UserCoinModel.deleteCoins(userid);
+        const user = await userModel.deleteUserInfo(userid);
+        res.status(200).json({ message: 'User and related data deleted successfully',deletedData: { user }});
+    } catch (error) {
+        res.status(400).json({
+            message: 'Error deleting user and related data',
+            error: error.message
+        });
+    }
+};
 
 module.exports = {
     addItemToStorage,
@@ -181,4 +210,6 @@ module.exports = {
     addPet,
     updatePet,
     deletePet,
+    updateUser,
+    deleteUser,
 };

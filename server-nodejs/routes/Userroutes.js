@@ -31,8 +31,9 @@ router.delete('/delete-item',AuthToken, UserController.deleteItemfromStorage);
 
 // Routes for user pets
 router.post('/buy-userpets', AuthToken, UserController.createUserPet);
-router.post('/api/feed-pet', AuthToken, UserController.feedPet);
+router.post('/feed-pet', AuthToken, UserController.feedPet);
 router.put('/update-userpets', AuthToken, UserController.updateUserPet);
 router.delete('/delete-userpets', AuthToken, UserController.deleteUserPet);
+
 
 module.exports = router;

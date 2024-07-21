@@ -47,14 +47,23 @@ const findbyEmail = async (email) => {
     }
 }
 
-/*const getUserByUserId = async () => {
+const updateUserInfo = async (userid, newUsername, newPassword, newRole) => {
     try {
-        const result = await pool.query('SELECT * FROM user_table');
-        return result.rows;
+      const result = await pool.query('UPDATE user_table SET username = $2 , password = $3 , role = $4 WHERE userid = $1', [newUsername, newPassword, newRole, userid]);
+      return result.rows[0];
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
-};*/
+};
+
+const deleteUserInfo  = async (userid) => {
+    try {
+      const result = await pool.query('DELETE FROM user_table WHERE user_id = $1 RETURNING *', [userid]);
+      return result.rows[0];
+    } catch (error) {
+       console.error(error);
+    }
+};
 
 const updateUserVerification = async (userid) => {
     try{
@@ -258,6 +267,8 @@ module.exports = {
     getResetpassemail,
     findbyEmail,
     deleteUserById,
+    deleteUserInfo,
+    updateUserInfo,
     getUserStorageItems,
     getUserActivityTime,
     getUserActivity,
