@@ -20,7 +20,7 @@ const createUser = async (username, email, hashedPassword) => {
 
 const getUserData = async (email) => {
     try {
-        const result = await pool.query('SELECT user_id,username, email, password , user_verify FROM user_table WHERE email = $1', [email]);
+        const result = await pool.query('SELECT user_id,username, email, password , user_verify , role FROM user_table WHERE email = $1', [email]);
         return result.rows[0];
     } catch (error) {
         console.error(error);
@@ -49,7 +49,7 @@ const findbyEmail = async (email) => {
 
 const findRoleById = async (uid) => {
     try {
-        const query = await pool.query( 'SELECT role FROM user_table WHERE user_id = $1',[uid]);
+        const result = await pool.query('SELECT role FROM user_table WHERE user_id = $1',[uid]);
         return result.rows[0];
     } catch (error) {
         console.error(error);
@@ -285,6 +285,5 @@ module.exports = {
     deductUserCoins,
     getTimeByLanguage,
     getUserPet,
-    randomizePet,
 };
 

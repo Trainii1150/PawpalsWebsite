@@ -38,7 +38,6 @@ const loginUser = async (req, res) => {
         if (!user.user_verify) {
             return res.status(400).json({ error: 'Email not verified. Please resend verification email.' });
         }
-
         const { accessToken, refreshToken } = tokenUserGenerate(user);
         res.json({ uid: String(user.user_id), accessToken, refreshToken });
     } catch (error) {

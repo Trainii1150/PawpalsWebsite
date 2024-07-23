@@ -60,7 +60,7 @@ export class AuthService {
     const token = this.cookieService.get('token');
     if(token){
       const decodeuserrole:any = jwtDecode(token);
-      return decodeuserrole;
+      return decodeuserrole.role;
     }
     return null;
   };

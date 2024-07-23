@@ -14,7 +14,7 @@ export class AdminRoleGuard implements CanActivate {
     state: RouterStateSnapshot): boolean {
     const role = 'admin';
     const userrole = this.authService.getRole();
-    
+    console.log(userrole);
     if (userrole === role) {
       return true;
     }

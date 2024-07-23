@@ -67,6 +67,7 @@ export class LoginComponent {
       confirmButtonText: 'Ok',
     }).then((result)=>{
       if(result.isConfirmed){
+        console.log(req)
         this.authService.setLocalStorage(req);
         this.router.navigate(['/']);
       }

@@ -47,7 +47,7 @@ const refreshToken = (req, res, next) => {
       return res.sendStatus(403);
     }
     console.log('Access token is expired');
-    const accessToken = jwt.sign({ username: decoded.username, userId: decoded.userId }, secret.Accesstoken, { expiresIn: '5m' });
+    const accessToken = jwt.sign({ username: decoded.username, userId: decoded.userId, role: decoded.role }, secret.Accesstoken, { expiresIn: '5m' });
     res.json({ accessToken });
   });
 };
