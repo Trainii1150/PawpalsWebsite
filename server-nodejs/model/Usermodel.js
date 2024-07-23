@@ -47,6 +47,15 @@ const findbyEmail = async (email) => {
     }
 }
 
+const findRoleById = async (uid) => {
+    try {
+        const query = await pool.query( 'SELECT role FROM user_table WHERE user_id = $1',[uid]);
+        return result.rows[0];
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 const updateUserInfo = async (userid, newUsername, newPassword, newRole) => {
     try {
       const result = await pool.query('UPDATE user_table SET username = $2 , password = $3 , role = $4 WHERE userid = $1', [newUsername, newPassword, newRole, userid]);
@@ -261,7 +270,7 @@ const getUserPet = async (uid) => {
 module.exports = {
     createUser,
     getUserData,
-    getUserByUserId,
+    findRoleById,
     updateUserVerification,
     updatePassword,
     getResetpassemail,

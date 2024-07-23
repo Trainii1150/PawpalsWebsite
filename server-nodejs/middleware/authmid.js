@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const UserModel = require('../model/UserModel');
 const secret = process.env;
 
 const AuthToken = (req, res, next) => {
@@ -21,6 +22,20 @@ const AuthToken = (req, res, next) => {
   });
 };
 
+const checkIsadmin = async (req, res, next) => {
+  try {
+    const userId = req.user.userId; // req.user จาก middleware ของ JWT (AuthToken)
+    const user = await UserModel.findRoleById(userId);
+    if (user && user.role === 'admin') {
+      next(); // หากเป็น admin ให้ดำเนินการต่อ
+    } else {
+      return res.status(403).json({ message: 'Forbidden' }); // หากroleไม่ใช่ admin ให้ส่ง 403
+    }
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
 const refreshToken = (req, res, next) => {
   const refreshToken = req.body.refreshToken;
   if (!refreshToken) {
@@ -37,4 +52,4 @@ const refreshToken = (req, res, next) => {
   });
 };
 
-module.exports = { AuthToken, refreshToken };
+module.exports = { AuthToken, checkIsadmin ,refreshToken };

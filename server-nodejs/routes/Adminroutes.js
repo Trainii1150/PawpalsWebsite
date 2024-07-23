@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const AdminController = require('../controller/AdminController');
-const { AuthToken } = require('../middleware/authmid'); // Import the auth middleware functions
+const { AuthToken ,checkIsadmin} = require('../middleware/authmid'); // Import the auth middleware functions
 
 // Define routes for managing storage items
 router.post('/add-storeitem', AuthToken, AdminController.addItemToStorage); // Add a new item to storage
@@ -27,4 +27,10 @@ router.delete('/delete-pets', AuthToken, AdminController.deletePet); // Delete a
 router.put('/update-user', AuthToken, AdminController.updateUser); // Update user details (username, password, etc.)
 router.delete('/delete-user', AuthToken, AdminController.deleteUser); // Delete a user
 
+
+
+// test routes
+router.post('/test-admin', AuthToken, checkIsadmin, (req, res) => {
+    res.send('Welcome to the admin');
+});
 module.exports = router;

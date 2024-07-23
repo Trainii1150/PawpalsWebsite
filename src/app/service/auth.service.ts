@@ -45,15 +45,24 @@ export class AuthService {
   };
 
   isloggedin(){
-    return !!this.cookieService.get('auth_key');
+    return !!this.cookieService.get('token');
   };
 
   setLocalStorage(resObject:any){
     const tokenPayload: any = jwtDecode(resObject.accessToken);
     const exp = tokenPayload.exp*1000;
-    this.cookieService.set('auth_key',resObject.accessToken,exp);
+    this.cookieService.set('token',resObject.accessToken,exp);
     this.cookieService.set('refresh_token', resObject.refreshToken);
     this.cookieService.set('uid',resObject.uid);
+  };
+
+  getRole(){
+    const token = this.cookieService.get('token');
+    if(token){
+      const decodeuserrole:any = jwtDecode(token);
+      return decodeuserrole;
+    }
+    return null;
   };
 
   setExtensionsToken(email: any) {

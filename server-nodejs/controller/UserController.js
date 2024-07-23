@@ -59,8 +59,8 @@ const checkEmail = async (req, res) => {
 };
 
 const tokenUserGenerate = (user) => {
-    const accessToken = jwt.sign({ username: user.username, userId: user.user_id }, process.env.Accesstoken, { expiresIn: '5m' });
-    const refreshToken = jwt.sign({ username: user.username, userId: user.user_id }, process.env.RefreshToken, { expiresIn: '1d' });
+    const accessToken = jwt.sign({ username: user.username, userId: user.user_id, role: user.role }, process.env.Accesstoken, { expiresIn: '5m' });
+    const refreshToken = jwt.sign({ username: user.username, userId: user.user_id, role: user.role }, process.env.RefreshToken, { expiresIn: '1d' });
     return { accessToken, refreshToken };
 };
 

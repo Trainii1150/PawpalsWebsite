@@ -24,7 +24,7 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const accessToken = this.cookieService.get('auth_key');
+    const accessToken = this.cookieService.get('token');
     //const token = this.cookieService.get('auth_key');
     if(accessToken){
       console.log('Token has been retrieved');
@@ -37,19 +37,19 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 || error.status === 403) {
-          // Token expired, attempt to refresh
+        if (error.status === 401) {
+          // Handle 401 Unauthorized (Token expired)
           console.log('Access token expired');
           const refreshToken = this.cookieService.get('refresh_token');
-          if(refreshToken){
+          if (refreshToken) {
             return this.authService.refreshToken(refreshToken).pipe(
               switchMap((newTokens: any) => {
                 if (newTokens) {
-                  this.cookieService.set('auth_key', newTokens.accessToken);
-  
+                  this.cookieService.set('token', newTokens.accessToken);
+    
                   // Console log the new access token
                   console.log('New access token:', newTokens.accessToken);
-                  
+    
                   request = request.clone({
                     setHeaders: {
                       Authorization: `Bearer ${newTokens.accessToken}`
@@ -60,24 +60,30 @@ export class AuthInterceptor implements HttpInterceptor {
                 return throwError(error);
               }),
               catchError(error => {
-                //when refresh has expired
+                // When refresh token has expired
                 this.authService.logout();
                 this.router.navigate(['/login']);
                 return throwError(error);
               })
-            )
-          }else{
-            //refresh not found
+            );
+          } else {
+            // Refresh token not found
             this.authService.logout();
             this.router.navigate(['/login']);
             return throwError(error);
           }
-        } else{
+        } else if (error.status === 403) {
+          // Handle 403 Forbidden
+          console.log('Access forbidden');
+          this.authService.logout();
+          this.router.navigate(['/login']);
+          return throwError(error);
+        } else {
           // Pass the error along to be handled by the calling code
           return throwError(error);
         }
-        
       })
     );
+    
   }
 }
