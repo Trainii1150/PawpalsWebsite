@@ -1,5 +1,10 @@
 const pool = require('../config/database');
 
+const getAllStorage = async () => {
+  const result = await pool.query('SELECT * FROM user_storage');
+  return result.rows;
+};
+
 const createStorageItem = async (userId, itemId, quantity) => {
     const result = await pool.query(
         'INSERT INTO user_storage (user_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *',
@@ -83,4 +88,5 @@ module.exports = {
     getFoodItem,
     deleteFoodItem,
     updateFoodQuantity,
+    getAllStorage,
 };

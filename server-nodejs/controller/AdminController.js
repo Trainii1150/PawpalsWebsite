@@ -1,9 +1,10 @@
+const bcrypt = require('bcrypt');
+const userModel = require('../model/UserModel'); // Import userModel
 const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
 const UserPetsModel = require('../model/userPetsModel');
 const PetModel = require('../model/PetModel');
 const UserCoinModel = require('../model/CoinsModel');
-const userModel = require('../model/UserModel');
 
 // Adds an item to storage or updates the quantity if it already exists.
 const addItemToStorage = async (req, res) => {
@@ -39,7 +40,7 @@ const updateStorageItem = async (req, res) => {
     }
 };
 
-//Deletes item from storage.
+// Deletes item from storage.
 const deleteItemFromStorage = async (req, res) => {
     const { storageId, userId, itemId } = req.body;
 
@@ -104,7 +105,6 @@ const createUserPet = async (req, res) => {
     }
 };
 
-
 // Update an existing pet for a user
 const updateUserPet = async (req, res) => {
     const { userPetId, petId, petName, hungerLevel } = req.body;
@@ -131,7 +131,6 @@ const deleteUserPet = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
-
 
 // Create a new pet
 const addPet = async (req, res) => {
@@ -181,6 +180,42 @@ const updateUser = async (req, res) => {
     }
 };
 
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await userModel.getAllUsers(); // Ensure there's a function getAllUsers in userModel
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+const getAllItems = async (req, res) => {
+    try {
+        const items = await itemModel.getAllItems(); // Ensure there's a function getAllItems in itemModel
+        res.status(200).json(items);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+const getAllPets = async (req, res) => {
+    try {
+        const pets = await PetModel.getAllPets(); // Ensure there's a function getAllPets in PetModel
+        res.status(200).json(pets);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
+const getAllStorage = async (req, res) => {
+    try {
+        const storageItems = await StorageItemModel.getAllStorage(); // Ensure there's a function getAllStorage in StorageItemModel
+        res.status(200).json(storageItems);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
 const deleteUser = async (req, res) => {
     const { userid } = req.body;
     try {
@@ -212,4 +247,8 @@ module.exports = {
     deletePet,
     updateUser,
     deleteUser,
+    getAllUsers, // Updated function name
+    getAllItems,
+    getAllPets,
+    getAllStorage
 };

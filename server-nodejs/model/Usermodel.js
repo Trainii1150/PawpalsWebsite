@@ -18,6 +18,16 @@ const createUser = async (username, email, hashedPassword) => {
     }
 };
 
+const getAllUsers = async () => {
+  try {
+      const result = await pool.query('SELECT user_id, username, email, role FROM user_table');
+      return result.rows;
+  } catch (error) {
+      console.error(error);
+      throw new Error('Error fetching users');
+  }
+};
+
 const getUserData = async (email) => {
     try {
         const result = await pool.query('SELECT user_id,username, email, password , user_verify , role FROM user_table WHERE email = $1', [email]);
@@ -285,5 +295,6 @@ module.exports = {
     deductUserCoins,
     getTimeByLanguage,
     getUserPet,
+    getAllUsers
 };
 

@@ -70,4 +70,21 @@ export class AdminService {
   deleteUser(userid: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/delete-user`, { body: { userid } });
   }
+
+  getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/users`);
+  }
+
+  getAllItems(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/items`);
+  }
+
+  getAllPets(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/pets`);
+  }
+
+  getAllStorage(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/storage`);
+  }
+
 }

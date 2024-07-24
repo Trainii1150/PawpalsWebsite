@@ -1,1 +1,139 @@
-<p>dashboard works!</p>
+<div class="dashboard-container flex">
+    <!-- Sidebar -->
+    <div class="sidebar w-1/6 h-screen bg-gray-100 p-4">
+      <div class="sidebar-menu flex flex-col space-y-4">
+        <a (click)="navigateTo('manage-users')" class="sidebar-item flex items-center space-x-2">
+          <i class="icon-users"></i>
+          <span>Manage Users</span>
+        </a>
+        <a (click)="navigateTo('manage-items')" class="sidebar-item flex items-center space-x-2">
+          <i class="icon-items"></i>
+          <span>Manage Items</span>
+        </a>
+        <a (click)="navigateTo('manage-pets')" class="sidebar-item flex items-center space-x-2">
+          <i class="icon-pets"></i>
+          <span>Manage Pets</span>
+        </a>
+        <a (click)="navigateTo('manage-storage')" class="sidebar-item flex items-center space-x-2">
+          <i class="icon-storage"></i>
+          <span>Manage Storage</span>
+        </a>
+      </div>
+    </div>
+  
+    <!-- Main Content -->
+    <div class="main-content flex-1 p-6 bg-white">
+      <div class="header flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-semibold">Admin Dashboard</h1>
+      </div>
+      <div *ngIf="currentSection === 'manage-users'">
+        <h2 class="text-xl font-semibold mb-4">Manage Users</h2>
+        <button class="btn btn-primary mb-4" (click)="fetchUsers()">Fetch Users</button>
+        <table class="table-auto w-full">
+          <thead>
+            <tr>
+              <th class="px-4 py-2">ID</th>
+              <th class="px-4 py-2">Username</th>
+              <th class="px-4 py-2">Email</th>
+              <th class="px-4 py-2">Role</th>
+              <th class="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td class="border px-4 py-2">{{user.user_id}}</td>
+              <td class="border px-4 py-2">{{user.username}}</td>
+              <td class="border px-4 py-2">{{user.email}}</td>
+              <td class="border px-4 py-2">{{user.role}}</td>
+              <td class="border px-4 py-2">
+                <button class="btn btn-secondary" (click)="updateUser(user.user_id)">Update</button>
+                <button class="btn btn-danger" (click)="deleteUser(user.user_id)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="currentSection === 'manage-items'">
+        <h2 class="text-xl font-semibold mb-4">Manage Items</h2>
+        <button class="btn btn-primary mb-4" (click)="fetchItems()">Fetch Items</button>
+        <table class="table-auto w-full">
+          <thead>
+            <tr>
+              <th class="px-4 py-2">ID</th>
+              <th class="px-4 py-2">Item Name</th>
+              <th class="px-4 py-2">Description</th>
+              <th class="px-4 py-2">Item Type</th>
+              <th class="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of items">
+              <td class="border px-4 py-2">{{item.item_id}}</td>
+              <td class="border px-4 py-2">{{item.item_name}}</td>
+              <td class="border px-4 py-2">{{item.description}}</td>
+              <td class="border px-4 py-2">{{item.item_type}}</td>
+              <td class="border px-4 py-2">
+                <button class="btn btn-secondary" (click)="updateItem(item.item_id)">Update</button>
+                <button class="btn btn-danger" (click)="deleteItem(item.item_id)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="currentSection === 'manage-pets'">
+        <h2 class="text-xl font-semibold mb-4">Manage Pets</h2>
+        <button class="btn btn-primary mb-4" (click)="fetchPets()">Fetch Pets</button>
+        <table class="table-auto w-full">
+          <thead>
+            <tr>
+              <th class="px-4 py-2">ID</th>
+              <th class="px-4 py-2">Pet Name</th>
+              <th class="px-4 py-2">Description</th>
+              <th class="px-4 py-2">Pet Type</th>
+              <th class="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pet of pets">
+              <td class="border px-4 py-2">{{pet.pet_id}}</td>
+              <td class="border px-4 py-2">{{pet.pet_name}}</td>
+              <td class="border px-4 py-2">{{pet.description}}</td>
+              <td class="border px-4 py-2">{{pet.pet_type}}</td>
+              <td class="border px-4 py-2">
+                <button class="btn btn-secondary" (click)="updatePet(pet.pet_id)">Update</button>
+                <button class="btn btn-danger" (click)="deletePet(pet.pet_id)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="currentSection === 'manage-storage'">
+        <h2 class="text-xl font-semibold mb-4">Manage Storage</h2>
+        <button class="btn btn-primary mb-4" (click)="fetchStorageItems()">Fetch Storage Items</button>
+        <table class="table-auto w-full">
+          <thead>
+            <tr>
+              <th class="px-4 py-2">Storage ID</th>
+              <th class="px-4 py-2">User ID</th>
+              <th class="px-4 py-2">Item ID</th>
+              <th class="px-4 py-2">Quantity</th>
+              <th class="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let storage of storageItems">
+              <td class="border px-4 py-2">{{storage.storage_id}}</td>
+              <td class="border px-4 py-2">{{storage.user_id}}</td>
+              <td class="border px-4 py-2">{{storage.item_id}}</td>
+              <td class="border px-4 py-2">{{storage.quantity}}</td>
+              <td class="border px-4 py-2">
+                <button class="btn btn-secondary" (click)="updateStorageItem(storage.storage_id, storage.user_id, storage.item_id, storage.quantity)">Update</button>
+                <button class="btn btn-danger" (click)="deleteStorageItem(storage.storage_id, storage.user_id, storage.item_id)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
