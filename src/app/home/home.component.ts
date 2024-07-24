@@ -331,7 +331,7 @@ formatTimestamp(timestamp: string | null | undefined): string {
 buyItem(item: any): void {
   const uid = this.cookieService.get('uid');
   if (uid) {
-    this.userService.buyItem(uid, item.id)
+    this.userService.buyItem(uid, item.item_id)
       .subscribe(
         (response: any) => {
           Swal.fire({
@@ -550,6 +550,7 @@ randomizePet(): void {
     });
   }
 }
+
 
 initializeChart(): void {
   const chartContainer = document.getElementById("donut-chart");

@@ -31,14 +31,14 @@ const addItemToStorage = async (req, res) => {
 // Updates the quantity of an item in storage.
 const updateStorageItem = async (req, res) => {
     const { storageId, userId, itemId, quantity } = req.body;
-
     try {
-        const updatedItem = await StorageItemModel.updateStorageItem(storageId, userId, itemId, quantity);
-        return res.status(200).json({message: 'Item updated successfully'})
+        await StorageItemModel.updateStorageItem(storageId, userId, itemId, quantity);
+        res.status(200).json({ message: 'Storage item updated successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
+
 
 // Deletes item from storage.
 const deleteItemFromStorage = async (req, res) => {

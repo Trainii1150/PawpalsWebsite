@@ -33,20 +33,21 @@ const getAllPets = async () => {
       console.error('Error getting all pets:', error);
       throw error;
     }
-};
+  };
 
-const updatePet = async (pets_id, pet_name, description, pet_type) => {
+const updatePet = async (petId, petName, description, petType) => {
     try {
         const result = await pool.query(
             'UPDATE pets SET pet_name = $1, description = $2, pet_type = $3 WHERE pet_id = $4 RETURNING *',
-            [pet_name, description, pet_type, pets_id]
+            [petName, description, petType, petId]
         );
         return result.rows[0];
     } catch (error) {
         console.error(error);
+        throw new Error('Error updating pet');
     }
-    
 };
+
 
 const deletePet = async (pets_id) => {
     try {

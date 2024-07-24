@@ -1,139 +1,213 @@
-<div class="dashboard-container flex">
+<div class="dashboard-container flex bg-white h-screen">
     <!-- Sidebar -->
-    <div class="sidebar w-1/6 h-screen bg-gray-100 p-4">
-      <div class="sidebar-menu flex flex-col space-y-4">
-        <a (click)="navigateTo('manage-users')" class="sidebar-item flex items-center space-x-2">
-          <i class="icon-users"></i>
-          <span>Manage Users</span>
-        </a>
-        <a (click)="navigateTo('manage-items')" class="sidebar-item flex items-center space-x-2">
-          <i class="icon-items"></i>
-          <span>Manage Items</span>
-        </a>
-        <a (click)="navigateTo('manage-pets')" class="sidebar-item flex items-center space-x-2">
-          <i class="icon-pets"></i>
-          <span>Manage Pets</span>
-        </a>
-        <a (click)="navigateTo('manage-storage')" class="sidebar-item flex items-center space-x-2">
-          <i class="icon-storage"></i>
-          <span>Manage Storage</span>
-        </a>
-      </div>
+    <div class="sidebar w-1/6 p-4">
+        <div class="sidebar-menu flex flex-col space-y-4">
+            <a (click)="navigateTo('manage-users')" class="sidebar-item flex items-center space-x-2">
+                <span>Manage Users</span>
+            </a>
+            <a (click)="navigateTo('manage-items')" class="sidebar-item flex items-center space-x-2">
+                <span>Manage Items</span>
+            </a>
+            <a (click)="navigateTo('manage-pets')" class="sidebar-item flex items-center space-x-2">
+                <span>Manage Pets</span>
+            </a>
+            <a (click)="navigateTo('manage-storage')" class="sidebar-item flex items-center space-x-2">
+                <span>Manage Storage</span>
+            </a>
+        </div>
     </div>
-  
+
     <!-- Main Content -->
-    <div class="main-content flex-1 p-6 bg-white">
-      <div class="header flex items-center justify-between mb-4">
-        <h1 class="text-2xl font-semibold">Admin Dashboard</h1>
-      </div>
-      <div *ngIf="currentSection === 'manage-users'">
-        <h2 class="text-xl font-semibold mb-4">Manage Users</h2>
-        <button class="btn btn-primary mb-4" (click)="fetchUsers()">Fetch Users</button>
-        <table class="table-auto w-full">
-          <thead>
-            <tr>
-              <th class="px-4 py-2">ID</th>
-              <th class="px-4 py-2">Username</th>
-              <th class="px-4 py-2">Email</th>
-              <th class="px-4 py-2">Role</th>
-              <th class="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let user of users">
-              <td class="border px-4 py-2">{{user.user_id}}</td>
-              <td class="border px-4 py-2">{{user.username}}</td>
-              <td class="border px-4 py-2">{{user.email}}</td>
-              <td class="border px-4 py-2">{{user.role}}</td>
-              <td class="border px-4 py-2">
-                <button class="btn btn-secondary" (click)="updateUser(user.user_id)">Update</button>
-                <button class="btn btn-danger" (click)="deleteUser(user.user_id)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div *ngIf="currentSection === 'manage-items'">
-        <h2 class="text-xl font-semibold mb-4">Manage Items</h2>
-        <button class="btn btn-primary mb-4" (click)="fetchItems()">Fetch Items</button>
-        <table class="table-auto w-full">
-          <thead>
-            <tr>
-              <th class="px-4 py-2">ID</th>
-              <th class="px-4 py-2">Item Name</th>
-              <th class="px-4 py-2">Description</th>
-              <th class="px-4 py-2">Item Type</th>
-              <th class="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of items">
-              <td class="border px-4 py-2">{{item.item_id}}</td>
-              <td class="border px-4 py-2">{{item.item_name}}</td>
-              <td class="border px-4 py-2">{{item.description}}</td>
-              <td class="border px-4 py-2">{{item.item_type}}</td>
-              <td class="border px-4 py-2">
-                <button class="btn btn-secondary" (click)="updateItem(item.item_id)">Update</button>
-                <button class="btn btn-danger" (click)="deleteItem(item.item_id)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div *ngIf="currentSection === 'manage-pets'">
-        <h2 class="text-xl font-semibold mb-4">Manage Pets</h2>
-        <button class="btn btn-primary mb-4" (click)="fetchPets()">Fetch Pets</button>
-        <table class="table-auto w-full">
-          <thead>
-            <tr>
-              <th class="px-4 py-2">ID</th>
-              <th class="px-4 py-2">Pet Name</th>
-              <th class="px-4 py-2">Description</th>
-              <th class="px-4 py-2">Pet Type</th>
-              <th class="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let pet of pets">
-              <td class="border px-4 py-2">{{pet.pet_id}}</td>
-              <td class="border px-4 py-2">{{pet.pet_name}}</td>
-              <td class="border px-4 py-2">{{pet.description}}</td>
-              <td class="border px-4 py-2">{{pet.pet_type}}</td>
-              <td class="border px-4 py-2">
-                <button class="btn btn-secondary" (click)="updatePet(pet.pet_id)">Update</button>
-                <button class="btn btn-danger" (click)="deletePet(pet.pet_id)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div *ngIf="currentSection === 'manage-storage'">
-        <h2 class="text-xl font-semibold mb-4">Manage Storage</h2>
-        <button class="btn btn-primary mb-4" (click)="fetchStorageItems()">Fetch Storage Items</button>
-        <table class="table-auto w-full">
-          <thead>
-            <tr>
-              <th class="px-4 py-2">Storage ID</th>
-              <th class="px-4 py-2">User ID</th>
-              <th class="px-4 py-2">Item ID</th>
-              <th class="px-4 py-2">Quantity</th>
-              <th class="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let storage of storageItems">
-              <td class="border px-4 py-2">{{storage.storage_id}}</td>
-              <td class="border px-4 py-2">{{storage.user_id}}</td>
-              <td class="border px-4 py-2">{{storage.item_id}}</td>
-              <td class="border px-4 py-2">{{storage.quantity}}</td>
-              <td class="border px-4 py-2">
-                <button class="btn btn-secondary" (click)="updateStorageItem(storage.storage_id, storage.user_id, storage.item_id, storage.quantity)">Update</button>
-                <button class="btn btn-danger" (click)="deleteStorageItem(storage.storage_id, storage.user_id, storage.item_id)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="main-content flex-1 p-6">
+        <div class="header flex items-center justify-between mb-4">
+            <h1 class="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
+        </div>
+        <div *ngIf="currentSection === 'manage-users'">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Users</h2>
+            <button class="btn btn-primary mb-4" (click)="fetchUsers()">Fetch Users</button>
+            <table class="table-auto w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-gray-800">ID</th>
+                        <th class="px-4 py-2 text-gray-800">Username</th>
+                        <th class="px-4 py-2 text-gray-800">Email</th>
+                        <th class="px-4 py-2 text-gray-800">Role</th>
+                        <th class="px-4 py-2 text-gray-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let user of users" class="hover:bg-gray-50">
+                        <td class="border px-4 py-2 text-gray-700">{{ user.user_id }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ user.username }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ user.email }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ user.role }}</td>
+                        <td class="border px-4 py-2">
+                            <button class="btn btn-secondary mr-2" (click)="populateUserForm(user)">Update</button>
+                            <button class="btn btn-danger" (click)="deleteUser(user.user_id)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="selectedUser" class="mt-4">
+                <h3 class="text-lg font-semibold text-gray-800">Update User</h3>
+                <form (submit)="updateUser()">
+                    <input type="hidden" [(ngModel)]="selectedUser.user_id" name="userId">
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Username</label>
+                        <input type="text" [(ngModel)]="selectedUser.username" name="username" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Email</label>
+                        <input type="email" [(ngModel)]="selectedUser.email" name="email" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Role</label>
+                        <input type="text" [(ngModel)]="selectedUser.role" name="role" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update User</button>
+                </form>
+            </div>
+        </div>
+
+        <div *ngIf="currentSection === 'manage-items'">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Items</h2>
+            <button class="btn btn-primary mb-4" (click)="fetchItems()">Fetch Items</button>
+            <table class="table-auto w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-gray-800">ID</th>
+                        <th class="px-4 py-2 text-gray-800">Item Name</th>
+                        <th class="px-4 py-2 text-gray-800">Description</th>
+                        <th class="px-4 py-2 text-gray-800">Item Type</th>
+                        <th class="px-4 py-2 text-gray-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of items" class="hover:bg-gray-50">
+                        <td class="border px-4 py-2 text-gray-700">{{ item.item_id }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ item.item_name }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ item.description }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ item.item_type }}</td>
+                        <td class="border px-4 py-2">
+                            <button class="btn btn-secondary mr-2" (click)="populateItemForm(item)">Update</button>
+                            <button class="btn btn-danger" (click)="deleteItem(item.item_id)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="selectedItem" class="mt-4">
+                <h3 class="text-lg font-semibold text-gray-800">Update Item</h3>
+                <form (submit)="updateItem()">
+                    <input type="hidden" [(ngModel)]="selectedItem.item_id" name="itemId">
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Item Name</label>
+                        <input type="text" [(ngModel)]="selectedItem.item_name" name="item_name" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Description</label>
+                        <input type="text" [(ngModel)]="selectedItem.description" name="description" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Item Type</label>
+                        <input type="text" [(ngModel)]="selectedItem.item_type" name="item_type" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Item</button>
+                </form>
+            </div>
+        </div>
+
+        <div *ngIf="currentSection === 'manage-pets'">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Pets</h2>
+            <button class="btn btn-primary mb-4" (click)="fetchPets()">Fetch Pets</button>
+            <table class="table-auto w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-gray-800">ID</th>
+                        <th class="px-4 py-2 text-gray-800">Pet Name</th>
+                        <th class="px-4 py-2 text-gray-800">Description</th>
+                        <th class="px-4 py-2 text-gray-800">Pet Type</th>
+                        <th class="px-4 py-2 text-gray-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let pet of pets" class="hover:bg-gray-50">
+                        <td class="border px-4 py-2 text-gray-700">{{ pet.pet_id }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ pet.pet_name }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ pet.description }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ pet.pet_type }}</td>
+                        <td class="border px-4 py-2">
+                            <button class="btn btn-secondary mr-2" (click)="populatePetForm(pet)">Update</button>
+                            <button class="btn btn-danger" (click)="deletePet(pet.pet_id)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="selectedPet" class="mt-4">
+                <h3 class="text-lg font-semibold text-gray-800">Update Pet</h3>
+                <form (submit)="updatePet()">
+                    <input type="hidden" [(ngModel)]="selectedPet.pet_id" name="petId">
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Pet Name</label>
+                        <input type="text" [(ngModel)]="selectedPet.pet_name" name="pet_name" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Description</label>
+                        <input type="text" [(ngModel)]="selectedPet.description" name="description" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Pet Type</label>
+                        <input type="text" [(ngModel)]="selectedPet.pet_type" name="pet_type" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Pet</button>
+                </form>
+            </div>
+        </div>
+
+        <div *ngIf="currentSection === 'manage-storage'">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Storage</h2>
+            <button class="btn btn-primary mb-4" (click)="fetchStorageItems()">Fetch Storage Items</button>
+            <table class="table-auto w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-gray-800">Storage ID</th>
+                        <th class="px-4 py-2 text-gray-800">User ID</th>
+                        <th class="px-4 py-2 text-gray-800">Item ID</th>
+                        <th class="px-4 py-2 text-gray-800">Quantity</th>
+                        <th class="px-4 py-2 text-gray-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let storage of storageItems" class="hover:bg-gray-50">
+                        <td class="border px-4 py-2 text-gray-700">{{ storage.storage_id }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ storage.user_id }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ storage.item_id }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ storage.quantity }}</td>
+                        <td class="border px-4 py-2">
+                            <button class="btn btn-secondary mr-2" (click)="populateStorageForm(storage)">Update</button>
+                            <button class="btn btn-danger" (click)="deleteStorageItem(storage.storage_id, storage.user_id, storage.item_id)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="selectedStorageItem" class="mt-4">
+                <h3 class="text-lg font-semibold text-gray-800">Update Storage Item</h3>
+                <form (submit)="updateStorageItem()">
+                    <input type="hidden" [(ngModel)]="selectedStorageItem.storage_id" name="storageId">
+                    <div class="mb-4">
+                        <label class="block text-gray-700">User ID</label>
+                        <input type="text" [(ngModel)]="selectedStorageItem.user_id" name="userId" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Item ID</label>
+                        <input type="text" [(ngModel)]="selectedStorageItem.item_id" name="itemId" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Quantity</label>
+                        <input type="number" [(ngModel)]="selectedStorageItem.quantity" name="quantity" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Storage Item</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
-  
+</div>

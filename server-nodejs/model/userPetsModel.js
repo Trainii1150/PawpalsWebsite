@@ -2,13 +2,14 @@ const pool = require('../config/database');
 
 const createUserPet = async (userId, petId, petName) => {
     try {
-        const result = await db.query(
-            'INSERT INTO user_pets (user_id, pet_id, pet_name VALUES ($1, $2, $3) RETURNING *',
-            [userId, petId, petName]
+        const result = await pool.query(
+            'INSERT INTO user_pets (user_id, pet_id, pet_name, hunger_level, last_fed) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [userId, petId, petName, 100, new Date()]
         );
         return result.rows[0];
     } catch (error) {
-        console.error(error);
+        console.error('Error creating user pet:', error);
+        throw new Error('Error creating user pet');
     }
 };
 

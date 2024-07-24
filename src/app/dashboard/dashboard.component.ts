@@ -19,6 +19,11 @@ export class DashboardComponent implements OnInit {
   newPet: any = { petName: '', description: '', petType: '' };
   newStorageItem: any = { userId: '', itemId: '', quantity: 0 };
 
+  selectedUser: any = null;
+  selectedItem: any = null;
+  selectedPet: any = null;
+  selectedStorageItem: any = null;
+
   constructor(private adminService: AdminService, private router: Router) {} // Inject Router
 
   ngOnInit() {
@@ -60,9 +65,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  updateUser(userId: number) {
-    this.adminService.updateUser(userId, 'updateduser', 'updatedpassword', 'admin', 100).subscribe(() => {
+  updateUser() {
+    this.adminService.updateUser(this.selectedUser.user_id, this.selectedUser.username, this.selectedUser.email, this.selectedUser.role, 0).subscribe(() => {
       this.fetchUsers();
+      this.selectedUser = null;
     });
   }
 
@@ -70,6 +76,10 @@ export class DashboardComponent implements OnInit {
     this.adminService.deleteUser(userId).subscribe(() => {
       this.fetchUsers();
     });
+  }
+
+  populateUserForm(user: any) {
+    this.selectedUser = { ...user };
   }
 
   // Item Management Functions
@@ -86,9 +96,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  updateItem(itemId: number) {
-    this.adminService.updateItem(itemId, 'updateditem', 'updated description', 'type').subscribe(() => {
+  updateItem() {
+    this.adminService.updateItem(this.selectedItem.item_id, this.selectedItem.item_name, this.selectedItem.description, this.selectedItem.item_type).subscribe(() => {
       this.fetchItems();
+      this.selectedItem = null;
     });
   }
 
@@ -96,6 +107,10 @@ export class DashboardComponent implements OnInit {
     this.adminService.deleteItem(itemId).subscribe(() => {
       this.fetchItems();
     });
+  }
+
+  populateItemForm(item: any) {
+    this.selectedItem = { ...item };
   }
 
   // Pet Management Functions
@@ -112,9 +127,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  updatePet(petId: number) {
-    this.adminService.updatePet(petId, 'updatedpet', 'updated description', 'type').subscribe(() => {
+  updatePet() {
+    this.adminService.updatePet(this.selectedPet.pet_id, this.selectedPet.pet_name, this.selectedPet.description, this.selectedPet.pet_type).subscribe(() => {
       this.fetchPets();
+      this.selectedPet = null;
     });
   }
 
@@ -122,6 +138,10 @@ export class DashboardComponent implements OnInit {
     this.adminService.deletePet(petId).subscribe(() => {
       this.fetchPets();
     });
+  }
+
+  populatePetForm(pet: any) {
+    this.selectedPet = { ...pet };
   }
 
   // Storage Item Management Functions
@@ -138,9 +158,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  updateStorageItem(storageId: number, userId: number, itemId: number, quantity: number) {
-    this.adminService.updateStorageItem(storageId, userId, itemId, quantity).subscribe(() => {
+  updateStorageItem() {
+    this.adminService.updateStorageItem(this.selectedStorageItem.storage_id, this.selectedStorageItem.user_id, this.selectedStorageItem.item_id, this.selectedStorageItem.quantity).subscribe(() => {
       this.fetchStorageItems();
+      this.selectedStorageItem = null;
     });
   }
 
@@ -148,5 +169,9 @@ export class DashboardComponent implements OnInit {
     this.adminService.deleteItemFromStorage(storageId, userId, itemId).subscribe(() => {
       this.fetchStorageItems();
     });
+  }
+
+  populateStorageForm(storage: any) {
+    this.selectedStorageItem = { ...storage };
   }
 }

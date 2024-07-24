@@ -1,8 +1,13 @@
 const pool = require('../config/database');
 
 const getAllStorage = async () => {
+  try {
   const result = await pool.query('SELECT * FROM user_storage');
   return result.rows;
+} catch (error) {
+  console.error('Error getting all Storage:', error);
+  throw error;
+}
 };
 
 const createStorageItem = async (userId, itemId, quantity) => {
@@ -14,12 +19,18 @@ const createStorageItem = async (userId, itemId, quantity) => {
 };
 
 const updateStorageItem = async (storageId, userId, itemId, quantity) => {
-    const result = await pool.query(
-        'UPDATE user_storage SET quantity = $4 WHERE storage_id = $1 AND user_id = $2 AND item_id = $3 RETURNING *',
-        [storageId, userId, itemId, quantity]
-    );
-    return result.rows[0];
+  try {
+      const result = await pool.query(
+          'UPDATE user_storage SET item_id = $1, user_id = $2, quantity = $3 WHERE storage_id = $4 RETURNING *',
+          [itemId, userId, quantity, storageId]
+      );
+      return result.rows[0];
+  } catch (error) {
+      console.error(error);
+      throw new Error('Error updating storage item');
+  }
 };
+
 
 const deleteStorageItem = async (storageId, userId, itemId) => {
     const result = await pool.query(

@@ -332,7 +332,7 @@ const updateUserPet = async (req, res) => {
     const { userPetId, petId, petName, hungerLevel } = req.body;
 
     try {
-        const updatedPet = await UserPetsModel.updateUserPet(userPetId, petId, petName, hungerLevel);
+        const updatedPet = await UserPetsModel.createUserPet(userPetId, petId, petName, hungerLevel);
         if (!updatedPet) {
             return res.status(404).json({ message: 'Pet not found' });
         }
@@ -365,24 +365,25 @@ const getTimeByLanguageController = async (req, res) => {
     }
   };
 
-const randomizePet = async (req, res) => {
+  const randomizePet = async (req, res) => {
     const { uid } = req.body;
-  
+
     try {
-      const pets = PetModel.getAllPets();
-      if (pets.length === 0) {
-        return res.status(400).json({ error: 'No pets available' });
-      } 
-      // Select a random pet
-      const randomPet = pets[Math.floor(Math.random() * pets.length)];
-      const newuserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name);
-      res.status(200).json(newuserPet);
+        const pets = await PetModel.getAllPets(); // เพิ่ม await ที่นี่
+        if (pets.length === 0) {
+            return res.status(400).json({ error: 'No pets available' });
+        }
+        // Select a random pet
+        const randomPet = pets[Math.floor(Math.random() * pets.length)];
+        const newuserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name);
+        res.status(200).json(newuserPet);
 
     } catch (error) {
-      console.error('Error randomizing pet:', error.message);
-      res.status(500).json({ error: error.message });
+        console.error('Error randomizing pet:', error.message);
+        res.status(500).json({ error: error.message });
     }
 };
+  
   
 const feedPet = async (req, res) => {
     const { uid, petId, foodValue} = req.body;

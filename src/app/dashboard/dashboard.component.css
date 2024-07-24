@@ -1,0 +1,69 @@
+.dashboard-container {
+    font-family: 'Poppins', sans-serif;
+}
+
+.sidebar {
+    background-color: #3E3E3E; /* สีดำเข้ม */
+}
+
+.sidebar-item {
+    background-color: #386B73; /* สีเขียวเข้ม */
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    color: #fff;
+}
+
+.sidebar-item:hover {
+    background-color: #2E565C; /* สีเขียวเข้มขึ้น */
+}
+
+.main-content {
+    background-color: #ffffff; /* สีขาว */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.table-auto th, .table-auto td {
+    padding: 8px 12px;
+}
+
+.table-auto thead {
+    background-color: #D4D4D4; /* สีเทาอ่อน */
+}
+
+.btn-primary {
+    background-color: #34515E; /* สีฟ้าเข้ม */
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #273A46; /* สีฟ้าเข้มขึ้น */
+}
+
+.btn-secondary {
+    background-color: #D4D4D4; /* สีเทาอ่อน */
+    color: #3E3E3E; /* สีดำเข้ม */
+}
+
+.btn-secondary:hover {
+    background-color: #B0B0B0; /* สีเทาเข้มขึ้น */
+}
+
+.btn-danger {
+    background-color: #e53e3e; /* สีแดง */
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #c53030; /* สีแดงเข้มขึ้น */
+}
+
+.form-input {
+    background-color: #edf2f7; /* สีเทาอ่อน */
+    border: 1px solid #cbd5e0; /* สีเทาอ่อน */
+    padding: 8px;
+    border-radius: 4px;
+    width: 100%;
+}

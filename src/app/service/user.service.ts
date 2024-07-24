@@ -19,7 +19,7 @@ export class UserService {
   }
 
   // Method to randomize a pet
-  randomizePet(uid: string){
+  randomizePet(uid: string) {
     return this.http.post(`${this.UrlApi}/randomize-pet`, { uid });
   }
 }
