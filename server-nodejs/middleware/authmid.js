@@ -36,20 +36,4 @@ const checkIsadmin = async (req, res, next) => {
   }
 }
 
-const refreshToken = (req, res, next) => {
-  const refreshToken = req.body.refreshToken;
-  if (!refreshToken) {
-    return res.sendStatus(401);
-  }
-
-  jwt.verify(refreshToken, secret.RefreshToken, (err, decoded) => {
-    if (err) {
-      return res.sendStatus(403);
-    }
-    console.log('Access token is expired');
-    const accessToken = jwt.sign({ username: decoded.username, userId: decoded.userId, role: decoded.role }, secret.Accesstoken, { expiresIn: '5m' });
-    res.json({ accessToken });
-  });
-};
-
-module.exports = { AuthToken, checkIsadmin ,refreshToken };
+module.exports = { AuthToken, checkIsadmin };

@@ -8,7 +8,7 @@ import { jwtDecode } from "jwt-decode";
   providedIn: 'root'
 })
 export class AuthService {
-  private UrlApi = environments.apiUrl; //connect data api from server node
+  private UrlApi = environments.apiAuthUrl; //connect data api from server node
   
   constructor(private http:HttpClient,private cookieService:CookieService) {}
 

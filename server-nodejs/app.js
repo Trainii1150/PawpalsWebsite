@@ -3,11 +3,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { ApolloServer, gql } = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
-const authUser = require('./routes/Userroutes');
 const { pool } = require('./config/database');
 const { AuthToken, refreshToken } = require('./middleware/authmid');
 const TokenRoutes = require('./routes/TokenRoutes');
+const UserRoutes = require('./routes/Userroutes');
 const adminRoutes = require('./routes/Adminroutes');
+const AuthRoutes = require('./routes/AuthRoutes');
 const UserController = require('./controller/UserController');
 const UserModel = require('./model/UserModel');
 const StoreModel = require('./model/StoreModel');
@@ -18,8 +19,9 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/api/user', TokenRoutes);
-app.use('/api/user', authUser);
+app.use('/api/auth', AuthRoutes);
+app.use('/api/user', UserRoutes);
+app.use('/api/admin', adminRoutes);
 
 const typeDefs = gql`
   type TimeByLanguage {
@@ -158,7 +160,6 @@ async function startServer() {
   });
 }
 
-app.use('/api/admin', adminRoutes);
 app.use('/graphql', AuthToken);
 
 startServer().catch((error) => {
