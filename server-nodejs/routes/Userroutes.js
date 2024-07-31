@@ -14,4 +14,13 @@ router.put('/update-userpets', AuthToken, UserController.updateUserPet);
 router.delete('/delete-userpets', AuthToken, UserController.deleteUserPet);
 router.post('/randomize-pet', AuthToken, UserController.randomizePet); // เพิ่ม AuthToken ที่นี่
 
+// Routes for user progress
+router.post('/update-progress', UserController.updateProgress);
+router.get('/get-progress/:userId', UserController.getProgress);
+
+
+// ดึงข้อมูลการตกแต่งของผู้ใช้
+router.get('/decorations/:userId', UserController.getUserDecorationHandler);
+router.post('/save-decorations', AuthToken, UserController.saveUserDecoration);
+
 module.exports = router;

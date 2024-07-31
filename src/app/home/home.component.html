@@ -81,8 +81,8 @@
         <div class="mt-8 w-full">
           <dd class="text-2xl font-bold dark:text-white">Food</dd>
           <progress class="progress w-full" value="{{foodStatus}}" max="100"></progress>
-          <dd class="text-2xl font-bold dark:text-white mt-4">Happyness</dd>
-          <progress class="progress w-full" value="{{happynessStatus}}" max="100"></progress>
+          <dd class="text-2xl font-bold dark:text-white mt-4">Happiness</dd>
+          <progress class="progress w-full" value="{{happinessStatus}}" max="100"></progress>
         </div>
       </div>
 
@@ -92,10 +92,10 @@
           <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">Unlock New Items</h5>
           <div class="flex items-center">
             <div class="flex-1">
-              <div class="text-3xl font-bold">175/200</div>
-              <div class="text-sm text-gray-500">Steak</div>
+              <div class="text-3xl font-bold">{{progress}}</div>
+              <div class="text-sm text-gray-500">{{progress_item_path}}</div>
             </div>
-            <img class="w-16 h-16 object-contain" src="./assets/foods/96_steak_dish.png" alt="Salad image" />
+            <img class="w-16 h-16 object-contain" src={{progress_item_path}} alt="food image" />
           </div>
         </div>
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
@@ -150,6 +150,15 @@
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               <button (click)="toggleActivity()" class="font-bold text-white">Activities</button>
+            </a>
+          </li>
+          <li>
+            <a>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <button (click)="toggleDecoration()" class="font-bold text-white">Decoration</button>
             </a>
           </li>
         </ul>
@@ -219,11 +228,59 @@
     </table>
   </div>
 
-  </div>  <div class="mt-8 flex justify-end">
+  </div>  
+  <div class="mt-8 flex justify-end">
     <button class="inline-flex items-center justify-center rounded-xl bg-green-100 py-3 px-6 font-dm text-base font-bold text-white shadow-xl shadow-green-400/75 transition-transform duration-200 ease-in-out hover:scale-[1.02]" (click)="logout()">
       Logout
     </button>
 </div>
+
+<!-- Decoration -->
+<div *ngIf="showDecoration" class="bg-white shadow rounded-2xl mt-8 p-4">
+  <div class="decoration-menu grid grid-cols-3 gap-4">
+    <!-- Menu buttons -->
+    <div class="col-span-1 flex flex-col space-y-2">
+      <button class="btn btn-warning w-full" (click)="selectedMenu = 'pet'">Change Pet</button>
+      <button class="btn btn-warning w-full" (click)="selectedMenu = 'background'">Change Background</button>
+      <button class="btn btn-success w-full" (click)="saveDecoration()">Save Decoration</button>
+    </div>
+
+    <!-- List and Preview -->
+    <div class="col-span-2 grid grid-cols-3 gap-4">
+      <!-- List of pets or backgrounds -->
+      <div class="col-span-1 bg-yellow-100 p-2 rounded-md">
+        <h3 class="font-bold text-lg">{{ selectedMenu === 'pet' ? 'Pet List' : 'Background List' }}</h3>
+        <div class="list-container max-h-64 overflow-y-auto">
+          <div *ngIf="selectedMenu === 'pet'">
+            <div *ngFor="let pet of pets" (click)="selectedPet = pet" [class.selected]="selectedPet === pet" class="p-2 mb-1 bg-white rounded-md cursor-pointer">
+              {{ pet.pet_name }}
+            </div>
+          </div>
+          <div *ngIf="selectedMenu === 'background'">
+            <div *ngFor="let background of backgrounds" (click)="selectedBackground = background" [class.selected]="selectedBackground === background" class="p-2 mb-1 bg-white rounded-md cursor-pointer">
+              {{ background.item_name }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="col-span-2 bg-gray-100 p-4 rounded-md">
+        <h3 class="font-bold text-lg mb-2">Preview</h3>
+        <div class="preview-container relative">
+          <div class="background-container" *ngIf="selectedBackground">
+            <img [src]="selectedBackground?.path" class="background-image">
+          </div>
+          <img [src]="selectedPet?.path" class="pet-image" *ngIf="selectedPet">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 
 </body>
 

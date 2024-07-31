@@ -3,6 +3,7 @@ const CoinsModel = require('../model/CoinsModel');
 const PetModel = require('../model/PetModel');
 const UserPetsModel = require('../model/userPetsModel');
 const ItemStorageModel = require('../model/ItemstorageModel');
+const DecorationModel = require('../model/DecorationModel');
 const jwt = require("jsonwebtoken");
 
 const tokenExtensionsGenerate = (req, res) => {
@@ -15,6 +16,7 @@ const tokenExtensionsGenerate = (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 const buyItem = async (req, res) => {
     const { uid, item_id } = req.body;
@@ -154,8 +156,74 @@ const feedPet = async (req, res) => {
       res.status(500).json({ error: 'An error occurred while feeding the pet' });
     }
 };
-  
+
+const updateProgress = async (req, res) => {
+  const { userId, itemId, progress } = req.body;
+
+  try {
+      await RewardProgressModel.createOrUpdateProgress(userId, itemId, progress);
+      res.status(200).json({ message: 'Progress updated successfully' });
+  } catch (error) {
+      console.error('Error updating progress:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
+
+const getProgress = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+      const progress = await RewardProgressModel.getProgressByUser(userId);
+      res.status(200).json(progress);
+  } catch (error) {
+      console.error('Error getting progress:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
+
+const getUserDecorationHandler = async (req, res) => {
+  try {
+    const userId = req.params.userId; // ใช้ req.params.userId แทน req.user.id ถ้ามีการส่ง userId ผ่าน URL
+    const decoration = await DecorationModel.getUserDecoration(userId);
+    if (decoration) {
+      res.json(decoration);
+    } else {
+      res.status(404).json({ error: 'User decoration not found' });
+    }
+  } catch (error) {
+    console.error('Error getting user decoration:', error);
+    res.status(500).json({ error: 'Failed to get user decoration' });
+  }
+};
+
+const saveUserDecoration = async (req, res) => {
+  const { userId, decoration } = req.body;
+
+  if (!userId || !decoration) {
+    return res.status(400).json({ success: false, message: 'User ID and decoration data are required' });
+  }
+
+  try {
+    let existingDecoration = await DecorationModel.getUserDecoration(userId);
+    if (existingDecoration) {
+      await DecorationModel.updateUserDecoration(userId, decoration);
+    } else {
+      await DecorationModel.createUserDecoration(userId, decoration);
+    }
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error saving decoration:', error);
+    res.status(500).json({ success: false, message: 'Failed to save decoration' });
+  }
+};
+
+
+
+
+
 module.exports = {
+    updateProgress,
+    getProgress,
     tokenExtensionsGenerate,
     buyItem,
     deleteItemfromStorage,
@@ -163,6 +231,8 @@ module.exports = {
     updateUserPet,
     deleteUserPet,
     getTimeByLanguageController,
+    getUserDecorationHandler,
+    saveUserDecoration,
     feedPet,
     randomizePet,
 };

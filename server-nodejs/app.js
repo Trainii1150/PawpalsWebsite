@@ -5,13 +5,14 @@ const { ApolloServer, gql } = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
 const { pool } = require('./config/database');
 const { AuthToken, refreshToken } = require('./middleware/authmid');
-const TokenRoutes = require('./routes/TokenRoutes');
 const UserRoutes = require('./routes/Userroutes');
 const adminRoutes = require('./routes/Adminroutes');
 const AuthRoutes = require('./routes/AuthRoutes');
 const UserController = require('./controller/UserController');
 const UserModel = require('./model/UserModel');
 const StoreModel = require('./model/StoreModel');
+const RewardProgressModel = require('./model/rewardProgressModel');
+const UserDecorationModel = require('./model/DecorationModel');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -36,6 +37,7 @@ const typeDefs = gql`
     time: Float
     Timestamp: String
   }
+
   type UserStorageItem {
     storage_id: Int
     item_id: Int
@@ -57,14 +59,44 @@ const typeDefs = gql`
     food_value: Int
     created_at: String
   }
+
   type Pet {
     pet_id: Int
     pet_name: String
     hunger_level: Int
     last_fed: String
+    path: String
   }
+
   type UserCoins {
     coins: Float
+  }
+
+  type Progress {
+    user_id: String
+    item_id: Int
+    progress: Float
+    item_path: String
+  }
+
+  type Background {
+    item_id: Int
+    item_name: String
+    path: String
+  }
+
+  type UserDecorationItems {
+    pets: [Pet]
+    backgrounds: [Background]
+  }
+
+  input DecorationInput {
+    pet_id: Int
+    background: String
+  }
+
+  type MutationResponse {
+    success: Boolean!
   }
 
   type Query {
@@ -75,6 +107,13 @@ const typeDefs = gql`
     userStorageItems(uid: ID!): [UserStorageItem]
     timeByLanguage(uid: String!): [TimeByLanguage]
     userPet(uid: String!): Pet
+    getProgress(userId: ID!): [Progress]
+    getUserDecorationItems(uid: ID!): UserDecorationItems
+  }
+
+  type Mutation {
+    updateProgress(userId: ID!, itemId: Int!, progress: Float!): Progress
+    saveUserDecoration(userId: ID!, decoration: DecorationInput!): MutationResponse
   }
 `;
 
@@ -99,59 +138,41 @@ const resolvers = {
       return UserModel.getTimeByLanguage(uid);
     },
     userPet: async (_, { uid }) => {
-      return UserModel.getUserPet(uid);
-    }
+      return UserModel.getUserPets(uid);
+    },
+    getProgress: async (_, { userId }) => {
+      return RewardProgressModel.getProgressByUser(userId);
+    },
+    getUserDecorationItems: async (_, { uid }) => {
+      const pets = await UserModel.getUserPets(uid);
+      const backgrounds = await UserModel.getUserBackgrounds(uid);
+      return {
+        pets,
+        backgrounds
+      };
+    },
   },
-};
-
-const SECRET_KEY = process.env.Accesstoken;
-
-app.post('/generate-token', (req, res) => {
-  const user = req.body;
-  const payload = {
-    username: user.username,
-    exp: Math.floor(Date.now() / 1000) + (5 * 60)
-  };
-
-  const token = jwt.sign(payload, SECRET_KEY, { algorithm: 'HS256' });
-
-  res.json({ token });
-});
-
-app.post('/save-token', (req, res) => {
-  const { token } = req.body;
-  const query = 'INSERT INTO token_used (extensions_token) VALUES ($1)';
-
-  pool.query(query, [token], (err, result) => {
-    if (err) {
-      console.error('Error saving token:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    } else {
-      console.log('Token saved successfully:', token);
-      res.status(200).json({ message: 'Token saved successfully' });
+  
+  Mutation: {
+    updateProgress: async (_, { userId, itemId, progress }) => {
+      const updatedProgress = await RewardProgressModel.createOrUpdateProgress(userId, itemId, progress);
+      return updatedProgress;
+    },
+    saveUserDecoration: async (_, { userId, decoration }) => {
+      let existingDecoration = await pool.query('SELECT * FROM user_decorations WHERE user_id = $1', [userId]);
+      if (existingDecoration.rows.length > 0) {
+        await UserDecorationModel.updateUserDecoration(userId, decoration);
+      } else {
+        await UserDecorationModel.createUserDecoration(userId, decoration);
+      }
+      return { success: true };
     }
-  });
-});
-app.post('/api/feed-pet', AuthToken, UserController.feedPet);
-
-app.post('/api/randomize-pet', AuthToken, UserController.randomizePet);
-
-app.post('/api/update-user-coins', AuthToken, async (req, res) => {
-  const { uid } = req.body;
-
-  try {
-    await UserModel.updateUserCoins(uid);
-    res.status(200).json({ message: 'User coins updated successfully' });
-  } catch (error) {
-    console.error('Error updating user coins:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
   }
-});
-
-app.post('/api/buy-item', AuthToken, UserController.buyItem);
+};
 
 async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });
+
   await server.start();
   server.applyMiddleware({ app });
 
@@ -159,8 +180,6 @@ async function startServer() {
     console.log(`Server is running on port ${port}`);
   });
 }
-
-app.use('/graphql', AuthToken);
 
 startServer().catch((error) => {
   console.error('Error starting the server:', error);

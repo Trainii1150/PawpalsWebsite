@@ -84,9 +84,9 @@ const deleteUserInfo  = async (userid) => {
     }
 };
 
-const updateUserVerification = async (userid) => {
+const updateUserVerification = async (email) => {
     try{
-        const result = await pool.query('UPDATE user_table SET user_verify = true WHERE user_id = $1',[userid]);
+        const result = await pool.query('UPDATE user_table SET user_verify = true WHERE email = $1',[email]);
         console.log(`this account is now verified.`);
     } catch (error) {
         console.error(error);
@@ -226,6 +226,21 @@ const deductUserCoins = async (uid, amount) => {
       client.release();
     }
 };
+const getUserBackgrounds = async (uid) => {
+  try {
+    const result = await pool.query(`
+      SELECT us.storage_id, us.item_id, us.quantity, us.created_at,
+             i.item_name, i.path
+      FROM user_storage us
+      JOIN items i ON us.item_id = i.item_id
+      WHERE us.user_id = $1 AND i.item_type = 'background'
+    `, [uid]);
+    return result.rows || [];
+  } catch (error) {
+    console.error('Error getting user backgrounds:', error);
+    throw new Error('Error getting user backgrounds');
+  }
+};
 
 const getTimeByLanguage = async (uid) => {
     try {
@@ -243,35 +258,39 @@ const getTimeByLanguage = async (uid) => {
     }
 };
 
-const getUserPet = async (uid) => {
+const getUserPets = async (uid) => {
   try {
     const result = await pool.query(`
-      SELECT p.pet_id, p.pet_name, up.hunger_level, up.last_fed 
+      SELECT p.pet_id, p.pet_name, up.hunger_level, up.last_fed, p.path 
       FROM user_pets up 
       JOIN pets p ON up.pet_id = p.pet_id 
       WHERE up.user_id = $1
     `, [uid]);
 
     if (result.rows.length === 0) {
-      throw new Error('Pet not found for this user');
+      return [];
     }
 
-    const pet = result.rows[0];
-    const now = new Date();
-    const lastFed = new Date(pet.last_fed);
-    const hoursPassed = Math.floor((now - lastFed) / (1000 * 60 * 60));
-    const newHungerLevel = Math.max(pet.hunger_level - hoursPassed, 0);
+    const pets = result.rows.map(pet => {
+      const now = new Date();
+      const lastFed = new Date(pet.last_fed);
+      const hoursPassed = Math.floor((now - lastFed) / (1000 * 60 * 60));
+      const newHungerLevel = Math.max(pet.hunger_level - hoursPassed, 0);
+      return { ...pet, hunger_level: newHungerLevel };
+    });
 
-    // อัปเดต hunger_level และ last_fed ในฐานข้อมูล
-    await pool.query(`
-      UPDATE user_pets
-      SET hunger_level = $1, last_fed = $2
-      WHERE user_id = $3 AND pet_id = $4
-    `, [newHungerLevel, now, uid, pet.pet_id]);
+    // Update hunger levels in the database
+    for (const pet of pets) {
+      await pool.query(`
+        UPDATE user_pets
+        SET hunger_level = $1, last_fed = $2
+        WHERE user_id = $3 AND pet_id = $4
+      `, [pet.hunger_level, new Date(), uid, pet.pet_id]);
+    }
 
-    return { ...pet, hunger_level: newHungerLevel };
+    return pets;
   } catch (error) {
-    console.error('Error getting user pet:', error);
+    console.error('Error getting user pets:', error);
     throw error;
   }
 };
@@ -294,7 +313,8 @@ module.exports = {
     getUserCoins,
     deductUserCoins,
     getTimeByLanguage,
-    getUserPet,
-    getAllUsers
+    getUserPets,
+    getAllUsers,
+    getUserBackgrounds
 };
 

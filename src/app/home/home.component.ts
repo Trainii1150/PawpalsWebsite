@@ -1,15 +1,16 @@
-import { Component, OnInit, AfterViewInit, HostListener  } from '@angular/core';
+import { Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { AuthService } from '../service/auth.service';
 import { UserService } from '../service/user.service';
 import { Router } from '@angular/router';
-import { Apollo } from 'apollo-angular';
+import { Apollo, gql } from 'apollo-angular';
 import { CookieService } from 'ngx-cookie-service';
 import { OwlOptions } from 'ngx-owl-carousel-o';
-import gql from 'graphql-tag';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
 import moment from 'moment';
 import { HttpClient } from '@angular/common/http';
+
+
 
 @Component({
   selector: 'app-home',
@@ -18,14 +19,19 @@ import { HttpClient } from '@angular/common/http';
 })
 export class HomeComponent implements OnInit, AfterViewInit {
 
+  
+  
+
+
   showActivity = false;
   showInventory = false;
   showStore = false;
+  showDecoration = false;
   genres = ['All', 'Foods', 'Decoration'];
   selectedGenre = 'All';
   petName: String | undefined = "David";
-  foodStatus: Number | undefined ;
-  happynessStatus: Number | undefined = 40;
+  foodStatus: Number | undefined;
+  happinessStatus: Number | undefined = 40;
   todayCodeTime: Number | undefined = 0;
   monthlyCodeTime: Number | undefined = 0;
   todayTimeCompare: Number | undefined = 0;
@@ -35,13 +41,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
   userStorageItems: any[] = [];
   userCoins: Number | undefined = 0;
   timeByLanguage: any[] = [];
-
-  items = [
-    { name: 'Bread', description: 'Just ordinary bread.', image: '../assets/foods/07_bread_dish.png', genre: 'Foods', count: 10 },
-    { name: 'Burger', description: 'Burger.', image: '../assets/foods/16_burger_dish.png', genre: 'Foods', count: 5 },
-    { name: 'Burrito', description: 'Mexican time amigos.', image: '../assets/foods/18_burrito_dish.png', genre: 'Foods', count: 3 },
-    { name: 'Above the Clouds', description: 'Background for your Extenios', image: '../assets/backgrounds/sofia-ritter-day-gif.gif', genre: 'Decoration', count: 1 }
-  ];
+  pets: any[] = [];
+  backgrounds: any[] = [];
+  selectedPet: any;
+  selectedBackground: any;
+  selectedMenu: string = 'pet'; // กำหนดค่าเริ่มต้นเป็น 'pet'
 
   customOptions: OwlOptions = {
     loop: true,
@@ -59,6 +63,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
     },
     nav: true
   }
+
+  progress: any;
+  progress_item_path: any;
 
   constructor(
     private authService: AuthService,
@@ -87,23 +94,34 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.getUserStorageItems();
     this.getTimeByLanguage();
     this.getPetHungerLevel();
+    this.getUserDecorationItems();
   }
 
   toggleActivity() {
     this.showActivity = !this.showActivity;
     this.showInventory = false;
     this.showStore = false;
+    this.showDecoration = false;
   }
 
   toggleInventory() {
     this.showInventory = !this.showInventory;
     this.showActivity = false;
     this.showStore = false;
+    this.showDecoration = false;
   }
 
   toggleStore() {
     this.showStore = !this.showStore;
     this.showInventory = false;
+    this.showActivity = false;
+    this.showDecoration = false;
+  }
+
+  toggleDecoration() {
+    this.showDecoration = !this.showDecoration;
+    this.showInventory = false;
+    this.showStore = false;
     this.showActivity = false;
   }
 
@@ -144,7 +162,39 @@ export class HomeComponent implements OnInit, AfterViewInit {
       console.error('Token not found in localStorage');
     }
   }
-
+  saveDecoration(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+      const decoration = {
+        pet: this.selectedPet?.path,
+        background: this.selectedBackground?.path,
+      };
+      this.userService.saveUserDecoration(uid, decoration).subscribe(
+        (response: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Decoration saved successfully!',
+          });
+        },
+        (error: any) => {
+          console.error('Error saving decoration:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to save decoration: ${error.message}`,
+          });
+        }
+      );
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'User ID not found in cookies',
+      });
+    }
+  }
+  
   getTimeByLanguage(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
@@ -402,6 +452,7 @@ getUserCoins(): void {
     });
   }
 }
+
 getUserPet(): void {
   const uid = this.cookieService.get('uid');
   if (uid) {
@@ -445,6 +496,7 @@ getUserPet(): void {
     });
   }
 }
+
 selectFoodItem(item: any) {
   const petId = 1; // ตัวอย่าง petId
   this.feedPet(petId, item.food_value, item.item_id);
@@ -520,6 +572,7 @@ getPetHungerLevel(): void {
     });
   }
 }
+
 randomizePet(): void {
   const uid = this.cookieService.get('uid');
   if (uid) {
@@ -551,11 +604,9 @@ randomizePet(): void {
   }
 }
 
-
 initializeChart(): void {
   const chartContainer = document.getElementById("donut-chart");
   if (chartContainer && typeof ApexCharts !== 'undefined') {
-    // ลบกราฟเดิมก่อนที่จะสร้างใหม่
     while (chartContainer.firstChild) {
       chartContainer.removeChild(chartContainer.firstChild);
     }
@@ -647,18 +698,61 @@ getChartOptions() {
   };
 }
 
-  selectGenre(genre: string) {
-    this.selectedGenre = genre;
-  }
+selectItem(item: any) {
+  console.log('Selected item:', item);
+}
 
-  get filteredItems() {
-    if (this.selectedGenre === 'All') {
-      return this.items;
-    }
-    return this.items.filter(item => item.genre === this.selectedGenre);
+getUserDecorationItems(): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.apollo.watchQuery({
+      query: gql`
+        query GetUserDecorationItems($uid: ID!) {
+          getUserDecorationItems(uid: $uid) {
+            pets {
+              pet_id
+              pet_name
+              path
+            }
+            backgrounds {
+              item_id
+              item_name
+              path
+            }
+          }
+        }
+      `,
+      variables: {
+        uid: uid
+      }
+    }).valueChanges.subscribe(
+      (response: any) => {
+        this.pets = response.data.getUserDecorationItems.pets;
+        this.backgrounds = response.data.getUserDecorationItems.backgrounds;
+      },
+      (error: any) => {
+        console.error('Error getting decoration items:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Failed to get decoration items: ${error.message}`,
+        });
+      }
+    );
+  } else {
+    console.error('User ID not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID not found in cookies',
+    });
   }
+}
 
-  selectItem(item: any) {
-    console.log('Selected item:', item);
-  }
+
+
+
+
+  
+
 }

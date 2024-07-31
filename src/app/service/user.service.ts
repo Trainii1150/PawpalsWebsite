@@ -22,4 +22,13 @@ export class UserService {
   randomizePet(uid: string) {
     return this.http.post(`${this.UrlApi}/randomize-pet`, { uid });
   }
+
+  saveUserDecoration(uid: string, decoration: { pet: string | undefined; background: string | undefined }) {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+    return this.http.post(`${this.UrlApi}/save-decorations`, { userId: uid, decoration }, { headers });
+  }
+  
+  
 }

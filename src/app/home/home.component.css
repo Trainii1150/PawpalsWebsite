@@ -1,262 +1,264 @@
 .inventory-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f5f5f5;
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  .inventory-header {
-    background-color: #1ABC9C;
-    padding: 10px;
-    border-radius: 10px;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .inventory-header h2 {
-    color: #fff;
-    margin: 0;
-  }
-  
-  .genres {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  .genres button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    background-color: #007acc;
-    color: white;
-    font-size: 1em;
-  }
-  
-  .genres button.active {
-    background-color: #005f99;
-  }
-  
-  .inventory-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
-  .inventory-slot {
-    position: relative;
-    width: 100px; /* ขยายขนาดช่องไอเท็ม */
-    height: 100px; /* ขยายขนาดช่องไอเท็ม */
-    background-color: #d1d5db;
-    border: 1px solid #6b7280;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .inventory-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    min-width: 120px;
-  }
-  
-  .inventory-item img {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .inventory-item span {
-    margin-top: 10px;
-  }
-  
-  .pet-details {
-    background-color: #F39C12;
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 20px;
-    width: 100%;
-  }
-  
-  .pet-details h3 {
-    color: #fff;
-    text-align: center;
-  }
-  
-  .pet-details img {
-    display: block;
-    margin: 0 auto;
-    width: 100px;
-    height: auto;
-  }
-  
-  .pet-status {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-  }
-  
-  .pet-item-slot {
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-  }
-  
-  .pet-item-slot img {
-    width: 30px;
-    height: 30px;
-  }
-  .pet-image-container {
-    width: 100px; /* ปรับขนาดตามที่ต้องการ */
-    height: 100px; /* ปรับขนาดตามที่ต้องการ */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f3f4f6; /* สีพื้นหลังที่ต้องการ */
-    border-radius: 50%; /* ทำให้เป็นวงกลม */
-    overflow: hidden; /* ป้องกันภาพล้นออกจากขอบ */
-  }
-  
-  .pet-image-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* ทำให้ภาพเต็มขนาดของ container */
-  }
-  
-  .pet-status-bars {
-    width: 100%;
-  }
-  
-  .status-bar {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .status-bar span {
-    width: 100px;
-    color: #fff;
-  }
-  
-  .status-bar-fill {
-    height: 20px;
-    background-color: #1ABC9C;
-    border-radius: 10px;
-  }
-  
-  .food-carousel {
-    margin-top: 20px;
-  }
-  
-  .food-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    min-width: 120px;
-  }
-  
-  .food-item img {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .food-item span {
-    margin-top: 10px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 10px;
+}
 
-  .shop-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #f1f1f1;
-    border-bottom: 1px solid #ccc;
-  }
-  
-  .coins-display {
-    background-color: #ffcc00;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  
-  .store-items-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    padding: 20px;
-  }
-  
-  .store-item {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    text-align: center;
-    width: 150px;
-  }
-  
-  .store-item img {
-    width: 100%;
-    height: auto;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 10px;
-  }
-  
-  .store-item h3 {
-    font-size: 18px;
-    margin: 10px 0;
-  }
-  
-  .store-item p {
-    font-size: 16px;
-    color: #555;
-  }
-  
-  .store-item button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .pet-display {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-  }
-  
-  .pet-display img {
-    width: 150px;
-    height: auto;
-    border-radius: 50%;
-  }
-  /* Donut Chart Specific Styles */
+.inventory-header {
+  background-color: #1ABC9C;
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.inventory-header h2 {
+  color: #fff;
+  margin: 0;
+}
+
+.genres {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.genres button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #007acc;
+  color: white;
+  font-size: 1em;
+}
+
+.genres button.active {
+  background-color: #005f99;
+}
+
+.inventory-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inventory-slot {
+  position: relative;
+  width: 100px; /* ขยายขนาดช่องไอเท็ม */
+  height: 100px; /* ขยายขนาดช่องไอเท็ม */
+  background-color: #d1d5db;
+  border: 1px solid #6b7280;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inventory-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+}
+
+.inventory-item img {
+  width: 50px;
+  height: 50px;
+}
+
+.inventory-item span {
+  margin-top: 10px;
+}
+
+.pet-details {
+  background-color: #F39C12;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.pet-details h3 {
+  color: #fff;
+  text-align: center;
+}
+
+.pet-details img {
+  display: block;
+  margin: 0 auto;
+  width: 100px;
+  height: auto;
+}
+
+.pet-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pet-item-slot {
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.pet-item-slot img {
+  width: 30px;
+  height: 30px;
+}
+
+.pet-image-container {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.pet-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pet-status-bars {
+  width: 100%;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.status-bar span {
+  width: 100px;
+  color: #fff;
+}
+
+.status-bar-fill {
+  height: 20px;
+  background-color: #1ABC9C;
+  border-radius: 10px;
+}
+
+.food-carousel {
+  margin-top: 20px;
+}
+
+.food-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+}
+
+.food-item img {
+  width: 50px;
+  height: 50px;
+}
+
+.food-item span {
+  margin-top: 10px;
+}
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f1f1f1;
+  border-bottom: 1px solid #ccc;
+}
+
+.coins-display {
+  background-color: #ffcc00;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.store-items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
+}
+
+.store-item {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  width: 150px;
+}
+
+.store-item img {
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
+.store-item h3 {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+.store-item p {
+  font-size: 16px;
+  color: #555;
+}
+
+.store-item button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pet-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.pet-display img {
+  width: 150px;
+  height: auto;
+  border-radius: 50%;
+}
+
+/* Donut Chart Specific Styles */
 #donut-chart {
   width: 100%;
-  height: 320px; /* หรือขนาดตามที่คุณต้องการ */
+  height: 320px;
 }
 
 /* Update Progress Bar Color */
@@ -268,15 +270,61 @@ progress {
   border-radius: 10px;
   background-color: #e0e0e0;
 }
+
 #donut-chart {
-  height: 320px; /* กำหนดความสูงให้กับกราฟ */
+  height: 320px;
 }
+
 progress::-webkit-progress-value {
-  background-color: #1ABC9C; /* เปลี่ยนเป็นสีเขียว */
+  background-color: #1ABC9C;
   border-radius: 10px;
 }
 
 progress::-moz-progress-bar {
-  background-color: #1ABC9C; /* เปลี่ยนเป็นสีเขียว */
+  background-color: #1ABC9C;
   border-radius: 10px;
 }
+
+.selected {
+  background-color: #ffd700;
+  font-weight: bold;
+}
+
+.preview-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.background-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.background-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* เพื่อให้ภาพพื้นหลังไม่ใหญ่กว่ากรอบ */
+  border-radius: 8px;
+}
+
+.pet-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+}
+
+.list-container {
+  max-height: 256px; /* ขนาดความสูงสูงสุดของรายการ */
+  overflow-y: auto;
+}
+
+.decoration-menu .col-span-2 {
+  min-height: 256px; /* กำหนดความสูงขั้นต่ำให้กับ preview-container */
+}
+
+
