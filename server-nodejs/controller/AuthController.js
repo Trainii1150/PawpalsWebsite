@@ -1,4 +1,5 @@
 const userModel = require('../model/UserModel');
+const { generateRandomNewUserPet } = require('../controller/UserController'); // Import generateRandomNewUserPet from UserController
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
@@ -166,7 +167,8 @@ const verifyEmail = async (req, res) => {
             return res.status(403).send("Email is already verified.");
         }
         await userModel.updateUserVerification(email);
-        res.status(201).json({ message: 'Email verified successfully' });
+        const newPet = await generateRandomNewUserPet(user.user_id);
+        res.status(201).json({ message: 'Email verified successfully', giftedPet: newPet });
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
             const { email } = jwt.decode(token);

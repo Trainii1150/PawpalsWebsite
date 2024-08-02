@@ -16,11 +16,14 @@ export class VerifyEmailComponent implements OnInit {
       const email :string = params['email'];
       if(verifytoken){
         this.authService.verifyEmail(verifytoken).subscribe(
-          (response) =>{
+          (response : any) =>{
+            const giftedPet  = response.giftedPet;
             Swal.fire({
               icon: 'success',
-              title: 'Email Verified',
+              title: 'Email Verified successfully',
               text: 'Your email has been verified successfully.',
+              html: `You have received a new pet: ${giftedPet.pet_name}! <br>
+              <img src="${giftedPet.path}" alt="${giftedPet.pet_name}" style="height: 200px; width: 200px; margin: 0 auto;">`,
               confirmButtonText: 'Ok',
             }).then(() => {
               // Redirect to login page

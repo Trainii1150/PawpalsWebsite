@@ -1,10 +1,10 @@
 const pool = require('../config/database');
 
-const createUserPet = async (userId, petId, petName) => {
+const createUserPet = async (userId, petId, petName, path) => {
     try {
         const result = await pool.query(
-            'INSERT INTO user_pets (user_id, pet_id, pet_name, hunger_level, last_fed) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [userId, petId, petName, 100, new Date()]
+            'INSERT INTO user_pets (user_id, pet_id, pet_name, hunger_level, last_fed, path) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [userId, petId, petName, 100, new Date(), path]
         );
         return result.rows[0];
     } catch (error) {

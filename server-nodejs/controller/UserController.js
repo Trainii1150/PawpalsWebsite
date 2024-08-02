@@ -108,7 +108,26 @@ const getTimeByLanguageController = async (req, res) => {
     }
 };
 
-  const randomizePet = async (req, res) => {
+// Generate a random new user pet for the first time
+const generateRandomNewUserPet = async (uid) => {
+  try {
+      const pets = await PetModel.getAllPets();
+      if (pets.length === 0) {
+          throw new Error('No pets available'); // Handle case where no pets are available
+      }
+      // Select a random pet from the available pets
+      const randomPet = pets[Math.floor(Math.random() * pets.length)];
+      
+      // Create a new user pet in the database
+      const newUserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name, randomPet.path);
+      return newUserPet; // Return the newly created user pet
+  } catch (error) {
+      console.error('Error generating new user pet:', error.message);
+      throw error;
+  }
+};
+
+const randomizePet = async (req, res) => {
     const { uid } = req.body;
 
     try {
@@ -118,7 +137,7 @@ const getTimeByLanguageController = async (req, res) => {
         }
         // Select a random pet
         const randomPet = pets[Math.floor(Math.random() * pets.length)];
-        const newuserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name);
+        const newuserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name, randomPet.path);
         res.status(200).json(newuserPet);
 
     } catch (error) {
@@ -235,4 +254,5 @@ module.exports = {
     saveUserDecoration,
     feedPet,
     randomizePet,
+    generateRandomNewUserPet,
 };
