@@ -24,7 +24,10 @@
         </div>
         <div *ngIf="currentSection === 'manage-users'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Users</h2>
-            <button class="btn btn-primary mb-4" (click)="fetchUsers()">Fetch Users</button>
+            <div class="header flex justify-between items-center mb-4">
+                <button class="btn btn-primary" (click)="fetchUsers()">Create Users</button>
+                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Users</button>
+            </div>
             <table class="table-auto w-full bg-white border border-gray-200">
                 <thead>
                     <tr class="bg-gray-100">
@@ -48,7 +51,7 @@
                     </tr>
                 </tbody>
             </table>
-            <div *ngIf="selectedUser" class="mt-4">
+            <div *ngIf="showForm" class="mt-4">
                 <h3 class="text-lg font-semibold text-gray-800">Update User</h3>
                 <form (submit)="updateUser()">
                     <input type="hidden" [(ngModel)]="selectedUser.user_id" name="userId">
@@ -62,7 +65,10 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700">Role</label>
-                        <input type="text" [(ngModel)]="selectedUser.role" name="role" class="form-input mt-1 block w-full border-gray-300">
+                        <select [(ngModel)]="selectedUser.role" name="role" class="form-select mt-1 block w-full border-gray-300">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Update User</button>
                 </form>
@@ -71,7 +77,10 @@
 
         <div *ngIf="currentSection === 'manage-items'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Items</h2>
-            <button class="btn btn-primary mb-4" (click)="fetchItems()">Fetch Items</button>
+            <div class="header flex justify-between items-center mb-4">
+                <button class="btn btn-primary" (click)="fetchUsers()">Create Items</button>
+                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Items</button>
+            </div>
             <table class="table-auto w-full bg-white border border-gray-200">
                 <thead>
                     <tr class="bg-gray-100">
@@ -118,7 +127,10 @@
 
         <div *ngIf="currentSection === 'manage-pets'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Pets</h2>
-            <button class="btn btn-primary mb-4" (click)="fetchPets()">Fetch Pets</button>
+            <div class="header flex justify-between items-center mb-4">
+                <button class="btn btn-primary" (click)="fetchUsers()">Create Pets</button>
+                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Pets</button>
+            </div>
             <table class="table-auto w-full bg-white border border-gray-200">
                 <thead>
                     <tr class="bg-gray-100">
@@ -165,7 +177,10 @@
 
         <div *ngIf="currentSection === 'manage-storage'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Storage</h2>
-            <button class="btn btn-primary mb-4" (click)="fetchStorageItems()">Fetch Storage Items</button>
+            <div class="header flex justify-between items-center mb-4">
+                <button class="btn btn-primary" (click)="fetchUsers()">Create Storage Items</button>
+                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Storage Items</button>
+            </div>
             <table class="table-auto w-full bg-white border border-gray-200">
                 <thead>
                     <tr class="bg-gray-100">

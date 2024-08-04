@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+import { AdminLoginComponent } from './admin-login/admin-login.component';
 import { HomeComponent } from './home/home.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { VerifyEmailComponent } from './verify-email/verify-email.component';
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'forget-password', component:ForgetpasswordComponent,canActivate:[UnauthGuard]},
   { path: 'reset-password', component: ResetpasswordComponent},
   { path: 'verify-email', component: VerifyEmailComponent},
+  { path: 'admin/login', component: AdminLoginComponent ,canActivate:[UnauthGuard]},
   { path: 'admin/dashboard', component: DashboardComponent ,canActivate:[AuthGuard,AdminRoleGuard]},
   { path: '', component:HomeComponent,canActivate:[AuthGuard]},
   { path: '**', component:NotFoundComponent}// Wildcard route for 404 page

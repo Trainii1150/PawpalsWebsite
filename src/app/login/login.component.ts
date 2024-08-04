@@ -28,11 +28,9 @@ export class LoginComponent {
     //console.log(this.loginForm.value);
     if(this.loginForm.value){
       const {email, password} = this.loginForm.value;
-      console.log(email, password);
       this.authService.login(email,password).subscribe(
         (response) => {
             // Handle successful registration
-            console.log(response);
             this.showLoginSuccess(response);          
         },
         (error) => {
@@ -68,7 +66,7 @@ export class LoginComponent {
     }).then((result)=>{
       if(result.isConfirmed){
         console.log(req)
-        this.authService.setLocalStorage(req);
+        this.authService.setCookies(req);
         this.router.navigate(['/']);
       }
     });

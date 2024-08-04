@@ -1,0 +1,40 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <section class="vh-100 bg_login">
+      <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow-2-strong" style="border-radius: 1rem;">
+              <div class="card-body p-5">
+                <div class="text-center text-heading-login">
+                  <h1 class="font_logo">Paw<span class="font_logohalf">Pals</span></h1>
+                  <h3 class="mb-3 text_loginheader">Admin Login</h3> <!-- Updated header -->
+                </div>
+                <div class="form-outline mb-3">
+                  <label class="form-label" for="email">Email</label>
+                  <input type="email" id="email" class="form-control form-control-md" formControlName="email" />
+                  <div *ngIf="loginForm.get('email')?.errors && loginForm.get('email')?.touched">
+                    <div *ngIf="loginForm.get('email')?.hasError('required')" class="error-message">Email is required.</div>
+                    <div *ngIf="loginForm.get('email')?.hasError('email')" class="error-message">Please enter a valid email address.</div>
+                  </div>
+                </div>
+                <div class="form-outline mb-3">
+                  <label class="form-label" for="password">Password</label>
+                  <input type="password" id="password" class="form-control form-control-md" formControlName="password" />
+                  <div *ngIf="loginForm.get('password')?.errors && loginForm.get('password')?.touched">
+                    <div *ngIf="loginForm.get('password')?.hasError('required')" class="error-message">Password is required.</div>
+                  </div>
+                </div>
+  
+                <div class="text-center mb-2">
+                  <button class="btn btn_login btn-lg btn-block" type="submit">Sign In</button>
+                </div>
+  
+                <p class="text-center">Don't have an account? <a [routerLink]="['/register']">Sign Up</a></p> <!-- Optionally keep this for regular users -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </form>
+  

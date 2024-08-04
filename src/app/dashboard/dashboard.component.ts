@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
   selectedItem: any = null;
   selectedPet: any = null;
   selectedStorageItem: any = null;
+  showForm: boolean = false;
 
   constructor(private adminService: AdminService, private router: Router) {} // Inject Router
 
@@ -79,7 +80,15 @@ export class DashboardComponent implements OnInit {
   }
 
   populateUserForm(user: any) {
-    this.selectedUser = { ...user };
+    console.log(this.showForm)
+    if (this.selectedUser && this.selectedUser.user_id === user.user_id) {
+      // If the same user is clicked again, toggle the form
+      this.showForm = !this.showForm;
+    } else {
+      // If a different user is clicked, show the form
+      this.selectedUser = { ...user };
+      this.showForm = true;
+    }
   }
 
   // Item Management Functions

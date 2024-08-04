@@ -39,8 +39,8 @@ const getUserData = async (email) => {
 };
 const getResetpassemail = async (email) => {
     try {
-        const user = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
-        return user.rows[0];
+        const result = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
+        return result.rows[0];
     } catch (error) {
         console.error(error);
         throw new Error('Error getting user by email');
@@ -68,7 +68,8 @@ const findRoleById = async (uid) => {
 
 const updateUserInfo = async (userid, newUsername, newPassword, newRole) => {
     try {
-      const result = await pool.query('UPDATE user_table SET username = $2 , password = $3 , role = $4 WHERE userid = $1', [newUsername, newPassword, newRole, userid]);
+      console.log(userid)
+      const result = await pool.query('UPDATE user_table SET username = $1 , password = $2 , role = $3 WHERE user_id = $4', [newUsername, newPassword, newRole, userid]);
       return result.rows[0];
     } catch (error) {
       console.error(error);

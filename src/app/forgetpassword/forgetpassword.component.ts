@@ -21,8 +21,8 @@ export class ForgetpasswordComponent {
 
   onSubmit():void {
     if(this.forgotPasswordForm.valid){
-      console.log(this.forgotPasswordForm.value);
-      this.authService.forgetpassword(this.forgotPasswordForm.value)
+      const { email } = this.forgotPasswordForm.value;
+      this.authService.forgetpassword(email)
         .subscribe(
           () =>{
             Swal.fire({

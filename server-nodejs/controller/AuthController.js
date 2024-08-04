@@ -62,7 +62,7 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        if (!user.user_verify) {
+        if (user.user_verify === false) {
             return res.status(400).json({ error: 'Email not verified. Please resend verification email.' });
         }
 
@@ -86,7 +86,7 @@ const checkEmail = async (req, res) => {
 };
 
 const resetpasswordemail = async (req, res) => {
-    const { email } = req.body;
+    const {email} = req.body;
     try {
         const user = await userModel.getResetpassemail(email);
         if (!user) {
@@ -94,7 +94,7 @@ const resetpasswordemail = async (req, res) => {
         }
         const token = tokenresetpassEmailGenerate(email);
         await sendresetEmail(email, token);
-        res.json({ message: 'Verification email resent successfully' });
+        res.status(200).json({ message: 'Verification email resent successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -203,6 +203,7 @@ const sendVerifyEmail = async (req, res) => {
 };
 
 const sendresetEmail = async (email, token) => {
+    console.log(email, token);
     try {
         const transporter = nodemailer.createTransport({
             host: 'smtp.office365.com',

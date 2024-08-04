@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { environments } from '../environments/environments';
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from "jwt-decode";
@@ -10,7 +11,7 @@ import { jwtDecode } from "jwt-decode";
 export class AuthService {
   private UrlApi = environments.apiAuthUrl; //connect data api from server node
   
-  constructor(private http:HttpClient,private cookieService:CookieService) {}
+  constructor(private http:HttpClient,private cookieService:CookieService,private router: Router) {}
 
   register(username: string,email: string ,password: string) {
     return this.http.post(`${this.UrlApi}/register`, { username,email, password });
@@ -48,12 +49,13 @@ export class AuthService {
     return !!this.cookieService.get('token');
   };
 
-  setLocalStorage(resObject:any){
+  setCookies(resObject:any){
     const tokenPayload: any = jwtDecode(resObject.accessToken);
     const exp = tokenPayload.exp*1000;
-    this.cookieService.set('token',resObject.accessToken,exp);
-    this.cookieService.set('refresh_token', resObject.refreshToken);
-    this.cookieService.set('uid',resObject.uid);
+    console.log(exp);
+    this.cookieService.set('token',resObject.accessToken,exp, '/');
+    this.cookieService.set('refresh_token', resObject.refreshToken, exp, '/');
+    this.cookieService.set('uid', resObject.uid, exp, '/');
   };
 
   getRole(){
@@ -74,7 +76,8 @@ export class AuthService {
   }
   
   logout(){
-    this.cookieService.deleteAll();
+    this.cookieService.deleteAll('/');
+    this.router.navigate(['/login']);
   }
 
   checkEmailNotTaken(email: string) {

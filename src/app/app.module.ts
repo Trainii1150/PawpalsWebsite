@@ -18,6 +18,7 @@ import { ResetpasswordComponent } from './resetpassword/resetpassword.component'
 import { NotFoundComponent } from './not-found/not-found.component';
 import { CookieService } from 'ngx-cookie-service';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { AdminLoginComponent } from './admin-login/admin-login.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
     ResetpasswordComponent,
     NotFoundComponent,
     DashboardComponent,
+    AdminLoginComponent,
   ],
   imports: [
     BrowserModule,
