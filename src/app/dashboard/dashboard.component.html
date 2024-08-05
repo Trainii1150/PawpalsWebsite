@@ -35,6 +35,7 @@
                         <th class="px-4 py-2 text-gray-800">Username</th>
                         <th class="px-4 py-2 text-gray-800">Email</th>
                         <th class="px-4 py-2 text-gray-800">Role</th>
+                        <th class="px-4 py-2 text-gray-800">Status</th>
                         <th class="px-4 py-2 text-gray-800">Actions</th>
                     </tr>
                 </thead>
@@ -44,7 +45,10 @@
                         <td class="border px-4 py-2 text-gray-700">{{ user.username }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ user.email }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ user.role }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ user.ban ? 'Banned' : 'Active' }}</td>
                         <td class="border px-4 py-2">
+                            <button *ngIf="!user.ban" class="btn btn-warning" (click)="banUser(user.user_id, true)">Ban</button>
+                            <button *ngIf="user.ban" class="btn btn-success" (click)="banUser(user.user_id, false)">Unban</button>
                             <button class="btn btn-secondary mr-2" (click)="populateUserForm(user)">Update</button>
                             <button class="btn btn-danger" (click)="deleteUser(user.user_id)">Delete</button>
                         </td>

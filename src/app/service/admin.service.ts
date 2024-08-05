@@ -71,6 +71,10 @@ export class AdminService {
     return this.http.delete(`${this.apiUrl}/delete-user`, { body: { userid } });
   }
 
+  banUser(userId: number, shouldBan: boolean): Observable<any> {
+    return this.http.put(`${this.apiUrl}/set-userban`, { userId, ban: shouldBan });
+  }
+
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/users`);
   }

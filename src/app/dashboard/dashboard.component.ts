@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminService } from '../service/admin.service'; // Import AdminService
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-dashboard',
@@ -90,6 +91,24 @@ export class DashboardComponent implements OnInit {
       this.showForm = true;
     }
   }
+
+  banUser(userId: number, shouldBan: boolean) {
+    this.adminService.banUser(userId, shouldBan).subscribe(() => {
+      this.fetchUsers(); // Refresh user list after banning/unbanning
+      Swal.fire({
+        icon: 'success',
+        title: `User ${shouldBan ? 'Banned' : 'Unbanned'}`,
+        text: `The user has been ${shouldBan ? 'banned' : 'unbanned'}.`,
+      });
+    }, error => {
+      Swal.fire({
+        icon: 'error',
+        title: `Error`,
+        text: `Failed to ${shouldBan ? 'ban' : 'unban'} the user.`,
+      });
+    });
+  }
+
 
   // Item Management Functions
   fetchItems() {

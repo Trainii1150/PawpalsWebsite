@@ -30,7 +30,7 @@ const getAllUsers = async () => {
 
 const getUserData = async (email) => {
     try {
-        const result = await pool.query('SELECT user_id,username, email, password , user_verify , role FROM user_table WHERE email = $1', [email]);
+        const result = await pool.query('SELECT user_id,username, email, password , user_verify , role , ban FROM user_table WHERE email = $1', [email]);
         return result.rows[0];
     } catch (error) {
         console.error(error);
@@ -111,6 +111,15 @@ const deleteUserById = async (userId) => {
         [userId]
     );
     return result.rows[0];
+};
+
+const setBan = async (userId, banStatus) => {
+    try {
+      await pool.query('UPDATE user_table SET ban = $1 WHERE user_id = $2', [banStatus, userId]);
+    } catch (error) {
+      console.error(error);
+      throw error; // Re-throw the error to be handled in the controller
+    }
 };
 
 const getUserStorageItems = async (uid) => {
@@ -316,6 +325,7 @@ module.exports = {
     getTimeByLanguage,
     getUserPets,
     getAllUsers,
-    getUserBackgrounds
+    getUserBackgrounds,
+    setBan,
 };
 

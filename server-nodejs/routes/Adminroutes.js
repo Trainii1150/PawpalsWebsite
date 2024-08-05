@@ -27,6 +27,9 @@ router.delete('/delete-pets', AuthToken, AdminController.deletePet); // Delete a
 router.put('/update-user', AuthToken, AdminController.updateUser); // Update user details (username, password, etc.)
 router.delete('/delete-user', AuthToken, AdminController.deleteUser); // Delete a user
 
+// Define route for setting user ban status
+router.put('/set-userban', AuthToken, AdminController.setUserBan); // Set user's ban status
+
 // Define route for getting all users, items, pets, and storage items
 router.get('/users', AuthToken, AdminController.getAllUsers); // Get all users
 router.get('/items', AuthToken, AdminController.getAllItems); // Get all items

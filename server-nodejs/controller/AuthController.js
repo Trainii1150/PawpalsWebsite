@@ -66,6 +66,10 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ error: 'Email not verified. Please resend verification email.' });
         }
 
+        if (user.ban === true) {
+            return res.status(403).json({ error: 'Your account has been banned. Please contact Pawpals@outlook.co.th.' });
+        }
+        
         const { accessToken, refreshToken } = tokenUserGenerate(user);
         res.json({ uid: String(user.user_id), accessToken, refreshToken });
     } catch (error) {

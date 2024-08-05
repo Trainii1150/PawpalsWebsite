@@ -37,7 +37,10 @@ export class LoginComponent {
             //console.error('Registration failed', error);
             if (error.status === 400){
               this.showResendEmailVerifyWarning(email)
-            } else {
+            } 
+            if(error.status === 403){
+              this.showBanWarning();
+            }else {
                 Swal.fire({
                 icon: 'error',
                 title: 'Login Failed',
@@ -107,5 +110,14 @@ export class LoginComponent {
         });
       }
     );
+  }
+
+   showBanWarning(): void {
+    Swal.fire({
+      icon: 'error',
+      title: 'Login Failed',
+      text: 'Your account has been banned. Please contact Pawpals@outlook.co.th.',
+      confirmButtonText: 'Ok',
+    });
   }
 }
