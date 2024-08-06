@@ -66,6 +66,7 @@ const typeDefs = gql`
     hunger_level: Int
     last_fed: String
     path: String
+    exp: Float
   }
 
   type UserCoins {
@@ -106,7 +107,7 @@ const typeDefs = gql`
     userCoins(uid: String!): UserCoins
     userStorageItems(uid: ID!): [UserStorageItem]
     timeByLanguage(uid: String!): [TimeByLanguage]
-    userPet(uid: String!): Pet
+    userPets(uid: String!): [Pet]
     getProgress(userId: ID!): [Progress]
     getUserDecorationItems(uid: ID!): UserDecorationItems
   }
@@ -137,8 +138,15 @@ const resolvers = {
     timeByLanguage: async (_, { uid }) => {
       return UserModel.getTimeByLanguage(uid);
     },
-    userPet: async (_, { uid }) => {
-      return UserModel.getUserPets(uid);
+    userPets: async (_, { uid }) => {
+      try {
+        const pets = await UserModel.getUserPets(uid);
+        console.log('Pets fetched:', pets); // เพิ่มการ debug
+        return pets;
+      } catch (error) {
+        console.error('Error in resolver:', error);
+        throw new ApolloError('Failed to fetch user pets');
+      }
     },
     getProgress: async (_, { userId }) => {
       return RewardProgressModel.getProgressByUser(userId);

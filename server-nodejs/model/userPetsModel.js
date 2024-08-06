@@ -47,10 +47,23 @@ const deleteUserPetbyUserid = async (userId) => {
     }
 };
 
+const updateUserPetExp = async (userId, exp) => {
+    try {
+        const result = await pool.query(
+            'UPDATE user_pets SET exp = exp + $2 WHERE user_id = $1 RETURNING *',
+            [userId, exp]
+        );
+        return result.rows[0];
+    } catch (error) {
+        console.error('Error updating user pet exp:', error);
+        throw new Error('Error updating user pet exp');
+    }
+};
 
 module.exports = {
     createUserPet,
     updateUserPet,
     deleteUserPet,
     deleteUserPetbyUserid,
+    updateUserPetExp,
 };

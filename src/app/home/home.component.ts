@@ -10,18 +10,16 @@ import Swal from 'sweetalert2';
 import moment from 'moment';
 import { HttpClient } from '@angular/common/http';
 
-
-
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit, AfterViewInit {
-
-  
-  
-
+petPath: any;
+  toggleInfoModal() {
+    this.showInfoModal = !this.showInfoModal;
+  }
 
   showActivity = false;
   showInventory = false;
@@ -32,6 +30,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   petName: String | undefined = "David";
   foodStatus: Number | undefined;
   happinessStatus: Number | undefined = 40;
+  exp: Number | undefined; // ตัวแปรเพื่อเก็บค่าประสบการณ์
   todayCodeTime: Number | undefined = 0;
   monthlyCodeTime: Number | undefined = 0;
   todayTimeCompare: Number | undefined = 0;
@@ -46,6 +45,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   selectedPet: any;
   selectedBackground: any;
   selectedMenu: string = 'pet'; // กำหนดค่าเริ่มต้นเป็น 'pet'
+  showInfoModal: boolean = false; // ตัวแปรเพื่อควบคุมการแสดง Info Modal
 
   customOptions: OwlOptions = {
     loop: true,
@@ -93,8 +93,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.getUserCoins();
     this.getUserStorageItems();
     this.getTimeByLanguage();
-    this.getPetHungerLevel();
     this.getUserDecorationItems();
+    this.getUserPets();
   }
 
   toggleActivity() {
@@ -162,6 +162,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       console.error('Token not found in localStorage');
     }
   }
+
   saveDecoration(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
@@ -453,53 +454,87 @@ getUserCoins(): void {
   }
 }
 
-getUserPet(): void {
+getUserPets(): void {
   const uid = this.cookieService.get('uid');
   if (uid) {
     this.apollo.watchQuery({
       query: gql`
-        query GetUserPet($uid: String!) {
-          userPet(uid: $uid) {
+        query GetUserPets($uid: String!) {
+          userPets(uid: $uid) {
             pet_id
             pet_name
             hunger_level
             last_fed
+            path
+            exp
           }
         }
       `,
       variables: {
-        uid: uid
+        uid: uid,
       },
     })
-    .valueChanges
-    .subscribe(
-      (response: any) => {
-        const pet = response.data.userPet;
-        this.petName = pet.pet_name;
-        this.foodStatus = pet.hunger_level;
-      },
-      (error: any) => {
-        console.error('Error getting user pet:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: `Failed to get user pet: ${error.message}`,
-        });
-      }
-    );
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          const pet = response.data.userPets[0]; // สมมติว่าเราดึงสัตว์เลี้ยงตัวแรก
+          this.petName = pet.pet_name;
+          this.foodStatus = pet.hunger_level;
+          this.happinessStatus = 40; // ค่าที่กำหนดเอง
+          this.exp = pet.exp;
+          this.petPath = pet.path;
+        },
+        error => {
+          console.error('Error getting user pets:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get user pets: ${error.message}`,
+          });
+        }
+      );
   } else {
     console.error('Token not found in cookies');
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'User ID token not found in cookies',
-    });
   }
 }
 
 selectFoodItem(item: any) {
   const petId = 1; // ตัวอย่าง petId
   this.feedPet(petId, item.food_value, item.item_id);
+}
+
+getUserPetExp(): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.apollo.watchQuery({
+      query: gql`
+        query GetUserPetExp($uid: String!) {
+          userPetExp(uid: $uid) {
+            exp
+          }
+        }
+      `,
+      variables: {
+        uid: uid,
+      },
+    })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          this.exp = response.data.userPetExp.exp;
+        },
+        error => {
+          console.error('Error getting pet experience:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get pet experience: ${error.message}`,
+          });
+        }
+      );
+  } else {
+    console.error('Token not found in cookies');
+  }
 }
 
 feedPet(petId: number, foodValue: number, itemId: number): void {
@@ -534,44 +569,6 @@ feedPet(petId: number, foodValue: number, itemId: number): void {
   }
 }
 
-getPetHungerLevel(): void {
-  const uid = this.cookieService.get('uid');
-  if (uid) {
-    this.apollo.watchQuery({
-      query: gql`
-        query GetUserPet($uid: String!) {
-          userPet(uid: $uid) {
-            hunger_level
-          }
-        }
-      `,
-      variables: {
-        uid: uid
-      }
-    })
-    .valueChanges
-    .subscribe(
-      (response: any) => {
-        this.foodStatus = response.data.userPet.hunger_level;
-      },
-      (error: any) => {
-        console.error('Error getting pet hunger level:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: `Failed to get pet hunger level: ${error.message}`,
-        });
-      }
-    );
-  } else {
-    console.error('Token not found in cookies');
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'User ID token not found in cookies',
-    });
-  }
-}
 
 randomizePet(): void {
   const uid = this.cookieService.get('uid');
@@ -610,9 +607,13 @@ initializeChart(): void {
     while (chartContainer.firstChild) {
       chartContainer.removeChild(chartContainer.firstChild);
     }
-    
-    const chart = new ApexCharts(chartContainer, this.getChartOptions());
-    chart.render();
+
+    if (this.timeByLanguage.length > 0) {
+      const chart = new ApexCharts(chartContainer, this.getChartOptions());
+      chart.render();
+    } else {
+      console.warn('No data available for chart');
+    }
   }
 }
 
@@ -748,11 +749,4 @@ getUserDecorationItems(): void {
     });
   }
 }
-
-
-
-
-
-  
-
 }

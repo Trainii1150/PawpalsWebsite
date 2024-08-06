@@ -253,31 +253,34 @@ const getUserBackgrounds = async (uid) => {
 };
 
 const getTimeByLanguage = async (uid) => {
-    try {
-      const result = await pool.query(`
-        SELECT "Languages" as language, SUM("time") as total_time
-        FROM public.coding_activity
-        WHERE user_id = $1
-        GROUP BY "Languages"
-      `, [uid]);
-  
-      return result.rows;
-    } catch (error) {
-      console.error('Error getting time by language:', error);
-      throw new Error('Error getting time by language');
-    }
+  try {
+    const result = await pool.query(`
+      SELECT "Languages" as language, SUM("time") as total_time
+      FROM public.coding_activity
+      WHERE user_id = $1
+      GROUP BY "Languages"
+    `, [uid]);
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error getting time by language:', error);
+    throw new Error('Error getting time by language');
+  }
 };
+
+
 
 const getUserPets = async (uid) => {
   try {
     const result = await pool.query(`
-      SELECT p.pet_id, p.pet_name, up.hunger_level, up.last_fed, p.path 
+      SELECT p.pet_id, p.pet_name, up.hunger_level, up.last_fed, p.path, up.exp 
       FROM user_pets up 
       JOIN pets p ON up.pet_id = p.pet_id 
       WHERE up.user_id = $1
     `, [uid]);
 
     if (result.rows.length === 0) {
+      console.log('No pets found for user:', uid); // เพิ่มการ debug
       return [];
     }
 
@@ -291,6 +294,7 @@ const getUserPets = async (uid) => {
 
     // Update hunger levels in the database
     for (const pet of pets) {
+      console.log('Updating hunger level for pet:', pet); // เพิ่มการ debug
       await pool.query(`
         UPDATE user_pets
         SET hunger_level = $1, last_fed = $2
@@ -304,7 +308,10 @@ const getUserPets = async (uid) => {
     throw error;
   }
 };
+
   
+
+
   
 module.exports = {
     createUser,
