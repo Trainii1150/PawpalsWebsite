@@ -20,7 +20,7 @@ const createUser = async (username, email, hashedPassword) => {
 
 const getAllUsers = async () => {
   try {
-      const result = await pool.query('SELECT user_id, username, email, role FROM user_table');
+      const result = await pool.query('SELECT user_id, username, email, role, ban FROM user_table');
       return result.rows;
   } catch (error) {
       console.error(error);
