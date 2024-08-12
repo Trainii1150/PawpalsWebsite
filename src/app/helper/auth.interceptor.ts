@@ -45,8 +45,7 @@ export class AuthInterceptor implements HttpInterceptor {
             return this.authService.refreshToken(refreshToken).pipe(
               switchMap((newTokens: any) => {
                 if (newTokens) {
-                  this.cookieService.set('token', newTokens.accessToken);
-    
+                  this.cookieService.set('token', newTokens.accessToken, { path: '/' });    
                   // Console log the new access token
                   console.log('New access token:', newTokens.accessToken);
     

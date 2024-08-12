@@ -28,8 +28,8 @@ export class AdminService {
     return this.http.post(`${this.apiUrl}/create-item`, { item_name, description, item_type });
   }
 
-  updateItem(item_id: number, item_name: string, description: string, item_type: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update-item`, { item_id, item_name, description, item_type });
+  updateItem(itemData : any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update-item`, itemData);
   }
 
   deleteItem(item_id: number): Observable<any> {
@@ -54,8 +54,8 @@ export class AdminService {
     return this.http.post(`${this.apiUrl}/add-pets`, { petName, description, petType });
   }
 
-  updatePet(petId: number, petName: string, description: string, petType: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update-pets`, { petId, petName, description, petType });
+  updatePet(petData : any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update-pets`, petData);
   }
 
   deletePet(petId: number): Observable<any> {

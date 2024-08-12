@@ -92,6 +92,7 @@
                         <th class="px-4 py-2 text-gray-800">Item Name</th>
                         <th class="px-4 py-2 text-gray-800">Description</th>
                         <th class="px-4 py-2 text-gray-800">Item Type</th>
+                        <th class="px-4 py-2 text-gray-800">Current Image</th>
                         <th class="px-4 py-2 text-gray-800">Actions</th>
                     </tr>
                 </thead>
@@ -101,6 +102,9 @@
                         <td class="border px-4 py-2 text-gray-700">{{ item.item_name }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ item.description }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ item.item_type }}</td>
+                        <td>
+                            <img [src]="item.path" alt="Pet Image" class="preview-image" style="max-width: 100px; max-height: 100px;">
+                          </td>
                         <td class="border px-4 py-2">
                             <button class="btn btn-secondary mr-2" (click)="populateItemForm(item)">Update</button>
                             <button class="btn btn-danger" (click)="deleteItem(item.item_id)">Delete</button>
@@ -124,6 +128,14 @@
                         <label class="block text-gray-700">Item Type</label>
                         <input type="text" [(ngModel)]="selectedItem.item_type" name="item_type" class="form-input mt-1 block w-full border-gray-300">
                     </div>
+                      <div class="mb-4">
+                        <label class="block text-gray-700">Upload Image</label>
+                        <input type="file" (change)="onFileSelectedItemimg($event)" accept="image/*" class="mt-1">
+                    </div>
+                    <div class="mb-4">
+                        <p>Image Preview:</p>
+                        <img [src]="imagePreviewUrl || selectedItem.path" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
+                    </div>
                     <button type="submit" class="btn btn-primary">Update Item</button>
                 </form>
             </div>
@@ -132,8 +144,8 @@
         <div *ngIf="currentSection === 'manage-pets'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Pets</h2>
             <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="fetchUsers()">Create Pets</button>
-                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Pets</button>
+                <button class="btn btn-primary" (click)="fetchPets()">Create Pets</button>
+                <button class="btn btn-primary" (click)="fetchPets()">Fetch Pets</button>
             </div>
             <table class="table-auto w-full bg-white border border-gray-200">
                 <thead>
@@ -142,6 +154,7 @@
                         <th class="px-4 py-2 text-gray-800">Pet Name</th>
                         <th class="px-4 py-2 text-gray-800">Description</th>
                         <th class="px-4 py-2 text-gray-800">Pet Type</th>
+                        <th class="px-4 py-2 text-gray-800">Current Image</th>
                         <th class="px-4 py-2 text-gray-800">Actions</th>
                     </tr>
                 </thead>
@@ -151,6 +164,9 @@
                         <td class="border px-4 py-2 text-gray-700">{{ pet.pet_name }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ pet.description }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ pet.pet_type }}</td>
+                        <td>
+                            <img [src]="pet.path" alt="Pet Image" class="preview-image" style="max-width: 100px; max-height: 100px;">
+                          </td>
                         <td class="border px-4 py-2">
                             <button class="btn btn-secondary mr-2" (click)="populatePetForm(pet)">Update</button>
                             <button class="btn btn-danger" (click)="deletePet(pet.pet_id)">Delete</button>
@@ -158,7 +174,7 @@
                     </tr>
                 </tbody>
             </table>
-            <div *ngIf="selectedPet" class="mt-4">
+            <div *ngIf="showForm" class="mt-4">
                 <h3 class="text-lg font-semibold text-gray-800">Update Pet</h3>
                 <form (submit)="updatePet()">
                     <input type="hidden" [(ngModel)]="selectedPet.pet_id" name="petId">
@@ -173,6 +189,14 @@
                     <div class="mb-4">
                         <label class="block text-gray-700">Pet Type</label>
                         <input type="text" [(ngModel)]="selectedPet.pet_type" name="pet_type" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Upload Image</label>
+                        <input type="file" (change)="onFileSelectedPetimg($event)" accept="image/*" class="mt-1">
+                    </div>
+                    <div class="mb-4">
+                        <p>Image Preview:</p>
+                        <img [src]="imagePreviewUrl || selectedPet.path" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
                     </div>
                     <button type="submit" class="btn btn-primary">Update Pet</button>
                 </form>

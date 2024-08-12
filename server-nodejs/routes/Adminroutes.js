@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const AdminController = require('../controller/AdminController');
 const { AuthToken ,checkIsadmin } = require('../middleware/authmid'); // Import the auth middleware functions
+
+// ตั้งค่า multer สำหรับการอัปโหลดไฟล์
+const storage = multer.memoryStorage(); // ใช้ memoryStorage เพื่อเก็บไฟล์ในหน่วยความจำ
+const upload = multer({ storage: storage });
 
 // Define routes for managing storage items
 router.post('/add-storeitem', AuthToken, AdminController.addItemToStorage); // Add a new item to storage
@@ -9,8 +14,8 @@ router.put('/update-storeitem', AuthToken, AdminController.updateStorageItem); /
 router.delete('/delete-storeitem', AuthToken, AdminController.deleteItemFromStorage); // Delete an item from storage
 
 // Define routes for managing items
-router.post('/create-item', AuthToken, AdminController.createItem); // Create a new item
-router.put('/update-item', AuthToken, AdminController.updateItem); // Update an existing item
+router.post('/create-item', AuthToken, upload.single('itemImage'),AdminController.createItem); // Create a new item
+router.put('/update-item', AuthToken,upload.single('itemImage'), AdminController.updateItem); // Update an existing item
 router.delete('/delete-item', AuthToken, AdminController.deleteItem); // Delete an item
 
 // Define routes for managing user pets
@@ -19,8 +24,8 @@ router.put('/update-userpets', AuthToken, AdminController.updateUserPet); // Upd
 router.delete('/delete-userpets', AuthToken, AdminController.deleteUserPet); // Delete a user pet
 
 // Define routes for managing pets
-router.post('/add-pets', AuthToken, AdminController.addPet); // Add a new pet
-router.put('/update-pets', AuthToken, AdminController.updatePet); // Update an existing pet
+router.post('/add-pets', AuthToken,upload.single('petImage'), AdminController.addPet); // Add a new pet
+router.put('/update-pets', AuthToken,upload.single('petImage'),AdminController.updatePet); // Update an existing pet
 router.delete('/delete-pets', AuthToken, AdminController.deletePet); // Delete a pet
 
 // Define routes for updating and deleting users

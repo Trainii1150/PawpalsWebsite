@@ -1,4 +1,7 @@
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const axios = require('axios');
+const path = require('path');
 const userModel = require('../model/UserModel'); // Import userModel
 const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
@@ -62,10 +65,30 @@ const deleteItemFromStorage = async (req, res) => {
 
 // Create a new item.
 const createItem = async (req, res) => {
-    const { item_name, description, item_type } = req.body;
+    const { itemname, description, itemtype } = req.body;
+    const itemImage = req.file;
     try {
-        const newItem = await itemModel.createItem(item_name, description, item_type);
-        res.status(201).json(newItem);
+        let imageurl = null;
+        if(itemImage) {
+            const filePath = `Items/${itemname}.gif`; // Construct the file path based on the pet name
+            // Upload GIF file directly to GitHub
+            const data = {
+                message: `Upload image for new ${itemname}`,
+                content: itemImage.buffer.toString('base64'),
+            };
+
+            const url = `https://api.github.com/repos/${process.env.REPO_OWNER}/${process.env.REPO_NAME}/contents/${filePath}`;
+            const response = await axios.put(url, data, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                    Accept: 'application/vnd.github.v3+json',
+                },
+            });
+
+            imageurl = response.data.content.download_url; // Get the URL of the uploaded image
+        }
+        const newItem = await itemModel.createItem(itemname, description, itemtype, imageurl);
+        return res.status(201).json({ message: 'Item created successfully', item: newItem });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -73,9 +96,29 @@ const createItem = async (req, res) => {
 
 // Update an existing item.
 const updateItem = async (req, res) => {
-    const { item_id, item_name, description, item_type } = req.body;
+    const { itemid, itemname, description, itemtype } = req.body;
+    const itemImage = req.file;
     try {
-        const updatedItem = await itemModel.updateItem(item_id, item_name, description, item_type);
+        let imageurl = null;
+        if (itemImage) {
+            const filePath = `Items/${itemImage}_${new Date().toISOString()}.gif`; 
+            // อัปโหลดไฟล์ GIF โดยตรงไปยัง GitHub
+            const data = {
+                message: `Upload image for new ${itemname}`,
+                content: itemname.buffer.toString('base64'),
+            };
+
+            const url = `https://api.github.com/repos/${process.env.REPO_OWNER}/${process.env.REPO_NAME}/contents/${filePath}`;
+            const response = await axios.put(url, data, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                    Accept: 'application/vnd.github.v3+json',
+                },
+            });
+
+            imageurl = response.data.content.download_url; // Get the URL of the uploaded image
+        }
+        const updatedItem = await itemModel.updateItem(itemid, itemname, description, itemtype, imageurl);
         res.status(200).json(updatedItem);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -135,21 +178,63 @@ const deleteUserPet = async (req, res) => {
 // Create a new pet
 const addPet = async (req, res) => {
     const { petName, description, petType } = req.body;
-    
+    const petImage = req.file; // Access the uploaded file from Multer
+
     try {
-        const newPet = await PetModel.createPet(petName, description, petType);
+        let imageurl = null;
+        if (petImage) {
+            const filePath = `Pets/${petName}.gif`; // Construct the file path based on the pet name
+            // Upload GIF file directly to GitHub
+            const data = {
+                message: `Upload image for new ${petName}`,
+                content: petImage.buffer.toString('base64'),
+            };
+
+            const url = `https://api.github.com/repos/${process.env.REPO_OWNER}/${process.env.REPO_NAME}/contents/${filePath}`;
+            const response = await axios.put(url, data, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                    Accept: 'application/vnd.github.v3+json',
+                },
+            });
+
+            imageurl = response.data.content.download_url; // Get the URL of the uploaded image
+        }
+
+        // Create the new pet record in the database
+        const newPet = await PetModel.createPet(petName, description, petType, imageurl);
         return res.status(201).json({ message: 'Pet created successfully', pet: newPet });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
 
+
 // Update an existing pet
 const updatePet = async (req, res) => {
     const { petId, petName, description, petType } = req.body;
-    
+    const petImage = req.file; // เข้าถึงไฟล์ที่อัปโหลดจาก Multer
     try {
-        const updatedPet = await PetModel.updatePet(petId, petName, description, petType);
+        let imageurl = null;
+        if (petImage) {
+            const filePath = `Pets/${petName}_${new Date().toISOString()}.gif`; // Construct the file path based on the pet name
+            // อัปโหลดไฟล์ GIF โดยตรงไปยัง GitHub
+            const data = {
+                message: `Upload image for new ${petName}`,
+                content: petImage.buffer.toString('base64'),
+            };
+
+            const url = `https://api.github.com/repos/${process.env.REPO_OWNER}/${process.env.REPO_NAME}/contents/${filePath}`;
+            const response = await axios.put(url, data, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                    Accept: 'application/vnd.github.v3+json',
+                },
+            });
+
+            imageurl = response.data.content.download_url; // Get the URL of the uploaded image
+        }
+        const updatedPet = await PetModel.updatePet(petId, petName, description, petType , imageurl);
         return res.status(200).json({ message: 'Pet updated successfully', pet: updatedPet });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });

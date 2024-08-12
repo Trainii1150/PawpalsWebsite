@@ -1,10 +1,10 @@
 const pool = require('../config/database'); // Use require instead of import
 
-const createPet = async (pet_name, description, pet_type) => {
+const createPet = async (pet_name, description, pet_type, pet_path) => {
    try {
         const result = await pool.query(
-            'INSERT INTO pets (pet_name, description, pet_type, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *',
-            [pet_name, description, pet_type]
+            'INSERT INTO pets (pet_name, description, pet_type, path ,created_at) VALUES ($1, $2, $3, $4,NOW()) RETURNING *',
+            [pet_name, description, pet_type, pet_path]
         );
         return result.rows[0];
    } catch (error) {
@@ -35,11 +35,11 @@ const getAllPets = async () => {
     }
   };
 
-const updatePet = async (petId, petName, description, petType) => {
+const updatePet = async (petId, petName, description, petType, path) => {
     try {
         const result = await pool.query(
-            'UPDATE pets SET pet_name = $1, description = $2, pet_type = $3 WHERE pet_id = $4 RETURNING *',
-            [petName, description, petType, petId]
+            'UPDATE pets SET pet_name = $1, description = $2, pet_type = $3 , path = $5 WHERE pet_id = $4 RETURNING *',
+            [petName, description, petType, petId, path]
         );
         return result.rows[0];
     } catch (error) {

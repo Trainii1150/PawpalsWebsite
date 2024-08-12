@@ -14,10 +14,12 @@ export class DashboardComponent implements OnInit {
   items: any[] = [];
   pets: any[] = [];
   storageItems: any[] = [];
+  selectedFile: File | null = null;
+  imagePreviewUrl: string | ArrayBuffer | null = null;
 
   newUser: any = { username: '', email: '', role: '' };
-  newItem: any = { item_name: '', description: '', item_type: '' };
-  newPet: any = { petName: '', description: '', petType: '' };
+  newItem: any = { item_name: '', description: '', item_type: '', path: '' };
+  newPet: any = { petName: '', description: '', petType: '' , path: ''};
   newStorageItem: any = { userId: '', itemId: '', quantity: 0 };
 
   selectedUser: any = null;
@@ -125,10 +127,18 @@ export class DashboardComponent implements OnInit {
   }
 
   updateItem() {
-    this.adminService.updateItem(this.selectedItem.item_id, this.selectedItem.item_name, this.selectedItem.description, this.selectedItem.item_type).subscribe(() => {
+    const formData = new FormData();
+    formData.append('itemid',this.selectedItem.item_id);
+    formData.append('itemname',this.selectedItem.item_name);
+    formData.append('description',this.selectedItem.description);
+    formData.append('itemtype',this.selectedItem.item_type);
+    formData.append('itemImage', this.selectedFile!);
+    this.adminService.updateItem(formData).subscribe(()=>{
+      this.showForm = !this.showForm;
+      this.imagePreviewUrl = null; // Clear the image preview
       this.fetchItems();
-      this.selectedItem = null;
-    });
+      this.selectedPet = null;
+    })
   }
 
   deleteItem(itemId: number) {
@@ -138,12 +148,31 @@ export class DashboardComponent implements OnInit {
   }
 
   populateItemForm(item: any) {
-    this.selectedItem = { ...item };
+    if(this.selectedItem && this.selectedItem.id === item.id) {
+      this.showForm = !this.showForm;
+    } else {
+      this.selectedItem = { ...item };
+      this.imagePreviewUrl = item.path;
+      this.showForm = true;
+    }
+  }
+
+  onFileSelectedItemimg(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreviewUrl = reader.result; // Set the preview URL
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   // Pet Management Functions
   fetchPets() {
     this.adminService.getAllPets().subscribe(data => {
+      this.imagePreviewUrl = null;
       this.pets = data;
     });
   }
@@ -156,7 +185,15 @@ export class DashboardComponent implements OnInit {
   }
 
   updatePet() {
-    this.adminService.updatePet(this.selectedPet.pet_id, this.selectedPet.pet_name, this.selectedPet.description, this.selectedPet.pet_type).subscribe(() => {
+    const formData = new FormData();
+    formData.append('petId', this.selectedPet.pet_id);
+    formData.append('petName', this.selectedPet.pet_name);
+    formData.append('description', this.selectedPet.description);
+    formData.append('petType', this.selectedPet.pet_type);
+    formData.append('petImage', this.selectedFile!);
+    this.adminService.updatePet(formData).subscribe(() => {
+      this.showForm = !this.showForm;
+      this.imagePreviewUrl = null; // Clear the image preview
       this.fetchPets();
       this.selectedPet = null;
     });
@@ -169,7 +206,27 @@ export class DashboardComponent implements OnInit {
   }
 
   populatePetForm(pet: any) {
-    this.selectedPet = { ...pet };
+    if (this.selectedPet && this.selectedPet.id === pet.id) {
+      // If the same pet is clicked again, toggle the form
+      this.showForm = !this.showForm;
+    } else {
+      // If a different pet is clicked, show the form and update the preview
+      this.selectedPet = { ...pet };
+      this.imagePreviewUrl = pet.path; // Set the image preview to the old image
+      this.showForm = true;
+    }
+  }
+
+  onFileSelectedPetimg(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreviewUrl = reader.result; // Set the preview URL
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   // Storage Item Management Functions

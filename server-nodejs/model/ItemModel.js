@@ -1,17 +1,17 @@
 const pool = require('../config/database'); // Use require instead of import
 
-const createItem = async (item_name, description, item_type, food_value, path) => {
+const createItem = async (item_name, description, item_type, path) => {
     const result = await pool.query(
-        'INSERT INTO items (item_name, description, item_type, food_value, path) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [item_name, description, item_type, food_value, path]
+        'INSERT INTO items (item_name, description, item_type, path) VALUES ($1, $2, $3, $4) RETURNING *',
+        [item_name, description, item_type, path]
     );
     return result.rows[0];
 };
 
-const updateItem = async (item_id, item_name, description, item_type, food_value, path) => {
+const updateItem = async (item_id, item_name, description, item_type, path) => {
     const result = await pool.query(
-        'UPDATE items SET item_name = $1, description = $2, item_type = $3, food_value = $4, path = $5 WHERE item_id = $6 RETURNING *',
-        [item_name, description, item_type, food_value, path, item_id]
+        'UPDATE items SET item_name = $1, description = $2, item_type = $3, path = $4 WHERE item_id = $5 RETURNING *',
+        [item_name, description, item_type, path, item_id]
     );
     return result.rows[0];
 };
