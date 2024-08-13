@@ -13,6 +13,7 @@ export class DashboardComponent implements OnInit {
   users: any[] = [];
   items: any[] = [];
   pets: any[] = [];
+  userPets: any[] = [];
   storageItems: any[] = [];
   selectedFile: File | null = null;
   imagePreviewUrl: string | ArrayBuffer | null = null;
@@ -20,6 +21,7 @@ export class DashboardComponent implements OnInit {
   newUser: any = { username: '', email: '', role: '' };
   newItem: any = { item_name: '', description: '', item_type: '', path: '' };
   newPet: any = { petName: '', description: '', petType: '' , path: ''};
+  newuserPet: any = {userpet_id: '', petId: '', petType: '', userId: '',path: ''}
   newStorageItem: any = { userId: '', itemId: '', quantity: 0 };
 
   selectedUser: any = null;
@@ -27,6 +29,8 @@ export class DashboardComponent implements OnInit {
   selectedPet: any = null;
   selectedStorageItem: any = null;
   showForm: boolean = false;
+  showCreateForm: boolean = false;
+  
 
   constructor(private adminService: AdminService, private router: Router) {} // Inject Router
 
@@ -59,6 +63,7 @@ export class DashboardComponent implements OnInit {
   fetchUsers() {
     this.adminService.getAllUsers().subscribe(data => {
       this.users = data;
+      this.showForm = false;
     });
   }
 
@@ -115,15 +120,40 @@ export class DashboardComponent implements OnInit {
   // Item Management Functions
   fetchItems() {
     this.adminService.getAllItems().subscribe(data => {
+      this.imagePreviewUrl = null;
       this.items = data;
+      this.showForm = false;
+      this.showCreateForm = false;
     });
   }
 
+
   createItem() {
-    this.adminService.createItem(this.newItem.item_name, this.newItem.description, this.newItem.item_type).subscribe(() => {
-      this.fetchItems();
-      this.newItem = { item_name: '', description: '', item_type: '' };
+    const formData = new FormData();
+    formData.append('itemname',this.newItem.item_name);
+    formData.append('description',this.newItem.description);
+    formData.append('itemtype',this.newItem.item_type);
+    formData.append('itemImage', this.selectedFile!);
+    this.adminService.createItem(formData).subscribe(() => {
+        this.newItem = { item_name: '', description: '', item_type: '', path: '' };
+        this.showCreateForm = false;
+        this.imagePreviewUrl = null; // Reset preview
+        this.fetchItems();
     });
+  }
+
+  showCreateItemForm() {
+    if (this.showCreateForm) {
+      // If the form is already open, close it
+      this.showCreateForm = false;
+      this.imagePreviewUrl = null; // Reset preview
+    } else {
+      // If the form is closed, reset and open it
+      this.newItem = { item_name: '', description: '', item_type: '', path: '' };
+      this.imagePreviewUrl = null; // Reset preview
+      this.showCreateForm = true;
+      this.showForm = false; // Ensure the update form is hidden
+    }
   }
 
   updateItem() {
@@ -148,12 +178,13 @@ export class DashboardComponent implements OnInit {
   }
 
   populateItemForm(item: any) {
-    if(this.selectedItem && this.selectedItem.id === item.id) {
-      this.showForm = !this.showForm;
+    if(this.showForm) {
+      this.showForm = false;
     } else {
       this.selectedItem = { ...item };
       this.imagePreviewUrl = item.path;
       this.showForm = true;
+      this.showCreateForm = false;
     }
   }
 
@@ -174,16 +205,39 @@ export class DashboardComponent implements OnInit {
     this.adminService.getAllPets().subscribe(data => {
       this.imagePreviewUrl = null;
       this.pets = data;
+      this.showForm = false;
+      this.showCreateForm = false;
     });
   }
 
   createPet() {
-    this.adminService.addPet(this.newPet.petName, this.newPet.description, this.newPet.petType).subscribe(() => {
-      this.fetchPets();
-      this.newPet = { petName: '', description: '', petType: '' };
+    const formData = new FormData();
+    formData.append('petName', this.newPet.pet_name);
+    formData.append('description', this.newPet.description);
+    formData.append('petType', this.newPet.pet_type);
+    formData.append('petImage', this.selectedFile!);
+    this.adminService.addPet(formData).subscribe(() => {
+        this.newPet = { pet_name: '', description: '', pet_type: '', path: '' };
+        this.showCreateForm = false;
+        this.imagePreviewUrl = null; // Reset preview
+        this.fetchPets();
     });
   }
 
+  showCreatePetForm() {
+    if (this.showCreateForm) {
+      // If the form is already open, close it
+      this.showCreateForm = false;
+      this.imagePreviewUrl = null; // Reset preview
+    } else {
+      // If the form is closed, reset and open it
+      this.newPet = { pet_name: '', description: '', pet_type: '', path: '' };
+      this.imagePreviewUrl = null; // Reset preview
+      this.showCreateForm = true;
+      this.showForm = false; // Ensure the update form is hidden
+    }
+  }
+  
   updatePet() {
     const formData = new FormData();
     formData.append('petId', this.selectedPet.pet_id);
@@ -206,7 +260,7 @@ export class DashboardComponent implements OnInit {
   }
 
   populatePetForm(pet: any) {
-    if (this.selectedPet && this.selectedPet.id === pet.id) {
+    if (this.showForm) {
       // If the same pet is clicked again, toggle the form
       this.showForm = !this.showForm;
     } else {
@@ -214,6 +268,7 @@ export class DashboardComponent implements OnInit {
       this.selectedPet = { ...pet };
       this.imagePreviewUrl = pet.path; // Set the image preview to the old image
       this.showForm = true;
+      this.showCreateForm = false;
     }
   }
 

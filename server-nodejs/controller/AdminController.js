@@ -70,7 +70,7 @@ const createItem = async (req, res) => {
     try {
         let imageurl = null;
         if(itemImage) {
-            const filePath = `Items/${itemname}.gif`; // Construct the file path based on the pet name
+            const filePath = `Items/${itemname}.png`; // Construct the file path based on the pet name
             // Upload GIF file directly to GitHub
             const data = {
                 message: `Upload image for new ${itemname}`,
@@ -101,7 +101,7 @@ const updateItem = async (req, res) => {
     try {
         let imageurl = null;
         if (itemImage) {
-            const filePath = `Items/${itemImage}_${new Date().toISOString()}.gif`; 
+            const filePath = `Items/${itemImage}_${new Date().toISOString()}.png`; 
             // อัปโหลดไฟล์ GIF โดยตรงไปยัง GitHub
             const data = {
                 message: `Upload image for new ${itemname}`,

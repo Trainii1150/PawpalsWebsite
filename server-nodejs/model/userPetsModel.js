@@ -13,11 +13,11 @@ const createUserPet = async (userId, petId, petName, path) => {
     }
 };
 
-const updateUserPet = async (userPetId, petId, petName, hungerLevel) => {
+const updateUserPet = async (userPetId, petId, petName, hungerLevel, path) => {
     try {
         const result = await db.query(
-            'UPDATE user_pets SET pet_id = $2, pet_name = $3, hunger_level = $4, last_fed = NOW() WHERE user_pet_id = $1 RETURNING *',
-            [userPetId, petId, petName, hungerLevel]
+            'UPDATE user_pets SET pet_id = $2, pet_name = $3, hunger_level = $4, last_fed = NOW(), path = $5 WHERE user_pet_id = $1 RETURNING *',
+            [userPetId, petId, petName, hungerLevel, path]
         );
         return result.rows[0]; // Return the updated pet details
     } catch (error) {

@@ -24,8 +24,8 @@ router.put('/update-userpets', AuthToken, AdminController.updateUserPet); // Upd
 router.delete('/delete-userpets', AuthToken, AdminController.deleteUserPet); // Delete a user pet
 
 // Define routes for managing pets
-router.post('/add-pets', AuthToken,upload.single('petImage'), AdminController.addPet); // Add a new pet
-router.put('/update-pets', AuthToken,upload.single('petImage'),AdminController.updatePet); // Update an existing pet
+router.post('/add-pets', AuthToken, upload.single('petImage'), AdminController.addPet); // Add a new pet
+router.put('/update-pets', AuthToken, upload.single('petImage'),AdminController.updatePet); // Update an existing pet
 router.delete('/delete-pets', AuthToken, AdminController.deletePet); // Delete a pet
 
 // Define routes for updating and deleting users

@@ -12,10 +12,10 @@ const getAllStorage = async () => {
   }
 };
 
-const createStorageItem = async (userId, itemId, quantity) => {
+const createStorageItem = async (userId, itemId, quantity, path) => {
   const result = await pool.query(
-    'INSERT INTO user_storage (user_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *',
-    [userId, itemId, quantity]
+    'INSERT INTO user_storage (user_id, item_id, quantity, path) VALUES ($1, $2, $3, $4) RETURNING *',
+    [userId, itemId, quantity, path]
   );
   return result.rows[0];
 };

@@ -25,7 +25,6 @@
         <div *ngIf="currentSection === 'manage-users'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Users</h2>
             <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="fetchUsers()">Create Users</button>
                 <button class="btn btn-primary" (click)="fetchUsers()">Fetch Users</button>
             </div>
             <table class="table-auto w-full bg-white border border-gray-200">
@@ -47,8 +46,8 @@
                         <td class="border px-4 py-2 text-gray-700">{{ user.role }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ user.ban ? 'Banned' : 'Active' }}</td>
                         <td class="border px-4 py-2">
-                            <button *ngIf="!user.ban" class="btn btn-warning" (click)="banUser(user.user_id, true)">Ban</button>
-                            <button *ngIf="user.ban" class="btn btn-success" (click)="banUser(user.user_id, false)">Unban</button>
+                            <button *ngIf="!user.ban" class="btn btn-warning mr-2" (click)="banUser(user.user_id, true)">Ban</button>
+                            <button *ngIf="user.ban" class="btn btn-success mr-2" (click)="banUser(user.user_id, false)">Unban</button>
                             <button class="btn btn-secondary mr-2" (click)="populateUserForm(user)">Update</button>
                             <button class="btn btn-danger" (click)="deleteUser(user.user_id)">Delete</button>
                         </td>
@@ -82,8 +81,8 @@
         <div *ngIf="currentSection === 'manage-items'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Items</h2>
             <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="fetchUsers()">Create Items</button>
-                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Items</button>
+                <button class="btn btn-primary" (click)="showCreateItemForm()">Create Items</button>
+                <button class="btn btn-primary" (click)="fetchItems()">Fetch Items</button>
             </div>
             <table class="table-auto w-full bg-white border border-gray-200">
                 <thead>
@@ -112,7 +111,36 @@
                     </tr>
                 </tbody>
             </table>
-            <div *ngIf="selectedItem" class="mt-4">
+
+             <!-- Create Item Form -->
+            <div *ngIf="showCreateForm" class="mt-4">
+                <h3 class="text-lg font-semibold text-gray-800">Create Item</h3>
+                <form (submit)="createItem()">
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Item Name</label>
+                        <input type="text" [(ngModel)]="newItem.item_name" name="item_name" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Description</label>
+                        <input type="text" [(ngModel)]="newItem.description" name="description" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Item Type</label>
+                        <input type="text" [(ngModel)]="newItem.item_type" name="item_type" class="form-input mt-1 block w-full border-gray-300">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Upload Image</label>
+                        <input type="file" (change)="onFileSelectedItemimg($event)" accept="image/*" class="mt-1">
+                    </div>
+                    <div class="mb-4">
+                        <p>Image Preview:</p>
+                        <img [src]="imagePreviewUrl" *ngIf="imagePreviewUrl" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Item</button>
+                </form>
+            </div>
+
+            <div *ngIf="showForm" class="mt-4">
                 <h3 class="text-lg font-semibold text-gray-800">Update Item</h3>
                 <form (submit)="updateItem()">
                     <input type="hidden" [(ngModel)]="selectedItem.item_id" name="itemId">
@@ -144,7 +172,7 @@
         <div *ngIf="currentSection === 'manage-pets'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Pets</h2>
             <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="fetchPets()">Create Pets</button>
+                <button class="btn btn-primary" (click)="showCreatePetForm()">Create Pets</button>
                 <button class="btn btn-primary" (click)="fetchPets()">Fetch Pets</button>
             </div>
             <table class="table-auto w-full bg-white border border-gray-200">
@@ -174,6 +202,35 @@
                     </tr>
                 </tbody>
             </table>
+            
+             <!-- Create Pet Form -->
+            <div *ngIf="showCreateForm" class="mt-4">
+                <h3 class="text-lg font-semibold text-gray-800">Create Pet</h3>
+                <form (submit)="createPet()">
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Pet Name</label>
+                        <input type="text" [(ngModel)]="newPet.pet_name" name="pet_name" class="form-input mt-1 block w-full border-gray-300" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Description</label>
+                        <input type="text" [(ngModel)]="newPet.description" name="description" class="form-input mt-1 block w-full border-gray-300" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Pet Type</label>
+                        <input type="text" [(ngModel)]="newPet.pet_type" name="pet_type" class="form-input mt-1 block w-full border-gray-300" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Upload Image</label>
+                        <input type="file" (change)="onFileSelectedPetimg($event)" accept="image/*" class="mt-1">
+                    </div>
+                    <div class="mb-4">
+                        <p>Image Preview:</p>
+                        <img [src]="imagePreviewUrl || newPet.path" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Pet</button>
+                </form>
+            </div>
+
             <div *ngIf="showForm" class="mt-4">
                 <h3 class="text-lg font-semibold text-gray-800">Update Pet</h3>
                 <form (submit)="updatePet()">
@@ -206,7 +263,6 @@
         <div *ngIf="currentSection === 'manage-storage'">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Storage</h2>
             <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="fetchUsers()">Create Storage Items</button>
                 <button class="btn btn-primary" (click)="fetchUsers()">Fetch Storage Items</button>
             </div>
             <table class="table-auto w-full bg-white border border-gray-200">

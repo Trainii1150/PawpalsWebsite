@@ -24,8 +24,8 @@ export class AdminService {
   }
 
   // Item Methods
-  createItem(item_name: string, description: string, item_type: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create-item`, { item_name, description, item_type });
+  createItem(itemData : any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/create-item`, itemData);
   }
 
   updateItem(itemData : any): Observable<any> {
@@ -50,8 +50,8 @@ export class AdminService {
   }
 
   // Pet Methods
-  addPet(petName: string, description: string, petType: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/add-pets`, { petName, description, petType });
+  addPet(petData : any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/add-pets`, petData);
   }
 
   updatePet(petData : any): Observable<any> {
