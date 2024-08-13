@@ -37,8 +37,8 @@ export class AdminService {
   }
 
   // User Pets Methods
-  createUserPet(userId: number, petId: number, petName: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create-userpets`, { userId, petId, petName });
+  createUserPet(userId: any, petId: number, petName: string, path : any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/create-userpets`, { userId, petId, petName,path });
   }
 
   updateUserPet(userPetId: number, petId: number, petName: string, hungerLevel: number): Observable<any> {
@@ -85,6 +85,10 @@ export class AdminService {
 
   getAllPets(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/pets`);
+  }
+
+  getAllUserPets(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/user-pets`);
   }
 
   getAllStorage(): Observable<any[]> {

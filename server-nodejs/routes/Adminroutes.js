@@ -39,6 +39,7 @@ router.put('/set-userban', AuthToken, AdminController.setUserBan); // Set user's
 router.get('/users', AuthToken, AdminController.getAllUsers); // Get all users
 router.get('/items', AuthToken, AdminController.getAllItems); // Get all items
 router.get('/pets', AuthToken, AdminController.getAllPets); // Get all pets
+router.get('/user-pets', AuthToken, AdminController.getAllUserPets)
 router.get('/storage', AuthToken, AdminController.getAllStorage); // Get all storage items
 
 // test routes

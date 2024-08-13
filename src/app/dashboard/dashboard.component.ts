@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../service/auth.service';
 import { AdminService } from '../service/admin.service'; // Import AdminService
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
@@ -21,18 +22,21 @@ export class DashboardComponent implements OnInit {
   newUser: any = { username: '', email: '', role: '' };
   newItem: any = { item_name: '', description: '', item_type: '', path: '' };
   newPet: any = { petName: '', description: '', petType: '' , path: ''};
-  newuserPet: any = {userpet_id: '', petId: '', petType: '', userId: '',path: ''}
+  newuserPet: any = {userpet_id: '',petName: '', petId: '', userId: '',path: ''}
   newStorageItem: any = { userId: '', itemId: '', quantity: 0 };
 
   selectedUser: any = null;
   selectedItem: any = null;
   selectedPet: any = null;
+  selectedPetId: number = 0;
+  selectedUserId: number = 0;
+  selectedUserPet: any = null;
   selectedStorageItem: any = null;
   showForm: boolean = false;
   showCreateForm: boolean = false;
-  
 
-  constructor(private adminService: AdminService, private router: Router) {} // Inject Router
+
+  constructor(private adminService: AdminService,  private authService: AuthService,private router: Router) {} // Inject Router
 
   ngOnInit() {
     this.fetchUsers();
@@ -43,6 +47,10 @@ export class DashboardComponent implements OnInit {
     switch (section) {
       case 'manage-users':
         this.fetchUsers();
+        break;
+      case 'manage-user-pets':
+        this.fetchUserPets();
+        this.fetchPets();
         break;
       case 'manage-items':
         this.fetchItems();
@@ -58,6 +66,11 @@ export class DashboardComponent implements OnInit {
         break;
     }
   }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
 
   // User Management Functions
   fetchUsers() {
@@ -67,12 +80,12 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  createUser() {
+  /*createUser() {
     this.adminService.createUserPet(this.newUser.username, this.newUser.email, this.newUser.role).subscribe(() => {
       this.fetchUsers();
       this.newUser = { username: '', email: '', role: '' };
     });
-  }
+  }*/
 
   updateUser() {
     this.adminService.updateUser(this.selectedUser.user_id, this.selectedUser.username, this.selectedUser.email, this.selectedUser.role, 0).subscribe(() => {
@@ -116,6 +129,91 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  // User Pet Management Functions
+  fetchUserPets() {
+    this.adminService.getAllUserPets().subscribe(data => {
+      this.userPets = data;
+    })
+  }
+
+  populateUserPetForm(userPet: any) {
+    if(this.showForm) {
+      this.showForm = false;
+    } else {
+      this.selectedUserPet = { ...userPet };
+      this.imagePreviewUrl = userPet.path;
+      this.showForm = true;
+      this.showCreateForm = false;
+      //this.fetchPets();
+    }
+  }
+  showCreateUserPetForm() {
+    if (this.showCreateForm) {
+      // If the form is already open, close it
+      this.showCreateForm = false;
+    } else {
+      // If the form is closed, reset and open it
+      this.newuserPet = { user_pet_id: null, user_id: '', pet_id: '' ,path : ''};
+      this.showCreateForm = true;
+      this.showForm = false; // Ensure the update form is hidden
+      //this.fetchPets();
+    }
+  }
+  updateSelectedUser() {
+    if (this.selectedUserId !== null) {
+        this.selectedUser = this.users.find(user => user.user_id.toString() === this.selectedUserId.toString()) || null;
+        if (this.selectedUser) {
+            this.newuserPet.userId = this.selectedUser.user_id;
+        }
+    }
+  }
+  // Method to update the selected pet details when a pet is selected in the dropdown
+  updateSelectedPet(selectedPetId : any) {
+    if (this.selectedPetId !== null) {
+         for (let pet of this.pets) {
+          if (pet.pet_id.toString() === selectedPetId.toString()) {
+              this.selectedPet = pet; // Set the selected pet
+              break; // Exit the loop once the pet is found
+          }
+        }
+        if (this.selectedPet) {
+            this.newuserPet.petName = this.selectedPet.pet_name;
+            this.newuserPet.petId = this.selectedPet.pet_id;
+            this.newuserPet.path = this.selectedPet.path; // Store the selected pet's path
+        }
+    }
+  }
+
+  createUserPet() {
+      this.adminService.createUserPet(this.newuserPet.userId, this.newuserPet.petId, this.newuserPet.petName, this.newuserPet.path).subscribe(()=>{
+        this.newuserPet = {userpet_id: '',petName: '', petId: '', userId: '',path: ''};
+        this.showCreateForm = false;
+        this.fetchUserPets();
+        this.fetchPets();
+      })
+  }
+
+  // Method to update an existing user pet
+  updateUserPet() {
+      this.adminService.updateUserPet(
+        this.selectedUserPet.user_pet_id,
+        this.selectedUserPet.pet_id,
+        this.selectedUserPet.pet_name,
+        this.selectedUserPet.hunger_level
+      ).subscribe(()=>{
+        this.showForm = !this.showForm;
+        this.fetchUserPets();
+        this.fetchPets();
+        this.selectedUserPet = null;
+      })
+  }
+
+  // Delete a user pet
+  deleteUserPet(userPetId: number,userId: any, petId: any) {
+    this.adminService.deleteUserPet(userPetId, userId, petId).subscribe(() => {
+      this.fetchUserPets();
+    });
+  }
 
   // Item Management Functions
   fetchItems() {

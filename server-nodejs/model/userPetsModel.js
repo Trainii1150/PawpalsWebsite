@@ -15,7 +15,7 @@ const createUserPet = async (userId, petId, petName, path) => {
 
 const updateUserPet = async (userPetId, petId, petName, hungerLevel, path) => {
     try {
-        const result = await db.query(
+        const result = await pool.query(
             'UPDATE user_pets SET pet_id = $2, pet_name = $3, hunger_level = $4, last_fed = NOW(), path = $5 WHERE user_pet_id = $1 RETURNING *',
             [userPetId, petId, petName, hungerLevel, path]
         );
@@ -27,7 +27,7 @@ const updateUserPet = async (userPetId, petId, petName, hungerLevel, path) => {
 
 const deleteUserPet = async (userPetId, userId, petId) => {
     try {
-        const result = await db.query(
+        const result = await pool.query(
             'DELETE FROM user_pets WHERE user_pet_id = $1 AND user_id = $2 AND pet_id = $3 RETURNING *',
             [userPetId, userId, petId]
         );
@@ -46,6 +46,15 @@ const deleteUserPetbyUserid = async (userId) => {
         throw error;
     }
 };
+const getAllUserPets = async () => {
+    try {
+      const result = await pool.query('SELECT * FROM user_pets');
+      return result.rows;
+    } catch (error) {
+      console.error('Error getting all user_pets:', error);
+      throw error;
+    }
+  };
 
 const updateUserPetExp = async (userId, exp) => {
     try {
@@ -66,4 +75,5 @@ module.exports = {
     deleteUserPet,
     deleteUserPetbyUserid,
     updateUserPetExp,
+    getAllUserPets,
 };
