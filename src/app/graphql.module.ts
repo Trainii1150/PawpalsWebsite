@@ -6,11 +6,10 @@ import { setContext } from '@apollo/client/link/context';
 import { HttpHeaders } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { getMainDefinition } from '@apollo/client/utilities';
-import { WebSocketLink } from '@apollo/client/link/ws';
-//import { ApolloLink } from '@apollo/client';
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 
 const httpUri = 'http://localhost:3000/graphql'; // GraphQL HTTP endpoint
-const wsUri = 'ws://localhost:3000/graphql'; // GraphQL WebSocket endpoint
 
 export function createApollo(httpLink: HttpLink, cookieService: CookieService): ApolloClientOptions<any> {
   const authLink = setContext((_, { headers }) => {
@@ -24,15 +23,12 @@ export function createApollo(httpLink: HttpLink, cookieService: CookieService): 
 
   const http = httpLink.create({ uri: httpUri });
 
-  const wsLink = new WebSocketLink({
-    uri: wsUri,
-    options: {
-      reconnect: true,
-      connectionParams: {
-        authToken: cookieService.get('auth_key'),
-      },
+  const wsLink = new GraphQLWsLink(createClient({
+    url: 'ws://localhost:3000/graphql',
+    connectionParams: {
+      authToken: cookieService.get('auth_key'),
     },
-  });
+  }));
 
   const link = split(
     ({ query }) => {

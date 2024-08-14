@@ -1,11 +1,12 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const { ApolloServer, gql } = require('apollo-server-express');
-const { createServer } = require('http');
 const { WebSocketServer } = require('ws');
 const { useServer } = require('graphql-ws/lib/use/ws');
-const { makeExecutableSchema } = require('@graphql-tools/schema'); // Import makeExecutableSchema
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const express = require('express');
+const { ApolloServer } = require('apollo-server-express');
+const http = require('http');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { gql } = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
 const { pool } = require('./config/database');
 const { AuthToken, refreshToken } = require('./middleware/authmid');
@@ -153,7 +154,7 @@ const resolvers = {
     }
   },
   Mutation: {
-   /* updateProgress: async (_, { userId, itemId, progress }) => {
+    updateProgress: async (_, { userId, itemId, progress }) => {
       const updatedProgress = await RewardProgressModel.createOrUpdateProgress(userId, itemId, progress);
       const updatedTimeByLanguage = await UserModel.getTimeByLanguage(userId);
       pubsub.publish('TIME_BY_LANGUAGE_UPDATED', {
@@ -169,12 +170,12 @@ const resolvers = {
         await UserDecorationModel.createUserDecoration(userId, decoration);
       }
       return { success: true };
-    }*/
+    }
   },
   Subscription: {
-   /* timeByLanguageUpdated: {
+    timeByLanguageUpdated: {
       subscribe: () => pubsub.asyncIterator(['TIME_BY_LANGUAGE_UPDATED']),
-    },*/
+    },
   }
 };
 
@@ -189,7 +190,7 @@ async function startServer() {
   apolloServer.applyMiddleware({ app });
 
   // Create HTTP server
-  const httpServer = createServer(app);
+  const httpServer = http.createServer(app);
 
   // Create WebSocket server
   const wsServer = new WebSocketServer({
