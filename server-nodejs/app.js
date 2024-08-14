@@ -2,6 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { ApolloServer, gql } = require('apollo-server-express');
+const { createServer } = require('http');
+const { WebSocketServer } = require('ws');
+const { useServer } = require('graphql-ws/lib/use/ws');
+const { makeExecutableSchema } = require('@graphql-tools/schema'); // Import makeExecutableSchema
 const jwt = require('jsonwebtoken');
 const { pool } = require('./config/database');
 const { AuthToken, refreshToken } = require('./middleware/authmid');
@@ -13,7 +17,9 @@ const UserModel = require('./model/UserModel');
 const StoreModel = require('./model/StoreModel');
 const RewardProgressModel = require('./model/rewardProgressModel');
 const UserDecorationModel = require('./model/DecorationModel');
+const { PubSub } = require('graphql-subscriptions');
 
+const pubsub = new PubSub();
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -116,54 +122,43 @@ const typeDefs = gql`
     updateProgress(userId: ID!, itemId: Int!, progress: Float!): Progress
     saveUserDecoration(userId: ID!, decoration: DecorationInput!): MutationResponse
   }
+
+  type Subscription {
+    timeByLanguageUpdated: [TimeByLanguage]
+  }
 `;
 
 const resolvers = {
   Query: {
-    userCoins: async (_, { uid }) => {
-      return UserModel.getUserCoins(uid);
-    },
-    activity: async (_, { uid }) => {
-      return UserModel.getUserActivity(uid);
-    },
-    time: async (_, { uid }) => {
-      return UserModel.getUserActivityTime(uid);
-    },
-    storeItems: async () => {
-      return StoreModel.getStoreItems();
-    },
-    userStorageItems: async (_, { uid }) => {
-      return UserModel.getUserStorageItems(uid);
-    },
-    timeByLanguage: async (_, { uid }) => {
-      return UserModel.getTimeByLanguage(uid);
-    },
+    userCoins: async (_, { uid }) => UserModel.getUserCoins(uid),
+    activity: async (_, { uid }) => UserModel.getUserActivity(uid),
+    time: async (_, { uid }) => UserModel.getUserActivityTime(uid),
+    storeItems: async () => StoreModel.getStoreItems(),
+    userStorageItems: async (_, { uid }) => UserModel.getUserStorageItems(uid),
+    timeByLanguage: async (_, { uid }) => UserModel.getTimeByLanguage(uid),
     userPets: async (_, { uid }) => {
       try {
         const pets = await UserModel.getUserPets(uid);
-        console.log('Pets fetched:', pets); // เพิ่มการ debug
         return pets;
       } catch (error) {
         console.error('Error in resolver:', error);
         throw new ApolloError('Failed to fetch user pets');
       }
     },
-    getProgress: async (_, { userId }) => {
-      return RewardProgressModel.getProgressByUser(userId);
-    },
+    getProgress: async (_, { userId }) => RewardProgressModel.getProgressByUser(userId),
     getUserDecorationItems: async (_, { uid }) => {
       const pets = await UserModel.getUserPets(uid);
       const backgrounds = await UserModel.getUserBackgrounds(uid);
-      return {
-        pets,
-        backgrounds
-      };
-    },
+      return { pets, backgrounds };
+    }
   },
-  
   Mutation: {
-    updateProgress: async (_, { userId, itemId, progress }) => {
+   /* updateProgress: async (_, { userId, itemId, progress }) => {
       const updatedProgress = await RewardProgressModel.createOrUpdateProgress(userId, itemId, progress);
+      const updatedTimeByLanguage = await UserModel.getTimeByLanguage(userId);
+      pubsub.publish('TIME_BY_LANGUAGE_UPDATED', {
+        timeByLanguageUpdated: updatedTimeByLanguage,
+      });
       return updatedProgress;
     },
     saveUserDecoration: async (_, { userId, decoration }) => {
@@ -174,18 +169,40 @@ const resolvers = {
         await UserDecorationModel.createUserDecoration(userId, decoration);
       }
       return { success: true };
-    }
+    }*/
+  },
+  Subscription: {
+   /* timeByLanguageUpdated: {
+      subscribe: () => pubsub.asyncIterator(['TIME_BY_LANGUAGE_UPDATED']),
+    },*/
   }
 };
 
 async function startServer() {
-  const server = new ApolloServer({ typeDefs, resolvers });
+  const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-  await server.start();
-  server.applyMiddleware({ app });
+  const apolloServer = new ApolloServer({
+    schema,
+  });
 
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app });
+
+  // Create HTTP server
+  const httpServer = createServer(app);
+
+  // Create WebSocket server
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql',
+  });
+
+  // Apply GraphQL WebSocket server
+  useServer({ schema }, wsServer);
+
+  // Start the server
+  httpServer.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}${apolloServer.graphqlPath}`);
   });
 }
 

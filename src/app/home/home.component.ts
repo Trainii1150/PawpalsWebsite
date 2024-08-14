@@ -95,6 +95,7 @@ petPath: any;
     this.getTimeByLanguage();
     this.getUserDecorationItems();
     this.getUserPets();
+    this.subscribeToTimeByLanguageUpdates();
   }
 
   toggleActivity() {
@@ -195,7 +196,21 @@ petPath: any;
       });
     }
   }
-  
+  subscribeToTimeByLanguageUpdates(): void {
+    this.apollo.subscribe({
+      query: gql`
+        subscription OnTimeByLanguageUpdated {
+          timeByLanguageUpdated {
+            language
+            total_time
+          }
+        }
+      `
+    }).subscribe((result: any) => {
+      this.timeByLanguage = result.data.timeByLanguageUpdated;
+      this.initializeChart();  // Re-render chart with updated data
+    });
+  }
   getTimeByLanguage(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
