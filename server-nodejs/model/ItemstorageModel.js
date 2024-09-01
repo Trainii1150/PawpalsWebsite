@@ -1,7 +1,5 @@
 const pool = require('../config/database');
 
-
-
 const getAllStorage = async () => {
   try {
     const result = await pool.query('SELECT * FROM user_storage');
@@ -12,10 +10,10 @@ const getAllStorage = async () => {
   }
 };
 
-const createStorageItem = async (userId, itemId, quantity, path) => {
+const createStorageItem = async (userId, itemId, quantity) => {
   const result = await pool.query(
-    'INSERT INTO user_storage (user_id, item_id, quantity, path) VALUES ($1, $2, $3, $4) RETURNING *',
-    [userId, itemId, quantity, path]
+    'INSERT INTO user_storage (user_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *',
+    [userId, itemId, quantity]
   );
   return result.rows[0];
 };

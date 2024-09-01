@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../service/auth.service';
-import { AdminService } from '../service/admin.service'; // Import AdminService
+import { AuthService } from '../services/auth.service';
+import { AdminService } from '../services/admin.service'; // Import AdminService
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
