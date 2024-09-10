@@ -310,7 +310,17 @@ const getUserPets = async (uid) => {
 };
 
   
+feedPet: async (userId, petId, foodValue) => {
+  // อัปเดตข้อมูลสัตว์เลี้ยงในฐานข้อมูล (เช่น การลด hunger_level)
+  const result = await pool.query(
+    'UPDATE pets SET hunger_level = hunger_level + $1 WHERE pet_id = $2 RETURNING *',
+    [foodValue, petId]
+  );
 
+  return result.rows[0]; // ส่งคืนข้อมูลสัตว์เลี้ยงที่อัปเดตแล้ว
+},
+
+  
 module.exports = {
     createUser,
     getUserData,

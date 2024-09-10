@@ -9,7 +9,7 @@ router.delete('/delete-item', AuthToken, UserController.deleteItemfromStorage);
 
 // Routes for user pets
 router.post('/buy-userpets', AuthToken, UserController.createUserPet);
-router.post('/feed-pet',AuthToken, UserController.feedPet);
+router.post('/feed-pet', AuthToken, UserController.feedPet);
 router.put('/update-userpets', AuthToken, UserController.updateUserPet);
 router.delete('/delete-userpets', AuthToken, UserController.deleteUserPet);
 router.post('/randomize-pet', AuthToken, UserController.randomizePet); // เพิ่ม AuthToken ที่นี่

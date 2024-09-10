@@ -16,17 +16,9 @@ import { GraphQLModule } from './graphql.module';
 import { ForgetpasswordComponent } from './forgetpassword/forgetpassword.component';
 import { ResetpasswordComponent } from './resetpassword/resetpassword.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { CookieService } from 'ngx-cookie-service';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminLoginComponent } from './admin-login/admin-login.component';
-
-// Services
-import { AuthService } from './services/auth.service';
-import { DataService } from './services/data.service';
-import { ChartService } from './services/chart.service';
-import { UserService } from './services/user.service';
-import { AdminService } from './services/admin.service';
-
-import { CookieService } from 'ngx-cookie-service';
 
 @NgModule({
   declarations: [
@@ -52,17 +44,12 @@ import { CookieService } from 'ngx-cookie-service';
     CarouselModule,
   ],
   providers: [
-    CookieService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
     },
-    AuthService,
-    DataService,
-    ChartService,
-    UserService,
-    AdminService,
+    CookieService
   ],
   bootstrap: [AppComponent]
 })

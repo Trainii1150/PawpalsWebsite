@@ -5,7 +5,6 @@ const UserPetsModel = require('../model/userPetsModel');
 const ItemStorageModel = require('../model/ItemstorageModel');
 const DecorationModel = require('../model/DecorationModel');
 const jwt = require("jsonwebtoken");
-const pubsub = require('../pubsub');
 
 const tokenExtensionsGenerate = (req, res) => {
     try {
@@ -20,31 +19,31 @@ const tokenExtensionsGenerate = (req, res) => {
 
 
 const buyItem = async (req, res) => {
-  const { uid, item_id } = req.body;
-
-  console.log('Buying item:', { uid, item_id });
-
-  if (!uid || !item_id) {
-    return res.status(400).json({ message: 'User ID and Item ID are required' });
-  }
-
-  try {
-    const itemPrice = await ItemStorageModel.getItemPrice(item_id);
-    await CoinsModel.deductUserCoins(uid, itemPrice);
-
-    const existingItem = await ItemStorageModel.checkItemInStorageItem(uid, item_id);
-    if (existingItem) {
-      const updatedItem = await ItemStorageModel.updateStorageItem(existingItem.storage_id, uid, item_id, existingItem.quantity + 1);
-      return res.status(200).json({ message: 'Item updated successfully' });
-    } else {
-      const newItem = await ItemStorageModel.createStorageItem(uid, item_id, 1);
-      return res.status(201).json({ message: 'Item bought successfully' });
+    const { uid, item_id } = req.body;
+  
+    console.log('Buying item:', { uid, item_id });
+  
+    if (!uid || !item_id) {
+      return res.status(400).json({ message: 'User ID and Item ID are required' });
     }
-  } catch (error) {
-    console.error('Error buying item:', error);
-    res.status(500).json({ message: 'Internal Server Error', error: error.message });
-  }
-};
+  
+    try {
+      const itemPrice = await ItemStorageModel.getItemPrice(item_id);
+      await CoinsModel.deductUserCoins(uid, itemPrice);
+  
+      const existingItem = await ItemStorageModel.checkItemInStorageItem(uid, item_id);
+      if (existingItem) {
+        const updatedItem = await ItemStorageModel.updateStorageItem(existingItem.storage_id, uid, item_id, existingItem.quantity + 1);
+        return res.status(200).json({ message: 'Item updated successfully' });
+      } else {
+        const newItem = await ItemStorageModel.createStorageItem(uid, item_id, 1);
+        return res.status(201).json({ message: 'Item bought successfully' });
+      }
+    } catch (error) {
+      console.error('Error buying item:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  };
   
 const deleteItemfromStorage = async (req, res) => {
     const { storageId, userId, itemId } = req.body;
@@ -149,41 +148,32 @@ const randomizePet = async (req, res) => {
   
   
 const feedPet = async (req, res) => {
-  const { uid, petId, foodValue } = req.body;
-
-  try {
-    // Check if the food item exists in the user's storage
-    const foodItem = await ItemStorageModel.getFoodItem(uid, foodValue);
-    if (!foodItem || foodItem.quantity === 0) {
-      return res.status(400).json({ error: 'Food item not found or quantity is zero' });
-    }
-
-    // Update the pet's hunger level
-    await PetModel.updateHungerLevel(petId, foodValue);
-
-    // Update the quantity of food in storage
-    const newQuantity = foodItem.quantity - 1;
-    await ItemStorageModel.updateFoodQuantity(foodItem.storage_id, newQuantity);
-
-    // Delete the food item if the quantity is zero
-    if (newQuantity === 0) {
-      await ItemStorageModel.deleteFoodItem(foodItem.storage_id);
-    }
-
-    // Publish the update to the subscription
-    const updatedPet = await PetModel.getPetById(petId);
-    pubsub.publish('PET_FED', { 
-      petFed: {
-        pet_id: petId,
-        hunger_level: updatedPet.hunger_level,
+    const { uid, petId, foodValue} = req.body;
+  
+    try {
+      // Check if the food item exists in the user's storage
+      const foodItem = await ItemStorageModel.getFoodItem(uid, foodValue);
+      if (!foodItem || foodItem.quantity === 0) {
+        return res.status(400).json({ error: 'Food item not found or quantity is zero' });
       }
-    });
-
-    res.status(200).json({ message: 'Pet fed successfully' });
-  } catch (error) {
-    console.error('Error feeding pet:', error);
-    res.status(500).json({ error: 'An error occurred while feeding the pet' });
-  }
+  
+      // Update the pet's hunger level
+      await PetModel.updateHungerLevel(petId, foodValue);
+  
+      // Update the quantity of food in storage
+      const newQuantity = foodItem.quantity - 1;
+      await ItemStorageModel.updateFoodQuantity(foodItem.storage_id, newQuantity);
+  
+      // Delete the food item if the quantity is zero
+      if (newQuantity === 0) {
+        await ItemStorageModel.deleteFoodItem(foodItem.storage_id);
+      }
+  
+      res.status(200).json({ message: 'Pet fed successfully' });
+    } catch (error) {
+      console.error('Error feeding pet:', error);
+      res.status(500).json({ error: 'An error occurred while feeding the pet' });
+    }
 };
 
 const updateProgress = async (req, res) => {
