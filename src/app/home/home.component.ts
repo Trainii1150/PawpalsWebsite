@@ -21,7 +21,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.showInfoModal = !this.showInfoModal;
   }
 
-  showActivity = false;
+ showActivity = false;
   showInventory = false;
   showStore = false;
   showDecoration = false;
@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   petName: String | undefined = "David";
   foodStatus: Number | undefined;
   happinessStatus: Number | undefined = 40;
-  exp: Number | undefined; // ตัวแปรเพื่อเก็บค่าประสบการณ์
+  exp: Number | undefined; 
   todayCodeTime: Number | undefined = 0;
   monthlyCodeTime: Number | undefined = 0;
   todayTimeCompare: Number | undefined = 0;
@@ -44,8 +44,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   backgrounds: any[] = [];
   selectedPet: any;
   selectedBackground: any;
-  selectedMenu: string = 'pet'; // กำหนดค่าเริ่มต้นเป็น 'pet'
-  showInfoModal: boolean = false; // ตัวแปรเพื่อควบคุมการแสดง Info Modal
+  selectedMenu: string = 'pet'; 
+  showInfoModal: boolean = false; 
 
   customOptions: OwlOptions = {
     loop: true,
@@ -92,10 +92,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.getStoreItems();
     this.getUserCoins();
     this.getUserStorageItems();
-    this.getTimeByLanguage();
+    this.getTimeByLanguage(); 
     this.getUserDecorationItems();
     this.getUserPets();
-    this.subscribeToTimeByLanguageUpdates();
   }
 
   toggleActivity() {
@@ -227,13 +226,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
         `,
         variables: {
           uid: uid
-        }
+        },
+        pollInterval: 3000000 // ดึงข้อมูลทุกๆ 5 นาที (300,000 มิลลิวินาที)
       })
       .valueChanges
       .subscribe(
         (response: any) => {
           this.timeByLanguage = response.data.timeByLanguage;
-          this.initializeChart();
+          this.initializeChart();  // อัปเดตกราฟด้วยข้อมูลใหม่
         },
         (error: any) => {
           console.error('Error getting time by language:', error);
@@ -253,6 +253,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       });
     }
   }
+  
 
   getStoreItems(): void {
     this.apollo
@@ -488,32 +489,34 @@ export class HomeComponent implements OnInit, AfterViewInit {
           }
         `,
         variables: {
-          uid: uid,
+          uid: uid
         },
+        pollInterval: 3000000 // Polling ทุกๆ 5 นาที (300,000 มิลลิวินาที)
       })
-        .valueChanges
-        .subscribe(
-          (response: any) => {
-            const pet = response.data.userPets[0]; // สมมติว่าเราดึงสัตว์เลี้ยงตัวแรก
-            this.petName = pet.pet_name;
-            this.foodStatus = pet.hunger_level;
-            this.happinessStatus = 40; // ค่าที่กำหนดเอง
-            this.exp = pet.exp;
-            this.petPath = pet.path;
-          },
-          error => {
-            console.error('Error getting user pets:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: `Failed to get user pets: ${error.message}`,
-            });
-          }
-        );
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          const pet = response.data.userPets[0]; // สมมติว่าเราดึงสัตว์เลี้ยงตัวแรก
+          this.petName = pet.pet_name;
+          this.foodStatus = pet.hunger_level;  // อัปเดตค่า hunger_level
+          this.happinessStatus = 40; // ค่า happiness ที่กำหนดเอง
+          this.exp = pet.exp;
+          this.petPath = pet.path;
+        },
+        error => {
+          console.error('Error getting user pets:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to get user pets: ${error.message}`,
+          });
+        }
+      );
     } else {
       console.error('Token not found in cookies');
     }
   }
+  
 
   selectFoodItem(item: any) {
     const petId = 1; // ตัวอย่าง petId
@@ -616,6 +619,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
       });
     }
   }
+
+  
 
   initializeChart(): void {
     const chartContainer = document.getElementById("donut-chart");

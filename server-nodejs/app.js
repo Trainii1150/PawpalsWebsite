@@ -1,36 +1,15 @@
-const { WebSocketServer } = require('ws');
-const { useServer } = require('graphql-ws/lib/use/ws');
-const { makeExecutableSchema } = require('@graphql-tools/schema');
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { gql } = require('apollo-server-express');
-const jwt = require('jsonwebtoken');
-const { pool } = require('./config/database');
-const { AuthToken, refreshToken } = require('./middleware/authmid');
-const UserRoutes = require('./routes/Userroutes');
-const adminRoutes = require('./routes/Adminroutes');
-const AuthRoutes = require('./routes/AuthRoutes');
-const UserController = require('./controller/UserController');
 const UserModel = require('./model/UserModel');
 const StoreModel = require('./model/StoreModel');
 const RewardProgressModel = require('./model/rewardProgressModel');
-const UserDecorationModel = require('./model/DecorationModel');
-const { PubSub } = require('graphql-subscriptions');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
 
-const pubsub = new PubSub();
-const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/api/auth', AuthRoutes);
-app.use('/api/user', UserRoutes);
-app.use('/api/admin', adminRoutes);
-
+// GraphQL Schema Definitions
 const typeDefs = gql`
   type TimeByLanguage {
     language: String
@@ -120,15 +99,12 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    updateProgress(userId: ID!, itemId: Int!, progress: Float!): Progress
-    saveUserDecoration(userId: ID!, decoration: DecorationInput!): MutationResponse
-  }
-
-  type Subscription {
-    timeByLanguageUpdated: [TimeByLanguage]
+    buyItem(userId: ID!, itemId: Int!): MutationResponse
+    updateTimeByLanguage(userId: ID!, language: String!, total_time: Float!): [TimeByLanguage]
   }
 `;
 
+// GraphQL Resolvers
 const resolvers = {
   Query: {
     userCoins: async (_, { uid }) => UserModel.getUserCoins(uid),
@@ -154,32 +130,21 @@ const resolvers = {
     }
   },
   Mutation: {
-    updateProgress: async (_, { userId, itemId, progress }) => {
-      const updatedProgress = await RewardProgressModel.createOrUpdateProgress(userId, itemId, progress);
-      const updatedTimeByLanguage = await UserModel.getTimeByLanguage(userId);
-      pubsub.publish('TIME_BY_LANGUAGE_UPDATED', {
-        timeByLanguageUpdated: updatedTimeByLanguage,
-      });
-      return updatedProgress;
-    },
-    saveUserDecoration: async (_, { userId, decoration }) => {
-      let existingDecoration = await pool.query('SELECT * FROM user_decorations WHERE user_id = $1', [userId]);
-      if (existingDecoration.rows.length > 0) {
-        await UserDecorationModel.updateUserDecoration(userId, decoration);
-      } else {
-        await UserDecorationModel.createUserDecoration(userId, decoration);
-      }
-      return { success: true };
-    }
-  },
-  Subscription: {
-    timeByLanguageUpdated: {
-      subscribe: () => pubsub.asyncIterator(['TIME_BY_LANGUAGE_UPDATED']),
+    updateTimeByLanguage: async (_, { userId, language, total_time }) => {
+      const updatedTimeByLanguage = await UserModel.updateTimeByLanguage(userId, language, total_time);
+      return updatedTimeByLanguage;
     },
   }
 };
 
 async function startServer() {
+  const app = express();
+  const port = process.env.PORT || 3000;
+
+  app.use(cors());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
   const apolloServer = new ApolloServer({
@@ -191,15 +156,6 @@ async function startServer() {
 
   // Create HTTP server
   const httpServer = http.createServer(app);
-
-  // Create WebSocket server
-  const wsServer = new WebSocketServer({
-    server: httpServer,
-    path: '/graphql',
-  });
-
-  // Apply GraphQL WebSocket server
-  useServer({ schema }, wsServer);
 
   // Start the server
   httpServer.listen(port, () => {
