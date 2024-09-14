@@ -1,5 +1,4 @@
-const UserModel = require('../model/UserModel');
-const CoinsModel = require('../model/CoinsModel');
+const UserModel = require('../model/Usermodel');
 const PetModel = require('../model/PetModel');
 const UserPetsModel = require('../model/userPetsModel');
 const ItemStorageModel = require('../model/ItemstorageModel');
@@ -19,31 +18,32 @@ const tokenExtensionsGenerate = (req, res) => {
 
 
 const buyItem = async (req, res) => {
-    const { uid, item_id } = req.body;
-  
-    console.log('Buying item:', { uid, item_id });
-  
-    if (!uid || !item_id) {
-      return res.status(400).json({ message: 'User ID and Item ID are required' });
+  const { uid, item_id } = req.body;
+
+  console.log('Buying item:', { uid, item_id });
+
+  if (!uid || !item_id) {
+    return res.status(400).json({ message: 'User ID and Item ID are required' });
+  }
+
+  try {
+    const itemPrice = await ItemStorageModel.getItemPrice(item_id);
+    await CoinsModel.deductUserCoins(uid, itemPrice);
+
+    const existingItem = await ItemStorageModel.checkItemInStorageItem(uid, item_id);
+    if (existingItem) {
+      const updatedItem = await ItemStorageModel.updateStorageItem(existingItem.storage_id, uid, item_id, existingItem.quantity + 1);
+      return res.status(200).json({ message: 'Item updated successfully' });
+    } else {
+      const newItem = await ItemStorageModel.createStorageItem(uid, item_id, 1);
+      return res.status(201).json({ message: 'Item bought successfully' });
     }
-  
-    try {
-      const itemPrice = await ItemStorageModel.getItemPrice(item_id);
-      await CoinsModel.deductUserCoins(uid, itemPrice);
-  
-      const existingItem = await ItemStorageModel.checkItemInStorageItem(uid, item_id);
-      if (existingItem) {
-        const updatedItem = await ItemStorageModel.updateStorageItem(existingItem.storage_id, uid, item_id, existingItem.quantity + 1);
-        return res.status(200).json({ message: 'Item updated successfully' });
-      } else {
-        const newItem = await ItemStorageModel.createStorageItem(uid, item_id, 1);
-        return res.status(201).json({ message: 'Item bought successfully' });
-      }
-    } catch (error) {
-      console.error('Error buying item:', error);
-      res.status(500).json({ message: 'Internal Server Error', error: error.message });
-    }
-  };
+  } catch (error) {
+    console.error('Error buying item:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
+
   
 const deleteItemfromStorage = async (req, res) => {
     const { storageId, userId, itemId } = req.body;

@@ -149,20 +149,24 @@ const getUserStorageItems = async (uid) => {
 };
 
 const getUserActivity = async (userId) => {
-    try {
-        const result = await pool.query(`
-            SELECT "ActivityCode_ID", "Languages", wordcount, coins, "time", "Timestamp", user_id
-            FROM public.coding_activity
-            WHERE user_id = $1
-            ORDER BY "Timestamp" DESC
-        `, [userId]);
+  try {
+    const result = await pool.query(`
+      SELECT "ActivityCode_ID", "Languages", wordcount, coins, "time", "Timestamp", "code_references", "paste_count", "project_name", user_id
+      FROM public.coding_activity
+      WHERE user_id = $1
+      ORDER BY "Timestamp" DESC
+    `, [userId]);
 
-        return result.rows;
-    } catch (error) {
-        console.error('Error getting activity data:', error);
-        throw new Error('Error getting activity data');
-    }
+    console.log('User Activity Data:', result.rows); // ตรวจสอบข้อมูลที่ดึงมา
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error getting activity data:', error);
+    throw new Error('Error getting activity data');
+  }
 };
+
+
 
 const getUserActivityTime = async (uid) => {
     try {

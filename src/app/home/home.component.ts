@@ -339,63 +339,74 @@ export class HomeComponent implements OnInit, AfterViewInit {
   getActivityData(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
-        this.apollo.watchQuery({
-            query: gql`
-                query GetActivity($uid: ID!) {
-                    activity(uid: $uid) {
-                        Languages
-                        wordcount
-                        coins
-                        time
-                        Timestamp
-                    }
-                }
-            `,
-            variables: {
-                uid: uid
-            },
-        })
-        .valueChanges
-        .subscribe(
-            (response: any) => {
-                this.activityData = response.data.activity.map((activity: any) => {
-                    return {
-                        ...activity,
-                        Timestamp: this.formatTimestamp(activity.Timestamp),
-                    };
-                });
-            },
-            (error: any) => {
-                console.error('Error getting activity data:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: `Failed to get activity data: ${error.message}`,
-                });
+      this.apollo.watchQuery({
+        query: gql`
+          query GetActivity($uid: ID!) {
+            activity(uid: $uid) {
+              Languages
+              wordcount
+              coins
+              time
+              Timestamp
+              project_name
             }
-        );
-    } else {
-        console.error('Token not found in cookies');
-        Swal.fire({
+          }
+        `,
+        variables: {
+          uid: uid
+        },
+      })
+      .valueChanges
+      .subscribe(
+        (response: any) => {
+          // แปลง timestamp เป็น Date ในที่เดียวทันทีหลังรับข้อมูล
+          this.activityData = response.data.activity.map((activity: any) => ({
+            ...activity,
+            Timestamp: this.cleanTimestamp(activity.Timestamp)  // แปลง string timestamp เป็น Date ที่จัดรูปแบบ
+          }));
+        },
+        (error: any) => {
+          console.error('Error getting activity data:', error);
+          Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'User ID token not found in cookies',
-        });
+            text: `Failed to get activity data: ${error.message}`,
+          });
+        }
+      );
+    } else {
+      console.error('Token not found in cookies');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'User ID token not found in cookies',
+      });
     }
   }
+  
 
   formatTimestamp(timestamp: string | null | undefined): string {
     if (!timestamp) {
       return 'Invalid Date';
     }
-
+  
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) {
       return 'Invalid Date';
     }
-
-    return moment(date).format('h:mm:ss a, MMMM Do YYYY');
+  
+    // รูปแบบใหม่: h:mm:ss a, MMMM Do YYYY
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('default', { month: 'long' });
+    const year = date.getFullYear();
+  
+    return `${hours % 12}:${minutes}:${seconds} ${period}, ${month} ${day} ${year}`;
   }
+  
 
   buyItem(item: any): void {
     const uid = this.cookieService.get('uid');
@@ -620,8 +631,258 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
   }
 
+  formatTimestampToActiveDays(timestamp: string | null | undefined): string {
+    if (!timestamp) {
+      // ถ้า timestamp เป็น null หรือ undefined ให้แสดงข้อความที่เหมาะสม
+      return 'No start date available - ' + moment(new Date()).format('DD/MM/YYYY');
+    }
+  
+    const startDate = new Date(parseInt(timestamp));
+    const endDate = new Date();
+  
+    if (isNaN(startDate.getTime())) {
+      // ถ้าการแปลง timestamp ไม่ถูกต้อง ให้แสดงวันที่สิ้นสุดเพียงอย่างเดียว
+      return 'No start date available - ' + moment(endDate).format('DD/MM/YYYY');
+    }
+  
+    const formattedStartDate = `${startDate.getDate()}/${startDate.getMonth() + 1}/${startDate.getFullYear()}`;
+    const formattedEndDate = `${endDate.getDate()}/${endDate.getMonth() + 1}/${endDate.getFullYear()}`;
+    return `${formattedStartDate} - ${formattedEndDate}`;
+  }
+  
+  
+// ฟังก์ชันสร้างรายงานสำหรับโปรเจกต์ที่รวมข้อมูล
+createReportForProjectGroup(name: string, projectGroup: any[], selectedDetails: any = { totalTimeChecked: true, activeDaysChecked: true, wordCountChecked: true, coinsEarnedChecked: true }): void {
+  // หาวันที่เริ่มต้นและวันที่สิ้นสุด
+  const timestamps = projectGroup.map(project => new Date(project.Timestamp));
+  const startDate = new Date(Math.min(...timestamps.map(t => t.getTime())));
+  const endDate = new Date(Math.max(...timestamps.map(t => t.getTime())));
   
 
+  // รวมค่าต่างๆ
+  const totalTime = projectGroup.reduce((sum, project) => sum + project.time, 0);
+  const totalWordCount = projectGroup.reduce((sum, project) => sum + project.wordcount, 0);
+  const totalCoins = projectGroup.reduce((sum, project) => sum + project.coins, 0);
+
+  let reportHtml = `
+    <div style="padding: 20px; font-family: Arial, sans-serif; border: 1px solid #ccc; border-radius: 10px; max-width: 800px; margin: 20px auto;">
+      <h1 style="color: #FF6B6B; text-align: center;">PawsPal</h1>
+      <h2 style="text-align: center; color: #333;">รายงานกิจกรรม</h2>
+      <h3 style="text-align: center; color: #555;">${name}</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="background-color: #f8f8f8;">
+            <th style="padding: 10px; text-align: left;">ชื่อโปรเจกต์</th>
+  `;
+
+  // เพิ่ม header ตามรายละเอียดที่ผู้ใช้เลือก
+  if (selectedDetails.totalTimeChecked) reportHtml += `<th style="padding: 10px; text-align: left;">เวลาทั้งหมด</th>`;
+  if (selectedDetails.activeDaysChecked) reportHtml += `<th style="padding: 10px; text-align: left;">ช่วงวันที่ทำงาน</th>`;
+  if (selectedDetails.wordCountChecked) reportHtml += `<th style="padding: 10px; text-align: left;">จำนวนคำ</th>`;
+  if (selectedDetails.coinsEarnedChecked) reportHtml += `<th style="padding: 10px; text-align: left;">เหรียญที่ได้</th>`;
+
+  reportHtml += `</tr></thead><tbody><tr><td style="padding: 10px; border-bottom: 1px solid #ddd;">${projectGroup[0].project_name}</td>`;
+
+  // เพิ่มข้อมูลตามรายละเอียดที่ผู้ใช้เลือก
+  if (selectedDetails.totalTimeChecked) reportHtml += `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${(totalTime / 60).toFixed(2)} ชั่วโมง</td>`;
+  if (selectedDetails.activeDaysChecked) reportHtml += `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${moment(startDate).format('DD/MM/YYYY')} - ${moment(endDate).format('DD/MM/YYYY')}</td>`;
+  if (selectedDetails.wordCountChecked) reportHtml += `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${totalWordCount}</td>`;
+  if (selectedDetails.coinsEarnedChecked) reportHtml += `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${totalCoins.toFixed(2)}</td>`;
+
+  reportHtml += `
+      </tr>
+      </tbody>
+    </table>
+    <p style="text-align: right; margin-top: 20px;">SN:4815165sa561dsa</p>
+  </div>`;
+
+  const newWindow = window.open('', '_blank');
+  if (newWindow) {
+    newWindow.document.write(reportHtml);
+    newWindow.document.close();
+  }
+}
+
+
+
+cleanTimestamp(timestamp: string | number): string {
+  // ตรวจสอบว่า timestamp เป็นตัวเลขหรือไม่
+  const timestampNum = Number(timestamp);
+  if (isNaN(timestampNum)) {
+    return 'Invalid date';
+  }
+
+  // แปลง timestamp ที่เป็น Unix time (หน่วยมิลลิวินาที) เป็น Date object
+  const dateObj = new Date(timestampNum);
+
+  // ตรวจสอบว่าเป็นวันที่ถูกต้องหรือไม่
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid date';
+  }
+
+  // จัดรูปแบบเป็น YYYY-MM-DD HH:mm
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // เดือนนับจาก 0
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  const hours = String(dateObj.getHours()).padStart(2, '0');
+  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
+
+
+generateReport(): void {
+  const aggregatedProjects = this.activityData.reduce((acc: any, project: any) => {
+    const existingProject = acc.find((p: any) => p.project_name === project.project_name);
+    if (existingProject) {
+      existingProject.wordcount += project.wordcount;
+      existingProject.coins += project.coins;
+      existingProject.time += project.time;
+      existingProject.timestamps.push(this.cleanTimestamp(project.Timestamp));  // ใช้ cleanTimestamp ที่ปรับปรุงแล้ว
+    } else {
+      acc.push({
+        ...project,
+        timestamps: [this.cleanTimestamp(project.Timestamp)]  // ใช้ cleanTimestamp ที่ปรับปรุงแล้ว
+      });
+    }
+    return acc;
+  }, []);
+
+  Swal.fire({
+    title: 'สร้างรายงาน',
+    html: `
+      <label for="name" class="label">ใส่ชื่อของคุณ</label>
+      <input id="name" class="input input-bordered w-full max-w-xs swal2-input" placeholder="Your Name">
+      
+      <div style="text-align: left; margin-top: 20px;">
+        <label class="label"><span class="label-text">เลือกโปรเจกต์:</span></label><br>
+        ${aggregatedProjects.map(
+          (project: { project_name: any; }, index: number) =>
+            `<label class="label cursor-pointer">
+              <span class="label-text">${project.project_name}</span>
+              <input type="radio" name="project" id="project${index}" value="${index}" class="radio radio-primary" ${index === 0 ? 'checked' : ''}>
+            </label>`
+        ).join('')}
+      </div>
+
+      <div style="text-align: left; margin-top: 20px;">
+        <label class="label"><span class="label-text">เลือกข้อมูลที่ต้องการแสดง:</span></label><br>
+        <label class="label cursor-pointer">
+          <span class="label-text">เวลาทั้งหมด</span>
+          <input type="checkbox" id="totalTime" value="totalTime" class="checkbox checkbox-primary" checked>
+        </label>
+        <label class="label cursor-pointer">
+          <span class="label-text">วันทำงาน</span>
+          <input type="checkbox" id="activeDays" value="activeDays" class="checkbox checkbox-primary" checked>
+        </label>
+        <label class="label cursor-pointer">
+          <span class="label-text">จำนวนคำ</span>
+          <input type="checkbox" id="wordCount" value="wordCount" class="checkbox checkbox-primary" checked>
+        </label>
+        <label class="label cursor-pointer">
+          <span class="label-text">เหรียญที่ได้</span>
+          <input type="checkbox" id="coinsEarned" value="coinsEarned" class="checkbox checkbox-primary" checked>
+        </label>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'สร้างรายงาน',
+    preConfirm: () => {
+      const name = (document.getElementById('name') as HTMLInputElement).value;
+      const selectedProjectElement = document.querySelector('input[name="project"]:checked') as HTMLInputElement;
+      const selectedProjectIndex = selectedProjectElement ? selectedProjectElement.value : undefined;
+
+      const totalTimeChecked = (document.getElementById('totalTime') as HTMLInputElement).checked;
+      const activeDaysChecked = (document.getElementById('activeDays') as HTMLInputElement).checked;
+      const wordCountChecked = (document.getElementById('wordCount') as HTMLInputElement).checked;
+      const coinsEarnedChecked = (document.getElementById('coinsEarned') as HTMLInputElement).checked;
+
+      if (!name) {
+        Swal.showValidationMessage('กรุณาใส่ชื่อของคุณ');
+        return;
+      }
+
+      if (selectedProjectIndex === undefined) {
+        Swal.showValidationMessage('กรุณาเลือกโปรเจกต์');
+        return;
+      }
+
+      return {
+        name,
+        selectedProjectIndex,
+        totalTimeChecked,
+        activeDaysChecked,
+        wordCountChecked,
+        coinsEarnedChecked
+      };
+    }
+  }).then((result: any) => {
+    if (result.isConfirmed) {
+      const formData = result.value;
+      const selectedProject = aggregatedProjects[formData.selectedProjectIndex]; 
+      
+      // สร้าง array ของ project ที่มีชื่อเดียวกันจาก aggregatedProjects
+      const projectsWithSameName = this.activityData.filter(p => p.project_name === selectedProject.project_name);
+
+      // เรียกใช้ createReportForProjectGroup พร้อมข้อมูลที่รวมแล้ว
+      this.createReportForProjectGroup(formData.name, projectsWithSameName, formData);  
+    }
+  });
+}
+  // ฟังก์ชันสำหรับดึงข้อมูล activityData จากเซิร์ฟเวอร์
+  fetchActivityData(formData: any): void {
+    const uid = this.cookieService.get('uid'); // ดึง user id จาก cookie
+    if (!uid) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'User ID not found in cookies',
+      });
+      return;
+    }
+  
+    // GraphQL query สำหรับดึงข้อมูล activity ของผู้ใช้
+    const userQuery = gql`
+      query GetUserActivity($uid: ID!) {
+        activity(uid: $uid) {
+          Languages
+          wordcount
+          coins
+          time
+          Timestamp
+          code_references
+          paste_count
+          project_name
+        }
+      }
+    `;
+  
+    // ดึงข้อมูล activity จาก GraphQL
+    this.apollo
+      .watchQuery({
+        query: userQuery,
+        variables: { uid: uid },
+      })
+      .valueChanges.subscribe(
+        (response: any) => {
+          const activityData = response.data.activity;
+          console.log('Activity Data:', activityData); // ตรวจสอบข้อมูลใน console
+          this.createReportForProjectGroup(formData, activityData); // ส่ง formData และ activityData ไปยัง createReport
+        },
+        (error: any) => {
+          console.error('Error fetching user data:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to fetch user data: ${error.message}`,
+          });
+        }
+      );
+  }
+  
+
+  
+  
   initializeChart(): void {
     const chartContainer = document.getElementById("donut-chart");
     if (chartContainer && typeof ApexCharts !== 'undefined') {

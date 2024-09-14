@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controller/UserController');
-const { AuthToken } = require('../middleware/authmid'); // Import the auth middleware functions
+const { AuthToken } = require('../middleware/authmid');
 
 // Route Item user
 router.post('/buy-item', AuthToken, UserController.buyItem);

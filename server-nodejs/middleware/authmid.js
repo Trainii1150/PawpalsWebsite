@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const UserModel = require('../model/UserModel');
+const UserModel = require('../model/Usermodel');
 const secret = process.env;
 
 const AuthToken = (req, res, next) => {

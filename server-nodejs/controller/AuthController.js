@@ -1,5 +1,5 @@
-const userModel = require('../model/UserModel');
-const { generateRandomNewUserPet } = require('../controller/UserController'); // Import generateRandomNewUserPet from UserController
+const userModel = require('../model/Usermodel');
+const { generateRandomNewUserPet } = require('../controller/UserController');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
