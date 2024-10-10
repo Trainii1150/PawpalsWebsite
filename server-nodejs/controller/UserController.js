@@ -3,6 +3,7 @@ const PetModel = require('../model/PetModel');
 const UserPetsModel = require('../model/userPetsModel');
 const ItemStorageModel = require('../model/ItemstorageModel');
 const DecorationModel = require('../model/DecorationModel');
+const CoinsModel = require('../model/coinsModel');
 const jwt = require("jsonwebtoken");
 
 const tokenExtensionsGenerate = (req, res) => {
@@ -19,7 +20,6 @@ const tokenExtensionsGenerate = (req, res) => {
 
 const buyItem = async (req, res) => {
   const { uid, item_id } = req.body;
-
   console.log('Buying item:', { uid, item_id });
 
   if (!uid || !item_id) {

@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  
   content: ["./src/**/*.{html,js}"],
   theme: {
     colors: {
@@ -22,9 +21,20 @@ module.exports = {
       green: {
         100: '#14B8A6'
       },
+      blue: {
+        100: '#ebf8ff',  // สีฟ้าอ่อนมาก
+        200: '#bee3f8',  // สีฟ้าอ่อน
+        300: '#90cdf4',  // สีฟ้าปานกลาง
+        400: '#63b3ed',  // สีฟ้าเข้ม
+        500: '#4299e1',  // สีฟ้าปกติ
+        600: '#3182ce',  // สีฟ้าเข้มขึ้น
+        700: '#2b6cb0',  // สีฟ้าเข้มมาก
+        800: '#2c5282',  // สีฟ้าเข้มสุด
+        900: '#2a4365',  // สีฟ้าเข้มลึกสุด
+      },
     },
     extend: {},
   },
-  darkMode: false, // ตรวจสอบให้แน่ใจว่า dark mode ถูกปิดอยู่
-  plugins: [require('daisyui'),],
+  darkMode: false, // ปิดโหมด dark mode
+  plugins: [require('daisyui')],
 };

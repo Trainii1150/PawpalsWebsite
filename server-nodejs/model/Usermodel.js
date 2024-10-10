@@ -151,7 +151,7 @@ const getUserStorageItems = async (uid) => {
 const getUserActivity = async (userId) => {
   try {
     const result = await pool.query(`
-      SELECT "ActivityCode_ID", "Languages", wordcount, coins, "time", "Timestamp", "code_references", "paste_count", "project_name", user_id
+      SELECT "ActivityCode_ID", "Languages", wordcount, coins, "time", "Timestamp", "code_references", "paste_count", "file_name", "project_name", user_id
       FROM public.coding_activity
       WHERE user_id = $1
       ORDER BY "Timestamp" DESC
@@ -165,7 +165,6 @@ const getUserActivity = async (userId) => {
     throw new Error('Error getting activity data');
   }
 };
-
 
 
 const getUserActivityTime = async (uid) => {
