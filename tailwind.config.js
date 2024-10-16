@@ -13,6 +13,7 @@ module.exports = {
       silver: '#ecebff',
       'bubble-gum': '#ff77e9',
       bermuda: '#78dcca',
+      black:'#000000',
       yellow: {
         100: '#ffb800',
         200: '#ffd464',
