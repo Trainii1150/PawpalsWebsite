@@ -39,6 +39,7 @@ const typeDefs = gql`
     code_references: String
     paste_count: Int
     project_name: String
+    file_name: String
   }
 
   type UserStorageItem {
@@ -113,6 +114,7 @@ const typeDefs = gql`
     userPets(uid: String!): [Pet]
     getProgress(userId: ID!): [Progress]
     getUserDecorationItems(uid: ID!): UserDecorationItems
+    filesByProject(projectName: String!, userId: ID!): [String]
   }
 `;
 
@@ -136,10 +138,13 @@ const resolvers = {
     timeByLanguage: async (_, { uid }) => {
       return UserModel.getTimeByLanguage(uid);
     },
+    filesByProject: async (_, { projectName, userId }) => {
+      return UserModel.getFilesByProjectName(projectName, userId);
+    },
     userPets: async (_, { uid }) => {
       try {
         const pets = await UserModel.getUserPets(uid);
-        console.log('Pets fetched:', pets); // เพิ่มการ debug
+        console.log('Pets fetched:', pets); 
         return pets;
       } catch (error) {
         console.error('Error in resolver:', error);
@@ -149,6 +154,7 @@ const resolvers = {
     getProgress: async (_, { userId }) => {
       return RewardProgressModel.getProgressByUser(userId);
     },
+    
     getUserDecorationItems: async (_, { uid }) => {
       const pets = await UserModel.getUserPets(uid);
       const backgrounds = await UserModel.getUserBackgrounds(uid);

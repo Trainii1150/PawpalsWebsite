@@ -1,4 +1,43 @@
+
+.content-section {
+  margin-top: -100px;
+  z-index: 1;
+  position: relative;
+  padding-top: 120px;
+}
+.menu {
+  height: 100%; /* ปรับความสูงให้เท่ากับ Static Box */
+  width: 100%;  /* ปรับความกว้างให้เท่ากับ Static Box */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+}
+
+
+
+#navbar-solid-bg{
+  z-index: 5;
+}
+.background-text {
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  z-index: 3;
+}
+.drawer-side{
+  z-index: 2;
+}
+.drawer{
+  z-index: 5;
+}
+.menu button {
+  transition: all 0.3s ease-in-out;
+  transform: scale(1);
+}
+/* Inventory Styles */
 .inventory-container {
+  
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,7 +56,7 @@
 }
 
 .inventory-header h2 {
-  color: #fff;
+  color: white;
   margin: 0;
 }
 
@@ -50,8 +89,8 @@
 
 .inventory-slot {
   position: relative;
-  width: 100px; /* ขยายขนาดช่องไอเท็ม */
-  height: 100px; /* ขยายขนาดช่องไอเท็ม */
+  width: 100px;
+  height: 100px;
   background-color: #d1d5db;
   border: 1px solid #6b7280;
   border-radius: 4px;
@@ -64,7 +103,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #fff;
+  background-color: white;
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -80,6 +119,7 @@
   margin-top: 10px;
 }
 
+/* Pet Details Section */
 .pet-details {
   background-color: #F39C12;
   padding: 20px;
@@ -89,7 +129,7 @@
 }
 
 .pet-details h3 {
-  color: #fff;
+  color: white;
   text-align: center;
 }
 
@@ -108,7 +148,7 @@
 }
 
 .pet-item-slot {
-  background-color: #fff;
+  background-color: white;
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -136,10 +176,7 @@
   object-fit: cover;
 }
 
-.pet-status-bars {
-  width: 100%;
-}
-
+/* Progress Bars */
 .status-bar {
   display: flex;
   align-items: center;
@@ -148,7 +185,7 @@
 
 .status-bar span {
   width: 100px;
-  color: #fff;
+  color: white;
 }
 
 .status-bar-fill {
@@ -157,6 +194,7 @@
   border-radius: 10px;
 }
 
+/* Food Carousel */
 .food-carousel {
   margin-top: 20px;
 }
@@ -165,7 +203,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #fff;
+  background-color: white;
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -181,6 +219,7 @@
   margin-top: 10px;
 }
 
+/* Shop Items */
 .shop-header {
   display: flex;
   justify-content: space-between;
@@ -192,7 +231,7 @@
 
 .coins-display {
   background-color: #ffcc00;
-  color: #fff;
+  color: white;
   padding: 10px 20px;
   border-radius: 4px;
   font-weight: bold;
@@ -241,7 +280,10 @@
   cursor: pointer;
   font-size: 14px;
 }
-
+.h-auto {
+  height: auto;
+}
+/* Pet Display */
 .pet-display {
   display: flex;
   justify-content: center;
@@ -255,13 +297,13 @@
   border-radius: 50%;
 }
 
-/* Donut Chart Specific Styles */
+/* Donut Chart */
 #donut-chart {
   width: 100%;
   height: 320px;
 }
 
-/* Update Progress Bar Color */
+/* Progress Bars */
 progress {
   appearance: none;
   -webkit-appearance: none;
@@ -269,10 +311,6 @@ progress {
   height: 20px;
   border-radius: 10px;
   background-color: #e0e0e0;
-}
-
-#donut-chart {
-  height: 320px;
 }
 
 progress::-webkit-progress-value {
@@ -285,9 +323,16 @@ progress::-moz-progress-bar {
   border-radius: 10px;
 }
 
+/* Selected Item Style */
 .selected {
   background-color: #ffd700;
   font-weight: bold;
+}
+
+/* List and Preview Containers */
+.list-container {
+  max-height: 256px; 
+  overflow-y: auto;
 }
 
 .preview-container {
@@ -305,7 +350,7 @@ progress::-moz-progress-bar {
 .background-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* เพื่อให้ภาพพื้นหลังไม่ใหญ่กว่ากรอบ */
+  object-fit: cover;
   border-radius: 8px;
 }
 
@@ -317,14 +362,3 @@ progress::-moz-progress-bar {
   width: 200px;
   height: 200px;
 }
-
-.list-container {
-  max-height: 256px; /* ขนาดความสูงสูงสุดของรายการ */
-  overflow-y: auto;
-}
-
-.decoration-menu .col-span-2 {
-  min-height: 256px; /* กำหนดความสูงขั้นต่ำให้กับ preview-container */
-}
-
-
