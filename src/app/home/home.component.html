@@ -44,10 +44,6 @@
     </div>
 </nav>
   
-  
-       <!-- <button (click)="switchLanguage('th')" class="text-white font-bold btn" [disabled]="selectedLanguage === 'th'">ภาษาไทย</button>
-        <button (click)="switchLanguage('en')" class="text-white font-bold btn" [disabled]="selectedLanguage === 'en'">English</button>
-        <button (click)="logout()" class="bg-red-500 text-white px-4 py-2 rounded-md btn">Logout</button>-->
 
   <!-- Content Section -->
   <section class="p-9 content-section">
@@ -56,50 +52,50 @@
       <!-- Top Row with Stats -->
       <div class="col-span-3 flex gap-4 justify-center">
 
-        <!-- Static Box 1 -->
-        <div class="static-box flex-1 p-6 bg-white shadow rounded-2xl">
-          <dl class="space-y-2 text-center">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'TODAY CODING TIME' | translate }}</dt>
-            <dd class="text-5xl font-light md:text-xl dark:text-black">{{ todayCodeTime }} {{ 'HOURS' | translate }}</dd>
-            <dd class="flex items-center justify-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
-              <span>{{ todayTimeCompare }}% {{ 'INCREASE' | translate }}</span>
-              <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.25 15.25V6.75H8.75"></path>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 7L6.75 17.25"></path>
-              </svg>
-            </dd>
-          </dl>
-        </div>
+<!-- Static Box 1: Today Coding Time -->
+<div class="static-box flex-1 p-6 bg-white shadow rounded-2xl">
+  <dl class="space-y-2 text-center">
+    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'TODAY CODING TIME' | translate }}</dt>
+    <dd class="text-5xl font-light md:text-xl dark:text-black">{{ todayCodeTime }} {{ 'HOURS' | translate }}</dd>
 
-        <!-- Static Box 2 -->
-        <div class="static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
-          <dl class="space-y-2 text-center">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'MONTHLY CODING TIME' | translate }}</dt>
-            <dd class="text-5xl font-light md:text-xl dark:text-black">{{ monthlyCodeTime }} {{ 'HOURS' | translate }}</dd>
-            <dd class="flex items-center justify-center space-x-1 text-sm font-medium text-red-500 dark:text-red-400">
-              <span>{{ monthlyTimeCompare }}% {{ 'INCREASE' | translate }}</span>
-              <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.25 8.75V17.25H8.75"></path>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 17L6.75 6.75"></path>
-              </svg>
-            </dd>
-          </dl>
-        </div>
+    <!-- เปลี่ยนสีและข้อความเมื่อค่าเป็นบวกหรือลบ -->
+    <dd [ngClass]="todayTimeCompare >= 0 ? 'text-green-100 dark:text-green-100' : 'text-red-100 dark:text-red-100'" 
+        class="flex items-center justify-center space-x-1 text-sm font-medium">
+      <span>{{ todayTimeCompare }}% 
+        {{ todayTimeCompare >= 0 ? ('INCREASE' | translate) : ('DECREASE' | translate) }}
+      </span>
+    </dd>
+  </dl>
+</div>
 
-        <!-- Static Box 3 -->
-        <div class=" static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
-          <dl class="space-y-2 text-center">
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'COINS' | translate }}</dt>
-            <dd class="text-5xl font-light md:text-xl dark:text-black">{{ userCoins }} {{ 'COINS' | translate }}</dd>
-            <dd class="flex items-center justify-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
-              <span>{{ 'TOTAL_COINS' | translate }} {{ userCoins }}</span>
-              <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.25 15.25V6.75H8.75"></path>
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 7L6.75 17.25"></path>
-              </svg>
-            </dd>
-          </dl>
-        </div>
+<!-- Static Box 2: Monthly Coding Time -->
+<div class="static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
+  <dl class="space-y-2 text-center">
+    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'MONTHLY CODING TIME' | translate }}</dt>
+    <dd class="text-5xl font-light md:text-xl dark:text-black">{{ monthlyCodeTime }} {{ 'HOURS' | translate }}</dd>
+
+    <!-- เปลี่ยนสีและข้อความเมื่อค่าเป็นบวกหรือลบ -->
+    <dd [ngClass]="monthlyTimeCompare >= 0 ? 'text-green-100 dark:text-green-100' : 'text-red-100 dark:text-red-100'" 
+        class="flex items-center justify-center space-x-1 text-sm font-medium">
+      <span>{{ monthlyTimeCompare }}% 
+        {{ monthlyTimeCompare >= 0 ? ('INCREASE' | translate) : ('DECREASE' | translate) }}
+      </span>
+    </dd>
+  </dl>
+</div>
+
+
+<!-- Static Box 3 -->
+<div class=" static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
+  <dl class="space-y-2 text-center">
+    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'COINS' | translate }}</dt>
+    <dd class="text-5xl font-light md:text-xl dark:text-black">{{ userCoins }} {{ 'COINS' | translate }}</dd>
+    <dd class="flex items-center justify-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
+      <span>{{ 'Coins spend' | translate }} {{ totalCoins }}</span>
+    </dd>
+  </dl>
+</div>
+
       </div>
 
       <!-- Donut Graph -->
@@ -121,32 +117,33 @@
       </div>
 
       <!-- Pet Box -->
-      <div [ngClass]="{'h-auto': showInfoModal, 'h-120': !showInfoModal}" 
-      class="pet-box flex flex-col items-center bg-yellow-100 rounded-2xl shadow p-6 relative transition-all duration-300">
-     <button class="absolute top-0 left-0 m-4 bg-transparent text-white p-2 rounded" 
-             (click)="toggleInfoModal()">
-         {{ 'INFO' | translate }}
-     </button>
-     <h5 class="mb-1 text-xl font-bold text-white">{{ petName }}</h5>
-     <img id="pet" class="w-32 h-32 object-contain" [src]="petPath" alt="Pet image" />
-     <div class="mt-8 w-full">
-         <dd class="text-2xl font-bold dark:text-white">{{ 'FOOD' | translate }}</dd>
-         <progress class="progress w-full" [value]="foodStatus" max="100"></progress>
-         <dd class="text-2xl font-bold dark:text-white mt-4">{{ 'HAPPINESS' | translate }}</dd>
-         <progress class="progress w-full" [value]="happinessStatus" max="100"></progress>
-     </div>
-             <!-- Info Modal -->
-             <div *ngIf="showInfoModal" class="w-full mt-4">
-              <div class="bg-white rounded-lg p-4 shadow-lg">
-                <h2 class="text-2xl font-bold mb-4">Pet Info</h2>
-                <p><strong>Name:</strong> {{petName}}</p>
-                <p><strong>Food Status:</strong> {{foodStatus}}</p>
-                <p><strong>Happiness Status:</strong> {{happinessStatus}}</p>
-                <p><strong>Experience (Exp):</strong> {{exp}}</p>
-              </div>
-            </div>
-          
- </div>
+<!-- Pet Box -->
+<div [ngClass]="{'h-auto': showInfoModal, 'h-120': !showInfoModal}" 
+     class="pet-box flex flex-col items-center bg-yellow-100 rounded-2xl shadow p-6 relative transition-all duration-300">
+  <button class="absolute top-0 left-0 m-4 bg-transparent text-white p-2 rounded" 
+          (click)="toggleInfoModal()">
+    {{ 'INFO' | translate }}
+  </button>
+  <h5 class="mb-1 text-xl font-bold text-white">{{ petName }}</h5>
+  <img id="pet" class="w-32 h-32 object-contain" [src]="petPath" alt="Pet image" />
+  <div class="mt-8 w-full">
+    <dd class="text-2xl font-bold dark:text-white">{{ 'FOOD' | translate }}</dd>
+    <progress class="progress w-full" [value]="foodStatus || 0" max="100"></progress>
+    <dd class="text-2xl font-bold dark:text-white mt-4">{{ 'HAPPINESS' | translate }}</dd>
+    <progress class="progress w-full" [value]="happinessStatus || 0" max="100"></progress>
+  </div>
+  <!-- Info Modal -->
+  <div *ngIf="showInfoModal" class="w-full mt-4">
+    <div class="bg-white rounded-lg p-4 shadow-lg">
+      <h2 class="text-2xl font-bold mb-4">Pet Info</h2>
+      <p><strong>Name:</strong> {{ petName }}</p>
+      <p><strong>Food Status:</strong> {{ foodStatus }}</p>
+      <p><strong>Happiness Status:</strong> {{ happinessStatus }}</p>
+      <p><strong>Experience (Exp):</strong> {{ exp }}</p>
+    </div>
+  </div>
+</div>
+
  
 
       <!-- Recent Files and Other Widgets -->
@@ -164,21 +161,9 @@
 
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
           <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">{{ 'RECENT_FILES' | translate }}</h5>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span>MEME.JS</span>
-              <span>{{ '32_MINUTES_AGO' | translate }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>DOGO.HTML</span>
-              <span>{{ '1_DAY_AGO' | translate }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>DOGO.C</span>
-              <span>{{ '1_WEEK_AGO' | translate }}</span>
-            </div>
-          </div>
+          <div class="space-y-2" id="recentFilesContainer"></div>
         </div>
+        
 
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
           <button (click)="randomizePet()">{{ 'RANDOMIZE_PET' | translate }}</button>

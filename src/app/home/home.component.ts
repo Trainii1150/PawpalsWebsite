@@ -17,14 +17,13 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./home.component.scss'],
 })
 
-
 export class HomeComponent implements OnInit, AfterViewInit {
   totalPages: number | undefined;
   petPath: any;
   selectedLanguage: string = 'en';
+  totalCoins: any;
   toggleInfoModal() {
     this.showInfoModal = !this.showInfoModal;
-    
   }
 
   showActivity = false;
@@ -37,14 +36,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
   foodStatus: Number | undefined;
   happinessStatus: Number | undefined = 40;
   exp: Number | undefined;
-  todayCodeTime: Number | undefined = 0;
-  monthlyCodeTime: Number | undefined = 0;
-  todayTimeCompare: Number | undefined = 0;
-  monthlyTimeCompare: Number | undefined = 0;
+  todayCodeTime: number = 0;
+  monthlyCodeTime: number = 0;
+  todayTimeCompare: number = 0;
+  monthlyTimeCompare: number = 0;
   activityData: any[] = [];
   storeItems: any[] = [];
   userStorageItems: any[] = [];
-  userCoins: Number | undefined = 0;
+  userCoins: number = 0;
   timeByLanguage: any[] = [];
   pets: any[] = [];
   backgrounds: any[] = [];
@@ -107,8 +106,62 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.getTimeByLanguage();
     this.getUserDecorationItems();
     this.getUserPets();
+    this.calculateTodayCompare();
+    this.calculateMonthlyCompare();
   }
-
+  getActivityData(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+      this.apollo
+        .watchQuery({
+          query: gql`
+            query GetActivity($uid: ID!) {
+              activity(uid: $uid) {
+                Languages
+                wordcount
+                coins
+                time
+                Timestamp
+                project_name
+                file_name
+              }
+            }
+          `,
+          variables: {
+            uid: uid,
+          },
+        })
+        .valueChanges.subscribe(
+          (response: any) => {
+            // เพิ่มการเรียงลำดับตาม Timestamp ก่อนเก็บข้อมูล
+            this.activityData = response.data.activity
+              .map((activity: any) => ({
+                ...activity,
+                Timestamp: this.cleanTimestamp(activity.Timestamp),
+              }))
+              .sort((a: any, b: any) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime()); // เรียงลำดับจากมากไปน้อย (ล่าสุดก่อน)
+  
+            // แสดงข้อมูลที่เรียงแล้วในส่วนของ Recent Files
+            this.displayRecentFiles();
+          },
+          (error: any) => {
+            console.error('Error getting activity data:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: `Failed to get activity data: ${error.message}`,
+            });
+          }
+        );
+    } else {
+      console.error('Token not found in cookies');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'User ID token not found in cookies',
+      });
+    }
+  }
   toggleActivity() {
     this.showActivity = !this.showActivity;
     this.showInventory = false;
@@ -189,12 +242,20 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
   getTime(): void {
     const uid = this.cookieService.get('uid');
-    if (uid !== null) {
+    if (uid) {
       this.apollo
         .watchQuery({
           query: gql`
-            query GetTime($uid: String!) {
-              time(uid: $uid)
+            query GetActivity($uid: ID!) {
+              activity(uid: $uid) {
+                Languages
+                wordcount
+                coins
+                time
+                Timestamp
+                project_name
+                file_name
+              }
             }
           `,
           variables: {
@@ -203,23 +264,126 @@ export class HomeComponent implements OnInit, AfterViewInit {
         })
         .valueChanges.subscribe(
           (response: any) => {
-            const timeInUnits = response.data.time / 10000;
-            this.todayCodeTime = parseFloat(timeInUnits.toFixed(2));
+            this.activityData = response.data.activity.map((activity: any) => {
+              let timestamp = activity.Timestamp;
+              
+              if (typeof timestamp === 'string') {
+                timestamp = parseInt(timestamp, 10);
+              }
+            
+              if (timestamp < 10000000000) {
+                timestamp *= 1000; // ถ้า timestamp เป็นหน่วยวินาที คูณด้วย 1000
+              }
+            
+              const dateObj = moment(timestamp).toDate();
+              console.log('Converted Date with moment:', dateObj);
+            
+              return {
+                ...activity,
+                Timestamp: dateObj,
+              };
+            });
+            
+            this.activityData.forEach((activity: any) => {
+              console.log('Timestamp:', activity.Timestamp, 'Date Object:', new Date(activity.Timestamp));
+            });
+            this.calculateTodayCompare();
+            this.calculateMonthlyCompare();
           },
           (error) => {
-            console.error('Error getting today time:', error);
+            console.error('Error getting activity data:', error);
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: `Failed to get today time: ${error.message}`,
+              text: `Failed to get activity data: ${error.message}`,
             });
           }
         );
     } else {
-      console.error('Token not found in localStorage');
+      console.error('Token not found in cookies');
     }
   }
+  
+  
+  calculateMonthlyCompare() {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+  
+    const thisMonthTime = this.activityData
+      .filter((activity) => {
+        const activityDate = new Date(activity.Timestamp);
+        return activityDate.getMonth() === currentMonth && activityDate.getFullYear() === currentYear;
+      })
+      .reduce((total, activity) => total + activity.time, 0);
+  
+    const lastMonthTime = this.activityData
+      .filter((activity) => {
+        const activityDate = new Date(activity.Timestamp);
+        return activityDate.getMonth() === currentMonth - 1 && activityDate.getFullYear() === currentYear;
+      })
+      .reduce((total, activity) => total + activity.time, 0);
+  
+    console.log('This Month Time:', thisMonthTime);
+    console.log('Last Month Time:', lastMonthTime);
+  
+    this.monthlyCodeTime = thisMonthTime; // เก็บเวลาเขียนโค้ดเดือนนี้
+  
+    const percentageChange = lastMonthTime
+      ? ((thisMonthTime - lastMonthTime) / lastMonthTime) * 100
+      : 0;
+  
+    this.monthlyTimeCompare = Number(percentageChange.toFixed(2));
+  }
+  
+  
+calculateTodayCompare() {
+  const todayTime = this.activityData
+    .filter((activity) => this.isSameDay(activity.Timestamp, new Date()))
+    .reduce((total, activity) => total + activity.time, 0);
 
+  const yesterdayTime = this.activityData
+    .filter((activity) => this.isSameDay(activity.Timestamp, new Date(Date.now() - 86400000)))
+    .reduce((total, activity) => total + activity.time, 0);
+
+  console.log('Today Time:', todayTime);
+  console.log('Yesterday Time:', yesterdayTime);
+
+  this.todayCodeTime = todayTime; // เก็บเวลาเขียนโค้ดวันนี้
+
+  const percentageChange = yesterdayTime
+    ? ((todayTime - yesterdayTime) / yesterdayTime) * 100
+    : 0;
+
+  this.todayTimeCompare = Number(percentageChange.toFixed(2));
+  console.log('Today Time Compare:', this.todayTimeCompare);
+}
+
+  
+
+  isSameDay(timestamp: string | number, date: Date): boolean {
+    const activityDate = new Date(timestamp);
+  
+    // ปรับวันที่ให้เป็นค่า UTC เพื่อหลีกเลี่ยงปัญหาเขตเวลา
+    const utcActivityDate = new Date(
+      activityDate.getUTCFullYear(),
+      activityDate.getUTCMonth(),
+      activityDate.getUTCDate()
+    );
+  
+    const utcDate = new Date(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate()
+    );
+  
+    return (
+      utcActivityDate.getDate() === utcDate.getDate() &&
+      utcActivityDate.getMonth() === utcDate.getMonth() &&
+      utcActivityDate.getFullYear() === utcDate.getFullYear()
+    );
+  }
+  
+  
   saveDecoration(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
@@ -372,7 +536,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
         .valueChanges.subscribe(
           (response: any) => {
             this.userStorageItems = response.data.userStorageItems;
-            console.log(this.userStorageItems);
           },
           (error: any) => {
             console.error('Error getting user storage items:', error);
@@ -393,52 +556,24 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getActivityData(): void {
-    const uid = this.cookieService.get('uid');
-    if (uid) {
-      this.apollo
-        .watchQuery({
-          query: gql`
-            query GetActivity($uid: ID!) {
-              activity(uid: $uid) {
-                Languages
-                wordcount
-                coins
-                time
-                Timestamp
-                project_name
-              }
-            }
-          `,
-          variables: {
-            uid: uid,
-          },
-        })
-        .valueChanges.subscribe(
-          (response: any) => {
-            this.activityData = response.data.activity.map((activity: any) => ({
-              ...activity,
-              Timestamp: this.cleanTimestamp(activity.Timestamp), // แปลง timestamp โดยใช้ Date object
-            }));
-          },
-          (error: any) => {
-            console.error('Error getting activity data:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: `Failed to get activity data: ${error.message}`,
-            });
-          }
-        );
-    } else {
-      console.error('Token not found in cookies');
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'User ID token not found in cookies',
-      });
+  
+  
+  displayRecentFiles(): void {
+    const recentFilesContainer = document.getElementById('recentFilesContainer');
+    if (recentFilesContainer) {
+      recentFilesContainer.innerHTML = this.activityData
+        .slice(0, 3) // แสดงแค่ไฟล์ล่าสุด 3 ไฟล์
+        .map(
+          (file) => `
+          <div class="flex justify-between">
+            <span>${file.file_name}</span>
+            <span>${moment(file.Timestamp).fromNow()}</span>
+          </div>`
+        )
+        .join('');
     }
   }
+  
 
   formatTimestamp(timestamp: string | null | undefined): string {
     if (!timestamp) {
@@ -555,17 +690,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
               }
             }
           `,
-          variables: {
-            uid: uid,
-          },
-          pollInterval: 3000000, // Polling ทุกๆ 5 นาที (300,000 มิลลิวินาที)
+          variables: { uid: uid },
+          pollInterval: 3000000,
         })
         .valueChanges.subscribe(
           (response: any) => {
             const pet = response.data.userPets[0]; // สมมติว่าเราดึงสัตว์เลี้ยงตัวแรก
             this.petName = pet.pet_name;
-            this.foodStatus = pet.hunger_level; // อัปเดตค่า hunger_level
-            this.happinessStatus = 40; // ค่า happiness ที่กำหนดเอง
+            this.foodStatus = isFinite(pet.hunger_level) ? pet.hunger_level : 0; // ตรวจสอบว่าค่าเป็นตัวเลขที่ถูกต้อง
+            this.happinessStatus = isFinite(pet.happiness_level) ? pet.happiness_level : 0; // ตรวจสอบว่าค่าเป็นตัวเลขที่ถูกต้อง
             this.exp = pet.exp;
             this.petPath = pet.path;
           },
@@ -582,6 +715,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       console.error('Token not found in cookies');
     }
   }
+  
 
   selectFoodItem(item: any) {
     const petId = 1; // ตัวอย่าง petId
@@ -711,7 +845,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   cleanTimestamp(timestamp: string | number | null | undefined): string {
-    console.log('Original timestamp:', timestamp); // ตรวจสอบค่า timestamp ดั้งเดิม
 
     if (!timestamp) {
       console.log('Timestamp is null or undefined');
@@ -727,7 +860,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
     // แปลงเป็นตัวเลขถ้าเป็น string
     const timestampNum =
       typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp;
-    console.log('Parsed timestamp as number:', timestampNum); // ตรวจสอบค่าหลังจากแปลงเป็นตัวเลข
 
     if (isNaN(timestampNum)) {
       console.log('Invalid timestamp after parsing:', timestampNum);
@@ -736,8 +868,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
     // แปลง Unix timestamp เป็น Date object
     const dateObj = new Date(timestampNum);
-    console.log('Date object:', dateObj); // ตรวจสอบค่า Date object
-
     if (isNaN(dateObj.getTime())) {
       console.log('Invalid Date object:', dateObj);
       return 'Invalid date';
@@ -752,8 +882,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
     const seconds = String(dateObj.getSeconds()).padStart(2, '0');
 
     const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    console.log('Formatted date:', formattedDate); // ตรวจสอบรูปแบบวันที่สุดท้าย
-
     return formattedDate;
   }
 
