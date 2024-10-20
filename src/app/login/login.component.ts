@@ -29,9 +29,18 @@ export class LoginComponent {
     if(this.loginForm.value){
       const {email, password} = this.loginForm.value;
       this.authService.login(email,password).subscribe(
-        (response) => {
-            // Handle successful registration
-            this.showLoginSuccess(response);          
+        (response : any) => {
+            // Check if the user received a gifted pet on first login
+            if(response.giftedPet !== null){
+              let giftedPet = response.giftedPet;
+              this.showGiftedPetModal(response,giftedPet)
+              this.authService.setCookies(response);
+            }
+            else{
+              // Handle successful registration
+              this.showLoginSuccess(response);    
+            }
+                  
         },
         (error) => {
             //console.error('Registration failed', error);
@@ -59,6 +68,19 @@ export class LoginComponent {
     this.isDarkBackground = currentHour >= 18 || currentHour < 6;
     console.log(this.isDarkBackground);
   }*/
+  showGiftedPetModal(req : object,giftedPet: any): void{
+    Swal.fire({
+      icon: 'success',
+      title: 'Email Verified successfully',
+      text: 'Your email has been verified successfully.',
+      html: `You have received a new pet: ${giftedPet.pet_name}! <br>
+      <img src="${giftedPet.path}" alt="${giftedPet.pet_name}" style="height: 200px; width: 200px; margin: 0 auto;">`,
+      confirmButtonText: 'Ok',
+    }).then(() => {
+      this.authService.setCookies(req);
+      this.router.navigate(['/']);
+    });
+  }
 
   showLoginSuccess(req: Object): void{
     Swal.fire({
@@ -68,7 +90,7 @@ export class LoginComponent {
       confirmButtonText: 'Ok',
     }).then((result)=>{
       if(result.isConfirmed){
-        console.log(req)
+        //console.log(req)
         this.authService.setCookies(req);
         this.router.navigate(['/']);
       }

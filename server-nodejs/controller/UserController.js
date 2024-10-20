@@ -20,6 +20,7 @@ const tokenExtensionsGenerate = (req, res) => {
 
 const buyItem = async (req, res) => {
   const { uid, item_id } = req.body;
+
   console.log('Buying item:', { uid, item_id });
 
   if (!uid || !item_id) {

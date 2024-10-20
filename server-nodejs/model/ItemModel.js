@@ -5,6 +5,7 @@ const createItem = async (item_name, description, item_type, path) => {
         'INSERT INTO items (item_name, description, item_type, path) VALUES ($1, $2, $3, $4) RETURNING *',
         [item_name, description, item_type, path]
     );
+    console.log(result.rows[0]);
     return result.rows[0];
 };
 
@@ -13,7 +14,22 @@ const updateItem = async (item_id, item_name, description, item_type, path) => {
         'UPDATE items SET item_name = $1, description = $2, item_type = $3, path = $4 WHERE item_id = $5 RETURNING *',
         [item_name, description, item_type, path, item_id]
     );
+    console.log('Item created:', result.rows[0]);
     return result.rows[0];
+};
+
+const updateItemWithoutPath = async (item_id, item_name, description, item_type) => {
+    try {
+        const result = await pool.query(
+            'UPDATE items SET item_name = $1, description = $2, item_type = $3 WHERE item_id = $4 RETURNING *',
+            [item_name, description, item_type, item_id]
+        );
+        console.log('Item updated:', result.rows[0]);
+        return result.rows[0];
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error updating item');
+    }
 };
 
 const deleteItem = async (item_id) => {
@@ -33,6 +49,7 @@ const getAllItems = async () => {
 module.exports = {
     createItem,
     updateItem,
+    updateItemWithoutPath,
     deleteItem,
     getItemById,
     getAllItems,

@@ -30,13 +30,20 @@ const getAllUsers = async () => {
 
 const getUserData = async (email) => {
     try {
-        const result = await pool.query('SELECT user_id,username, email, password , user_verify , role , ban FROM user_table WHERE email = $1', [email]);
+        const result = await pool.query('SELECT user_id,username, email, password , user_verify , role , ban , first_login FROM user_table WHERE email = $1', [email]);
         return result.rows[0];
     } catch (error) {
         console.error(error);
         throw new Error('Error getting user by email');
     }
 };
+
+
+const updateFirstLoginStatus = async (userId) => {
+  const query = `UPDATE user_table SET first_login = false WHERE user_id = $1`;
+  await db.query(query, [userId]);
+};
+
 const getResetpassemail = async (email) => {
     try {
         const result = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
@@ -327,6 +334,7 @@ feedPet: async (userId, petId, foodValue) => {
 module.exports = {
     createUser,
     getUserData,
+    updateFirstLoginStatus,
     findRoleById,
     updateUserVerification,
     updatePassword,
@@ -346,4 +354,3 @@ module.exports = {
     getUserBackgrounds,
     setBan,
 };
-

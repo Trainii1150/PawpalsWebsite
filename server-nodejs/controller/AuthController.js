@@ -69,9 +69,14 @@ const loginUser = async (req, res) => {
         if (user.ban === true) {
             return res.status(403).json({ error: 'Your account has been banned. Please contact Pawpals@outlook.co.th.' });
         }
+        let giftedPet = null;
+        if (user.first_login){
+            giftedPet = await generateRandomNewUserPet(user.user_id);
+            await userModel.updateFirstLoginStatus(user.user_id);
+        }
         
         const { accessToken, refreshToken } = tokenUserGenerate(user);
-        res.json({ uid: String(user.user_id), accessToken, refreshToken });
+        res.json({ uid: String(user.user_id), accessToken, refreshToken ,giftedPet});
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
@@ -171,8 +176,8 @@ const verifyEmail = async (req, res) => {
             return res.status(403).send("Email is already verified.");
         }
         await userModel.updateUserVerification(email);
-        const newPet = await generateRandomNewUserPet(user.user_id);
-        res.status(201).json({ message: 'Email verified successfully', giftedPet: newPet });
+        //const newPet = await generateRandomNewUserPet(user.user_id);
+        res.status(201).json({ message: 'Email verified successfully'/*, giftedPet: newPet*/ });
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
             const { email } = jwt.decode(token);

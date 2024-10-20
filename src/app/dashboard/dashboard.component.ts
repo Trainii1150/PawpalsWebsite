@@ -88,15 +88,45 @@ export class DashboardComponent implements OnInit {
   }*/
 
   updateUser() {
-    this.adminService.updateUser(this.selectedUser.user_id, this.selectedUser.username, this.selectedUser.email, this.selectedUser.role, 0).subscribe(() => {
+    this.adminService.updateUser(this.selectedUser.user_id, this.selectedUser.username, this.selectedUser.email, this.selectedUser.role, this.selectedUser.coins).subscribe(() => {
       this.fetchUsers();
       this.selectedUser = null;
+       // Success alert
+       Swal.fire({
+        icon: 'success',
+        title: 'User Updated',
+        text: 'The user has been successfully updated.',
+      });
+    },
+    (error) => {
+      // Error alert
+      console.log(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update the user. Please try again.',
+      });
     });
   }
 
   deleteUser(userId: number) {
     this.adminService.deleteUser(userId).subscribe(() => {
       this.fetchUsers();
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'User Deleted',
+          text: 'The user has been successfully deleted.',
+        });
+      },
+      (error) => {
+        // Error alert
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to delete the user. Please try again.',
+        });
     });
   }
 
@@ -227,6 +257,14 @@ export class DashboardComponent implements OnInit {
 
 
   createItem() {
+    if (!this.selectedFile) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Please select an image',
+        text: 'You need to upload an image before submitting!',
+      });
+      return; // หยุดการทำงานหากไม่มีไฟล์
+    }
     const formData = new FormData();
     formData.append('itemname',this.newItem.item_name);
     formData.append('description',this.newItem.description);
@@ -237,6 +275,19 @@ export class DashboardComponent implements OnInit {
         this.showCreateForm = false;
         this.imagePreviewUrl = null; // Reset preview
         this.fetchItems();
+        Swal.fire({
+          icon: 'success',
+          title: 'Item Created',
+          text: 'The Item has been successfully created.',
+        });
+        },
+        (error) => {
+          // Error alert
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to create the item. Please try again.',
+          });
     });
   }
 
@@ -266,12 +317,43 @@ export class DashboardComponent implements OnInit {
       this.imagePreviewUrl = null; // Clear the image preview
       this.fetchItems();
       this.selectedPet = null;
+        // Success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Item Updated',
+          text: 'The item has been successfully updated.',
+        });
+      },
+      (error) => {
+        // Error alert
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to update the item. Please try again.',
+        });
     })
   }
 
   deleteItem(itemId: number) {
     this.adminService.deleteItem(itemId).subscribe(() => {
       this.fetchItems();
+
+       // Success alert
+       Swal.fire({
+        icon: 'success',
+        title: 'Item Deleted',
+        text: 'The item has been successfully deleted.',
+      });
+    },
+    (error) => {
+      // Error alert
+      console.log(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to delete the item. Please try again.',
+      });
     });
   }
 
@@ -309,16 +391,40 @@ export class DashboardComponent implements OnInit {
   }
 
   createPet() {
+    if (!this.selectedFile) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Please select an image',
+        text: 'You need to upload an image before submitting!',
+      });
+      return; // หยุดการทำงานหากไม่มีไฟล์
+    }
     const formData = new FormData();
     formData.append('petName', this.newPet.pet_name);
     formData.append('description', this.newPet.description);
     formData.append('petType', this.newPet.pet_type);
     formData.append('petImage', this.selectedFile!);
+    console.log(formData);
     this.adminService.addPet(formData).subscribe(() => {
         this.newPet = { pet_name: '', description: '', pet_type: '', path: '' };
         this.showCreateForm = false;
         this.imagePreviewUrl = null; // Reset preview
         this.fetchPets();
+          // Success alert
+      Swal.fire({
+        icon: 'success',
+        title: 'Pet Created',
+        text: 'The pet has been successfully created.',
+      });
+      },
+      (error) => {
+        // Error alert
+        console.log(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to create the pet. Please try again.',
+        });
     });
   }
 
@@ -348,12 +454,42 @@ export class DashboardComponent implements OnInit {
       this.imagePreviewUrl = null; // Clear the image preview
       this.fetchPets();
       this.selectedPet = null;
+       // Success alert
+       Swal.fire({
+        icon: 'success',
+        title: 'Pet Updated',
+        text: 'The pet has been successfully updated.',
+      });
+    },
+    (error) => {
+      // Error alert
+      console.log(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update the pet. Please try again.',
+      });
     });
   }
 
   deletePet(petId: number) {
     this.adminService.deletePet(petId).subscribe(() => {
       this.fetchPets();
+      // Success alert
+      Swal.fire({
+        icon: 'success',
+        title: 'Pet Deleted',
+        text: 'The pet has been successfully deleted.',
+      });
+    },
+    (error) => {
+      // Error alert
+      console.log(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to delete the pet. Please try again.',
+      });
     });
   }
 
@@ -361,6 +497,7 @@ export class DashboardComponent implements OnInit {
     if (this.showForm) {
       // If the same pet is clicked again, toggle the form
       this.showForm = !this.showForm;
+      this.imagePreviewUrl = null; // Reset preview
     } else {
       // If a different pet is clicked, show the form and update the preview
       this.selectedPet = { ...pet };

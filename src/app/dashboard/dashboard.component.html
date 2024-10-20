@@ -41,6 +41,7 @@
                         <th class="px-4 py-2 text-gray-800">Username</th>
                         <th class="px-4 py-2 text-gray-800">Email</th>
                         <th class="px-4 py-2 text-gray-800">Role</th>
+                        <th class="px-4 py-2 text-gray-800">Coins</th>
                         <th class="px-4 py-2 text-gray-800">Status</th>
                         <th class="px-4 py-2 text-gray-800">Actions</th>
                     </tr>
@@ -51,6 +52,7 @@
                         <td class="border px-4 py-2 text-gray-700">{{ user.username }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ user.email }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ user.role }}</td>
+                        <td class="border px-4 py-2 text-gray-700">{{ user.coins | number: '1.2-2' }}</td>
                         <td class="border px-4 py-2 text-gray-700">{{ user.ban ? 'Banned' : 'Active' }}</td>
                         <td class="border px-4 py-2">
                             <button *ngIf="!user.ban" class="btn btn-warning mr-2" (click)="banUser(user.user_id, true)">Ban</button>
@@ -79,6 +81,10 @@
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
                         </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Coins</label>
+                        <input type="number" [(ngModel)]="selectedUser.coins" name="coins" class="form-input mt-1 block w-full border-gray-300" min="0" step="0.01">
                     </div>
                     <button type="submit" class="btn btn-primary">Update User</button>
                 </form>
@@ -326,7 +332,7 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700">Upload Image</label>
-                        <input type="file" (change)="onFileSelectedPetimg($event)" accept="image/*" class="mt-1">
+                        <input type="file" (change)="onFileSelectedPetimg($event)" accept="image/gif" class="mt-1">
                     </div>
                     <div class="mb-4">
                         <p>Image Preview:</p>

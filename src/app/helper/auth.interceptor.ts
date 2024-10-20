@@ -11,6 +11,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from '../service/auth.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2'; 
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -62,6 +63,7 @@ export class AuthInterceptor implements HttpInterceptor {
                 // When refresh token has expired
                 this.authService.logout();
                 this.router.navigate(['/login']);
+                this.showSessionExpiredAlert();
                 return throwError(error);
               })
             );
@@ -69,6 +71,7 @@ export class AuthInterceptor implements HttpInterceptor {
             // Refresh token not found
             this.authService.logout();
             this.router.navigate(['/login']);
+            this.showSessionExpiredAlert();
             return throwError(error);
           }
         } else if (error.status === 403) {
@@ -84,5 +87,14 @@ export class AuthInterceptor implements HttpInterceptor {
       })
     );
     
+  }
+
+  private showSessionExpiredAlert() {
+    Swal.fire({
+      title: 'Session Expired',
+      text: 'Your session has expired. Please log in again.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    });
   }
 }

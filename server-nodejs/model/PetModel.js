@@ -48,6 +48,18 @@ const updatePet = async (petId, petName, description, petType, path) => {
     }
 };
 
+const updatePetWithoutPath = async (petId, petName, description, petType) => {
+    try {
+        const result = await pool.query(
+            'UPDATE pets SET pet_name = $1, description = $2, pet_type = $3 WHERE pet_id = $4 RETURNING *',
+            [petName, description, petType, petId]
+        );
+        return result.rows[0];
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error updating pet');
+    }
+};
 
 const deletePet = async (pets_id) => {
     try {
@@ -79,6 +91,7 @@ module.exports = {
     getPet,
     getAllPets,
     updatePet,
+    updatePetWithoutPath,
     deletePet,
     updateHungerLevel,
 };

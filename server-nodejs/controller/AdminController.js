@@ -6,8 +6,8 @@ const userModel = require('../model/Usermodel'); // Import userModel
 const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
 const UserPetsModel = require('../model/userPetsModel');
-const PetModel = require('../model/PetModel');
-const UserCoinModel = require('../model/CoinsModel');
+const PetModel = require('../model/PetModel');;
+const UserCoinModel = require('../model/coinsModel');
 
 // Adds an item to storage or updates the quantity if it already exists.
 const addItemToStorage = async (req, res) => {
@@ -65,7 +65,7 @@ const deleteItemFromStorage = async (req, res) => {
 
 // Create a new item.
 const createItem = async (req, res) => {
-    const { itemname, description, itemtype } = req.body;
+    const { itemname, description, itemtype } = Object.assign({}, req.body);
     const itemImage = req.file;
     try {
         let imageurl = null;
@@ -118,7 +118,14 @@ const updateItem = async (req, res) => {
 
             imageurl = response.data.content.download_url; // Get the URL of the uploaded image
         }
-        const updatedItem = await itemModel.updateItem(itemid, itemname, description, itemtype, imageurl);
+        let updatedItem;
+
+        if(imageurl){
+            updatedItem = await itemModel.updateItem(itemid, itemname, description, itemtype, imageurl);
+        }
+        else{
+            updatedItem = await await itemModel.updateItemWithoutPath(itemid, itemname, description, itemtype);
+        }
         res.status(200).json(updatedItem);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -232,7 +239,16 @@ const updatePet = async (req, res) => {
 
             imageurl = response.data.content.download_url; // Get the URL of the uploaded image
         }
-        const updatedPet = await PetModel.updatePet(petId, petName, description, petType , imageurl);
+
+        let updatedPet;
+
+        if(imageurl){
+            updatedPet = await PetModel.updatePet(petId, petName, description, petType , imageurl);
+        }
+        else{
+            updatedPet = await PetModel.updatePetWithoutPath(petId, petName, description, petType );
+        }
+
         return res.status(200).json({ message: 'Pet updated successfully', pet: updatedPet });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -277,7 +293,16 @@ const setUserBan = async (req, res) => {
 const getAllUsers = async (req, res) => {
     try {
         const users = await userModel.getAllUsers(); // Ensure there's a function getAllUsers in userModel
-        res.status(200).json(users);
+        const usersWithCoins = await Promise.all(users.map(async (user) => {
+            // Fetch coins for each user
+            const coinData = await UserCoinModel.getUserCoins(user.user_id); // Adjust to your function's signature
+            return {
+                ...user,
+                coins: coinData.coins || 0, // Add the coins to the user object
+            };
+        }));
+        console.log(usersWithCoins);
+        res.status(200).json(usersWithCoins);
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
