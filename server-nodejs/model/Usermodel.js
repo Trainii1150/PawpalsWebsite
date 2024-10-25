@@ -40,8 +40,12 @@ const getUserData = async (email) => {
 
 
 const updateFirstLoginStatus = async (userId) => {
-  const query = `UPDATE user_table SET first_login = false WHERE user_id = $1`;
-  await db.query(query, [userId]);
+  try {
+      const result = `UPDATE user_table SET first_login = false WHERE user_id = $1`;
+      return result.rows[0];
+  } catch (error) {
+      console.error(error);
+  }
 };
 
 const getResetpassemail = async (email) => {
@@ -101,6 +105,15 @@ const updateUserVerification = async (email) => {
         throw new Error('Failed to update user verification status');
     }
 
+};
+const getpasswordbyemail = async (email) => {
+      try {
+        const result = await pool.query('SELECT password FROM user_table WHERE email = $1', [email]);
+        return result.rows[0];
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error getting user by email');
+    }
 };
 
 const updatePassword = async (password,email) => {
@@ -337,6 +350,7 @@ module.exports = {
     updateFirstLoginStatus,
     findRoleById,
     updateUserVerification,
+    getpasswordbyemail,
     updatePassword,
     getResetpassemail,
     findbyEmail,

@@ -8,7 +8,7 @@ router.post('/login', AuthController.loginUser);
 
 // Route Verification Email
 router.post('/verifyemail', AuthController.verifyEmail);
-router.post('/send-verifyemail', AuthController.sendVerifyEmail);
+router.post('/send-verifyemail', AuthController.sendVerifyEmailHandler);
 
 // Route Check Email is Taken
 router.post('/check-email', AuthController.checkEmail);

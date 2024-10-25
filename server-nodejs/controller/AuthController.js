@@ -56,8 +56,8 @@ const loginUser = async (req, res) => {
         if (!user) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        const userpassword = await userModel.getpasswordbyemail(email);
+        const passwordMatch = await bcrypt.compare(password, userpassword.password);
         if (!passwordMatch) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
@@ -139,11 +139,11 @@ const validateResetToken = async (req, res) => {
 const checkOldPassword = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await userModel.getUserData(email);
+        const userpassword = await userModel.getpasswordbyemail(email);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        const isPasswordMatch = await bcrypt.compare(password, userpassword.password);
         res.json(isPasswordMatch);
     } catch (error) {
         console.error('Error checking password:', error);
@@ -192,7 +192,7 @@ const verifyEmail = async (req, res) => {
     }
 };
 
-const sendVerifyEmail = async (req, res) => {
+const sendVerifyEmailHandler = async (req, res) => {
     const { email } = req.body;
     try {
         const user = await userModel.getUserData(email);
@@ -203,7 +203,7 @@ const sendVerifyEmail = async (req, res) => {
             return res.status(400).json({ error: 'Email already verified' });
         }
         const token = tokenEmailVerificationGenerate(user.email);
-        await sendEmail(user.email, token);
+        await sendVerifyEmail(user.email, token);
         res.json({ message: 'Verification email resent successfully' });
     } catch (error) {
         console.error('Failed to resend verification email:', error);
@@ -215,7 +215,7 @@ const sendresetEmail = async (email, token) => {
     console.log(email, token);
     try {
         const transporter = nodemailer.createTransport({
-            host: 'smtp.office365.com',
+            host: 'smtp.gmail.com',
             port: 587,
             secure: false,
             auth: {
@@ -245,10 +245,10 @@ const sendresetEmail = async (email, token) => {
     }
 };
 
-const sendEmail = async (email, token) => {
+const sendVerifyEmail = async (email, token) => {
     try {
         const transporter = nodemailer.createTransport({
-            host: 'smtp.office365.com',
+            host: 'smtp.gmail.com',
             port: 587,
             secure: false,
             auth: {
@@ -309,7 +309,7 @@ module.exports = {
     checkOldPassword,
     resetpassword,
     verifyEmail,
-    sendVerifyEmail,
+    sendVerifyEmailHandler,
     tokenExtensionsGenerate,
     refreshToken
 };

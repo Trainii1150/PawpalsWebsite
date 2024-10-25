@@ -24,7 +24,13 @@ export class AdminLoginComponent {
       const { email, password } = this.loginForm.value;
       this.authService.login(email, password).subscribe(
         (response) => {
-          this.showLoginSuccess(response);          
+          this.authService.setCookies(response);
+          if(this.authService.getRole() === 'admin') {
+            this.showLoginSuccess(response);    
+          }
+          else{
+            this.showAccessDenied();
+          }     
         },
         (error) => {
           Swal.fire({
@@ -45,8 +51,21 @@ export class AdminLoginComponent {
       confirmButtonText: 'Ok',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.authService.setCookies(req);
         this.router.navigate(['/admin/dashboard']); // Navigate to the admin dashboard
+      }
+    });
+  }
+
+  showAccessDenied(): void {
+    Swal.fire({
+      title: 'Access Denied',
+      text: 'You do not have permission to access this page.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.logout();
+        this.router.navigate(['/login']); // Navigate to the admin dashboard
       }
     });
   }
