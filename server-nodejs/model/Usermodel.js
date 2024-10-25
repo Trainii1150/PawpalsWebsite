@@ -30,7 +30,7 @@ const getAllUsers = async () => {
 
 const getUserData = async (email) => {
     try {
-        const result = await pool.query('SELECT user_id,username, email, password , user_verify , role , ban , first_login FROM user_table WHERE email = $1', [email]);
+        const result = await pool.query('SELECT user_id,username, email, user_verify , role , ban , first_login FROM user_table WHERE email = $1', [email]);
         return result.rows[0];
     } catch (error) {
         console.error(error);
