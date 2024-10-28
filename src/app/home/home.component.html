@@ -2,8 +2,8 @@
 <html lang="en" [attr.lang]="selectedLanguage">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Layout</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css" />
@@ -11,162 +11,219 @@
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 
-<body [class.lang-th]="selectedLanguage === 'th'" [class.lang-en]="selectedLanguage === 'en'" 
-  class="bg-cover bg-no-repeat bg-bottom" 
-  style="background-image: url('./assets/backgrounds/PawPalsBG.png'); background-size: 100%; padding-top: 10px;">
-
-
+<body [class.lang-th]="selectedLanguage === 'th'" [class.lang-en]="selectedLanguage === 'en'"
+  class="bg-cover bg-no-repeat bg-bottom" style="
+      background-image: url('./assets/backgrounds/PawPalsBG.png');
+      background-size: 100%;
+      padding-top: 10px;
+    ">
   <nav class="border-gray-200 bg-gradient-to-b from-blue-200 to-white dark:bg-gray-800 dark:border-gray-700" id="nav">
     <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
       <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-          <span class="self-center text-2xl font-semibold whitespace-nowrap text-white dark:text-white">PawPals</span>
+        <span class="self-center text-2xl font-semibold whitespace-nowrap text-white dark:text-white">PawPals</span>
       </a>
-      <button data-collapse-toggle="navbar-solid-bg" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-solid-bg" aria-expanded="false">
-          <span class="sr-only">Open main menu</span>
-          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
-          </svg>
+      <button data-collapse-toggle="navbar-solid-bg" type="button"
+        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        aria-controls="navbar-solid-bg" aria-expanded="false">
+        <span class="sr-only">Open main menu</span>
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M1 1h15M1 7h15M1 13h15" />
+        </svg>
       </button>
       <div class="hidden w-full md:block md:w-auto" id="navbar-solid-bg">
-        <ul class="flex flex-col font-medium mt-4 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent dark:border-gray-700">
-
+        <ul
+          class="flex flex-col font-medium mt-4 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent dark:border-gray-700">
           <li>
-            <button (click)="switchLanguage('en')" class="text-black  font-bold btn" [disabled]="selectedLanguage === 'en'">English</button>
+            <button (click)="switchLanguage('en')" class="text-black font-bold btn"
+              [disabled]="selectedLanguage === 'en'">
+              English
+            </button>
           </li>
           <li>
-            <button (click)="switchLanguage('th')" class="text-black font-bold btn" [disabled]="selectedLanguage === 'th'">Thai</button>
+            <button (click)="switchLanguage('th')" class="text-black font-bold btn"
+              [disabled]="selectedLanguage === 'th'">
+              Thai
+            </button>
           </li>
           <li>
-            <button (click)="logout()" class="bg-red-500 text-black px-4 py-2 rounded-md btn">Logout</button>
+            <button (click)="logout()" class="bg-red-500 text-black px-4 py-2 rounded-md btn">
+              Logout
+            </button>
           </li>
         </ul>
       </div>
     </div>
-</nav>
-  
+  </nav>
 
   <!-- Content Section -->
   <section class="p-9 content-section">
-    
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-screen-xl mx-auto">
       <!-- Top Row with Stats -->
       <div class="col-span-3 flex gap-4 justify-center">
+        <!-- Static Box 1: Today Coding Time -->
+        <div class="static-box flex-1 p-6 bg-white shadow rounded-2xl">
+          <dl class="space-y-2 text-center">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              {{ "TODAY CODING TIME" | translate }}
+            </dt>
+            <dd class="text-5xl font-light md:text-xl dark:text-black">
+              {{ todayCodeTime }} {{ "HOURS" | translate }}
+            </dd>
 
-<!-- Static Box 1: Today Coding Time -->
-<div class="static-box flex-1 p-6 bg-white shadow rounded-2xl">
-  <dl class="space-y-2 text-center">
-    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'TODAY CODING TIME' | translate }}</dt>
-    <dd class="text-5xl font-light md:text-xl dark:text-black">{{ todayCodeTime }} {{ 'HOURS' | translate }}</dd>
+            <!-- เปลี่ยนสีและข้อความเมื่อค่าเป็นบวกหรือลบ -->
+            <dd [ngClass]="
+                  todayTimeCompare >= 0
+                    ? 'text-green-100 dark:text-green-100'
+                    : 'text-red-100 dark:text-red-100'
+                " class="flex items-center justify-center space-x-1 text-sm font-medium">
+              <span>{{ todayTimeCompare }}%
+                {{
+                todayTimeCompare >= 0
+                ? ("INCREASE" | translate)
+                : ("DECREASE" | translate)
+                }}
+              </span>
+            </dd>
+          </dl>
+        </div>
 
-    <!-- เปลี่ยนสีและข้อความเมื่อค่าเป็นบวกหรือลบ -->
-    <dd [ngClass]="todayTimeCompare >= 0 ? 'text-green-100 dark:text-green-100' : 'text-red-100 dark:text-red-100'" 
-        class="flex items-center justify-center space-x-1 text-sm font-medium">
-      <span>{{ todayTimeCompare }}% 
-        {{ todayTimeCompare >= 0 ? ('INCREASE' | translate) : ('DECREASE' | translate) }}
-      </span>
-    </dd>
-  </dl>
-</div>
+        <!-- Static Box 2: Monthly Coding Time -->
+        <div class="static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
+          <dl class="space-y-2 text-center">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              {{ "MONTHLY CODING TIME" | translate }}
+            </dt>
+            <dd class="text-5xl font-light md:text-xl dark:text-black">
+              {{ monthlyCodeTime }} {{ "HOURS" | translate }}
+            </dd>
 
-<!-- Static Box 2: Monthly Coding Time -->
-<div class="static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
-  <dl class="space-y-2 text-center">
-    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'MONTHLY CODING TIME' | translate }}</dt>
-    <dd class="text-5xl font-light md:text-xl dark:text-black">{{ monthlyCodeTime }} {{ 'HOURS' | translate }}</dd>
+            <!-- เปลี่ยนสีและข้อความเมื่อค่าเป็นบวกหรือลบ -->
+            <dd [ngClass]="
+                  monthlyTimeCompare >= 0
+                    ? 'text-green-100 dark:text-green-100'
+                    : 'text-red-100 dark:text-red-100'
+                " class="flex items-center justify-center space-x-1 text-sm font-medium">
+              <span>{{ monthlyTimeCompare }}%
+                {{
+                monthlyTimeCompare >= 0
+                ? ("INCREASE" | translate)
+                : ("DECREASE" | translate)
+                }}
+              </span>
+            </dd>
+          </dl>
+        </div>
 
-    <!-- เปลี่ยนสีและข้อความเมื่อค่าเป็นบวกหรือลบ -->
-    <dd [ngClass]="monthlyTimeCompare >= 0 ? 'text-green-100 dark:text-green-100' : 'text-red-100 dark:text-red-100'" 
-        class="flex items-center justify-center space-x-1 text-sm font-medium">
-      <span>{{ monthlyTimeCompare }}% 
-        {{ monthlyTimeCompare >= 0 ? ('INCREASE' | translate) : ('DECREASE' | translate) }}
-      </span>
-    </dd>
-  </dl>
-</div>
-
-
-<!-- Static Box 3 -->
-<div class=" static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
-  <dl class="space-y-2 text-center">
-    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'COINS' | translate }}</dt>
-    <dd class="text-5xl font-light md:text-xl dark:text-black">{{ userCoins }} {{ 'COINS' | translate }}</dd>
-    <dd class="flex items-center justify-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
-      <span>{{ 'Coins spend' | translate }} {{ totalCoins }}</span>
-    </dd>
-  </dl>
-</div>
-
+        <!-- Static Box 3 -->
+        <div class="static-box flex-1 p-6 bg-white shadow rounded-2xl dark:bg-gray-900">
+          <dl class="space-y-2 text-center">
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              {{ "COINS" | translate }}
+            </dt>
+            <dd class="text-5xl font-light md:text-xl dark:text-black">
+              {{ userCoins }} {{ "COINS" | translate }}
+            </dd>
+            <dd
+              class="flex items-center justify-center space-x-1 text-sm font-medium text-green-500 dark:text-green-400">
+              <span>{{ "Coins spend" | translate }} {{ totalCoins }}</span>
+            </dd>
+          </dl>
+        </div>
       </div>
 
       <!-- Donut Graph -->
-      <div class="col-span-3 lg:col-span-2 bg-white shadow rounded-2xl p-6" style="position: relative;">
+      <div class="col-span-3 lg:col-span-2 bg-white shadow rounded-2xl p-6" style="position: relative">
         <div class="flex flex-col">
-          <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">{{ 'TIME USED' | translate }}</h5>
+          <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">
+            {{ "TIME USED" | translate }}
+          </h5>
           <div class="py-6 w-full" id="donut-chart"></div>
 
           <!-- Generate Report Button -->
           <div class="flex justify-center mt-4">
-            <button class="btn btn-primary flex items-center space-x-2 flex-nowrap whitespace-nowrap" (click)="generateReport()">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-              <span>{{ 'GENERATE_REPORT' | translate }}</span>
-            </button>
+            <!-- Button to trigger PDF download -->
+            <div class="flex justify-center mt-4">
+              <button class="btn btn-primary" (click)="generateReport()">
+                Download PDF
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Pet Box -->
-<!-- Pet Box -->
-<div [ngClass]="{'h-auto': showInfoModal, 'h-120': !showInfoModal}" 
-     class="pet-box flex flex-col items-center bg-yellow-100 rounded-2xl shadow p-6 relative transition-all duration-300">
-  <button class="absolute top-0 left-0 m-4 bg-transparent text-white p-2 rounded" 
-          (click)="toggleInfoModal()">
-    {{ 'INFO' | translate }}
-  </button>
-  <h5 class="mb-1 text-xl font-bold text-white">{{ petName }}</h5>
-  <img id="pet" class="w-32 h-32 object-contain" [src]="petPath" alt="Pet image" />
-  <div class="mt-8 w-full">
-    <dd class="text-2xl font-bold dark:text-white">{{ 'FOOD' | translate }}</dd>
-    <progress class="progress w-full" [value]="foodStatus || 0" max="100"></progress>
-    <dd class="text-2xl font-bold dark:text-white mt-4">{{ 'HAPPINESS' | translate }}</dd>
-    <progress class="progress w-full" [value]="happinessStatus || 0" max="100"></progress>
-  </div>
-  <!-- Info Modal -->
-  <div *ngIf="showInfoModal" class="w-full mt-4">
-    <div class="bg-white rounded-lg p-4 shadow-lg">
-      <h2 class="text-2xl font-bold mb-4">Pet Info</h2>
-      <p><strong>Name:</strong> {{ petName }}</p>
-      <p><strong>Food Status:</strong> {{ foodStatus }}</p>
-      <p><strong>Happiness Status:</strong> {{ happinessStatus }}</p>
-      <p><strong>Experience (Exp):</strong> {{ exp }}</p>
-    </div>
-  </div>
-</div>
+      <div [ngClass]="{ 'h-auto': showInfoModal, 'h-120': !showInfoModal }"
+      class="pet-box flex flex-col items-center bg-yellow-100 rounded-2xl shadow p-6 relative transition-all duration-300">
+      <!-- Info Button -->
+        <button class="absolute top-4 left-4 text-white font-semibold" (click)="toggleInfoModal()">
+          info
+        </button>
+        <!-- Pet Name -->
+        <h5 class="mt-4 text-2xl font-bold">{{ petName }}</h5>
+        <!-- Pet Image and Navigation Arrows -->
+        <div class="relative my-4 flex items-center justify-center">
+          <button class="absolute left-0 text-3xl text-white" (click)="prevPet()">
+            &#8249;
+          </button>
+          <img id="pet" class="w-32 h-32 object-contain" [src]="petPath" alt="Pet image" />
+          <button class="absolute right-0 text-3xl text-white" (click)="nextPet()">
+            &#8250;
+          </button>
+        </div>
 
- 
+        <!-- Food and Happiness Bars -->
+        <div class="w-full mt-8 flex flex-col items-center">
+          <div class="flex items-center space-x-2 w-full px-6">
+            <span class="text-xl">🍽️</span>
+            <progress class="progress w-full" [value]="foodStatus" max="100"></progress>
+          </div>
+          <div class="flex items-center space-x-2 w-full px-6 mt-4">
+            <span class="text-xl">💬</span>
+            <progress class="progress w-full" [value]="happinessStatus" max="100"></progress>
+          </div>
+        </div>
+
+        <!-- Info Modal -->
+        <div *ngIf="showInfoModal" class="w-full mt-4">
+          <div class="bg-white rounded-lg p-4 shadow-lg text-black">
+            <h2 class="text-2xl font-bold mb-4">Pet Info</h2>
+            <p><strong>Name:</strong> {{ petName }}</p>
+            <p><strong>Food Status:</strong> {{ foodStatus }}</p>
+            <p><strong>Happiness Status:</strong> {{ happinessStatus }}</p>
+            <p><strong>Experience (Exp):</strong> {{ exp }}</p>
+          </div>
+        </div>
+      </div>
 
       <!-- Recent Files and Other Widgets -->
       <div class="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
-          <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">{{ 'UNLOCK_NEW_ITEMS' | translate }}</h5>
+          <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">
+            {{ "UNLOCK_NEW_ITEMS" | translate }}
+          </h5>
           <div class="flex items-center">
             <div class="flex-1">
               <div class="text-3xl font-bold">{{ progress }}</div>
-              <div class="text-sm text-gray-500">{{ progress_item_path }}</div>
+              <div class="text-sm text-gray-500">
+                {{ progress_item_path }}
+              </div>
             </div>
             <img class="w-16 h-16 object-contain" [src]="progress_item_path" alt="food image" />
           </div>
         </div>
 
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
-          <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">{{ 'RECENT_FILES' | translate }}</h5>
+          <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">
+            {{ "RECENT_FILES" | translate }}
+          </h5>
           <div class="space-y-2" id="recentFilesContainer"></div>
         </div>
-        
 
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
-          <button (click)="randomizePet()">{{ 'RANDOMIZE_PET' | translate }}</button>
+          <button (click)="randomizePet()">
+            {{ "RANDOMIZE_PET" | translate }}
+          </button>
           <div class="flex items-center justify-center">
             <img class="w-16 h-16 object-contain" src="./assets/Treasure_Chest_(item).png" alt="Coupon image" />
           </div>
@@ -174,174 +231,216 @@
       </div>
 
       <!-- Menu -->
-      <ul class="col-span-3 lg:col-span-1 flex-col flex-grow md:flex-none shadow menu bg-error md:h-full rounded-box w-56 mt-8 mx-auto">
+      <ul
+        class="col-span-3 lg:col-span-1 flex-col flex-grow md:flex-none shadow menu bg-error md:h-full rounded-box w-56 mt-8 mx-auto">
         <li>
           <a>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            <button (click)="toggleStore()" class="store-button font-bold text-white">{{ 'STORE' | translate }}</button>
+            <button (click)="toggleStore()" class="store-button font-bold text-white">
+              {{ "STORE" | translate }}
+            </button>
           </a>
         </li>
         <li>
           <a>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <button (click)="toggleInventory()" class="font-bold text-white">{{ 'INVENTORY' | translate }}</button>
+            <button (click)="toggleInventory()" class="font-bold text-white">
+              {{ "INVENTORY" | translate }}
+            </button>
           </a>
         </li>
         <li>
           <a>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <button (click)="toggleActivity()" class="font-bold text-white">{{ 'ACTIVITIES' | translate }}</button>
+            <button (click)="toggleActivity()" class="font-bold text-white">
+              {{ "ACTIVITIES" | translate }}
+            </button>
           </a>
         </li>
         <li>
           <a>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <button (click)="toggleDecoration()" class="font-bold text-white">{{ 'DECORATION' | translate }}</button>
+            <button (click)="toggleDecoration()" class="font-bold text-white">
+              {{ "DECORATION" | translate }}
+            </button>
           </a>
         </li>
       </ul>
     </div>
   </section>
 
-
-  
-<!-- Menu Static box -->
+  <!-- Menu Static box -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-screen-xl mx-auto">
-<!-- Store -->
-<div *ngIf="showStore" class='col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6'>
-  <div class="overflow-x-auto">
-    <div class="shop-header flex justify-between items-center p-4">
-      <h2 class="font-bold text-lg">Store</h2>
-      <div class="coins-display font-bold">{{ userCoins }} COINS</div>
-    </div>
-    <div class="store-items-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-      <div *ngFor="let item of storeItems" class="store-item border p-4 rounded-lg shadow-md">
-        <img [src]="item.path" [alt]="item.item_name" class="w-full h-32 object-cover mb-2">
-        <h3 class="font-semibold text-md mb-1">{{ item.item_name }}</h3>
-        <p class="text-sm mb-2">{{ item.price }} COIN</p>
-        <button (click)="buyItem(item)" class="bg-blue-500 text-white py-1 px-2 rounded">Buy</button>
+    <!-- Store -->
+    <div *ngIf="showStore" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
+      <div class="overflow-x-auto">
+        <div class="shop-header flex justify-between items-center p-4">
+          <h2 class="font-bold text-lg">Store</h2>
+          <div class="coins-display font-bold">{{ userCoins }} COINS</div>
+        </div>
+        <div class="store-items-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+          <div *ngFor="let item of storeItems" class="store-item border p-4 rounded-lg shadow-md">
+            <img [src]="item.path" [alt]="item.item_name" class="w-full h-32 object-cover mb-2" />
+            <h3 class="font-semibold text-md mb-1">{{ item.item_name }}</h3>
+            <p class="text-sm mb-2">{{ item.price }} COIN</p>
+            <button (click)="buyItem(item)" class="bg-blue-500 text-white py-1 px-2 rounded">
+              Buy
+            </button>
+          </div>
+        </div>
+        <div class="pet-display flex justify-center p-4">
+          <img [src]="'../assets/pets/ducky_3_idle.gif'" alt="Pet image" class="w-24 h-24 object-contain" />
+        </div>
       </div>
     </div>
-    <div class="pet-display flex justify-center p-4">
-      <img [src]="'../assets/pets/ducky_3_idle.gif'" alt="Pet image" class="w-24 h-24 object-contain">
-    </div>
-  </div>
-</div>
-<!-- Inventory -->
-<div *ngIf="showInventory" class='col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6'>
-  <div class="overflow-x-auto">
-    <div class="inventory-header">
-      <h2 class="font-bold">Inventory</h2>
-    </div>
-    <div class="inventory-items-container">
-      <div *ngFor="let item of userStorageItems" class="inventory-item">
-        <img [src]="item.path" [alt]="item.item_name">
-        <h3>{{ item.item_name }}</h3>
-        <p>Quantity: {{ item.quantity }}</p>
-        <p>{{ item.description }}</p>
-        <button (click)="selectFoodItem(item)">Feed Pet</button>
+    <!-- Inventory -->
+    <div *ngIf="showInventory" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
+      <div class="overflow-x-auto">
+        <div class="inventory-header">
+          <h2 class="font-bold">Inventory</h2>
+        </div>
+        <div class="inventory-items-container">
+          <div *ngFor="let item of userStorageItems" class="inventory-item">
+            <img [src]="item.path" [alt]="item.item_name" />
+            <h3>{{ item.item_name }}</h3>
+            <p>Quantity: {{ item.quantity }}</p>
+            <p>{{ item.description }}</p>
+            <button (click)="selectFoodItem(item)">Feed Pet</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div *ngIf="showActivity" class='col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6 '> 
-  <div class="overflow-x-auto p-8">
-    <table class="min-w-full divide-y divide-gray-200 table-auto">
-      <thead class="bg-gray-50">
-        <tr class="bg-green-100">
-          <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Word Count</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Coins</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Languages</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Timestamp</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let activity of paginatedData">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ activity.wordcount }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ activity.coins }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ activity.Languages }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ activity.Timestamp }}</td>
-        </tr>
-      </tbody>
-    </table>
-    
-    <!-- Pagination -->
-    <div id="paginationSection" class="mt-4 flex items-center justify-between">
-      <div class="flex">
-        <button id="prevPageButton" (click)="prevPage()" class="bg-yellow-100 text-gray-600 px-4 py-2 rounded-l-md">Previous</button>
-        <span class="bg-yellow-200 px-4 py-2">Page {{ currentPage }} of {{ totalPages }}</span>
-        <button id="nextPageButton" (click)="nextPage()" class="bg-yellow-100 text-gray-600 px-4 py-2 rounded-r-md ">Next</button>
-      </div>
-      
-      <!-- Select number of rows -->
-      <div>
-        <label for="rowsPerPage" class="text-gray-700">Rows per page:</label>
-        <select id="rowsPerPage" [(ngModel)]="rowsPerPage" (change)="updatePagination()" class="ml-2 bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-md">
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-        </select>
+    <div *ngIf="showActivity" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
+      <div class="overflow-x-auto p-8">
+        <table class="min-w-full divide-y divide-gray-200 table-auto">
+          <thead class="bg-gray-50">
+            <tr class="bg-green-100">
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                Word Count
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                Coins
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                Languages
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
+                Timestamp
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let activity of paginatedData">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ activity.wordcount }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ activity.coins }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ activity.Languages }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ activity.Timestamp }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div id="paginationSection" class="mt-4 flex items-center justify-between">
+          <div class="flex">
+            <button id="prevPageButton" (click)="prevPage()" class="bg-yellow-100 text-gray-600 px-4 py-2 rounded-l-md">
+              Previous
+            </button>
+            <span class="bg-yellow-200 px-4 py-2">Page {{ currentPage }} of {{ totalPages }}</span>
+            <button id="nextPageButton" (click)="nextPage()" class="bg-yellow-100 text-gray-600 px-4 py-2 rounded-r-md">
+              Next
+            </button>
+          </div>
+
+          <!-- Select number of rows -->
+          <div>
+            <label for="rowsPerPage" class="text-gray-700">Rows per page:</label>
+            <select id="rowsPerPage" [(ngModel)]="rowsPerPage" (change)="updatePagination()"
+              class="ml-2 bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-md">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
+    <!-- Decoration -->
+    <div *ngIf="showDecoration" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
+      <div class="decoration-menu grid grid-cols-3 gap-4">
+        <!-- Menu buttons -->
+        <div class="col-span-1 flex flex-col space-y-2">
+          <button class="btn btn-warning w-full" (click)="selectedMenu = 'pet'">
+            Change Pet
+          </button>
+          <button class="btn btn-warning w-full" (click)="selectedMenu = 'background'">
+            Change Background
+          </button>
+          <button class="btn btn-success w-full" (click)="saveDecoration()">
+            Save Decoration
+          </button>
+        </div>
 
- <!-- Decoration -->
- <div *ngIf="showDecoration" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
-  <div class="decoration-menu grid grid-cols-3 gap-4">
-    <!-- Menu buttons -->
-    <div class="col-span-1 flex flex-col space-y-2">
-      <button class="btn btn-warning w-full" (click)="selectedMenu = 'pet'">Change Pet</button>
-      <button class="btn btn-warning w-full" (click)="selectedMenu = 'background'">Change Background</button>
-      <button class="btn btn-success w-full" (click)="saveDecoration()">Save Decoration</button>
-    </div>
-
-    <!-- List and Preview -->
-    <div class="col-span-2 grid grid-cols-3 gap-4">
-      <!-- List of pets or backgrounds -->
-      <div class="col-span-1 bg-yellow-100 p-2 rounded-md">
-        <h3 class="font-bold text-lg">{{ selectedMenu === 'pet' ? 'Pet List' : 'Background List' }}</h3>
-        <div class="list-container max-h-64 overflow-y-auto">
-          <div *ngIf="selectedMenu === 'pet'">
-            <div *ngFor="let pet of pets" (click)="selectedPet = pet" [class.selected]="selectedPet === pet" class="p-2 mb-1 bg-white rounded-md cursor-pointer">
-              {{ pet.pet_name }}
+        <!-- List and Preview -->
+        <div class="col-span-2 grid grid-cols-3 gap-4">
+          <!-- List of pets or backgrounds -->
+          <div class="col-span-1 bg-yellow-100 p-2 rounded-md">
+            <h3 class="font-bold text-lg">
+              {{ selectedMenu === "pet" ? "Pet List" : "Background List" }}
+            </h3>
+            <div class="list-container max-h-64 overflow-y-auto">
+              <div *ngIf="selectedMenu === 'pet'">
+                <div *ngFor="let pet of pets" (click)="selectedPet = pet" [class.selected]="selectedPet === pet"
+                  class="p-2 mb-1 bg-white rounded-md cursor-pointer">
+                  {{ pet.pet_name }}
+                </div>
+              </div>
+              <div *ngIf="selectedMenu === 'background'">
+                <div *ngFor="let background of backgrounds" (click)="selectedBackground = background"
+                  [class.selected]="selectedBackground === background"
+                  class="p-2 mb-1 bg-white rounded-md cursor-pointer">
+                  {{ background.item_name }}
+                </div>
+              </div>
             </div>
           </div>
-          <div *ngIf="selectedMenu === 'background'">
-            <div *ngFor="let background of backgrounds" (click)="selectedBackground = background" [class.selected]="selectedBackground === background" class="p-2 mb-1 bg-white rounded-md cursor-pointer">
-              {{ background.item_name }}
+
+          <!-- Preview -->
+          <div class="col-span-2 bg-gray-100 p-4 rounded-md">
+            <h3 class="font-bold text-lg mb-2">Preview</h3>
+            <div class="preview-container relative">
+              <div class="background-container" *ngIf="selectedBackground">
+                <img [src]="selectedBackground?.path" class="background-image" />
+              </div>
+              <img [src]="selectedPet?.path" class="pet-image" *ngIf="selectedPet" />
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Preview -->
-      <div class="col-span-2 bg-gray-100 p-4 rounded-md">
-        <h3 class="font-bold text-lg mb-2">Preview</h3>
-        <div class="preview-container relative">
-          <div class="background-container" *ngIf="selectedBackground">
-            <img [src]="selectedBackground?.path" class="background-image">
-          </div>
-          <img [src]="selectedPet?.path" class="pet-image" *ngIf="selectedPet">
-        </div>
-      </div>
     </div>
   </div>
-</div>
-</div>
-
-
 </body>
 
 </html>

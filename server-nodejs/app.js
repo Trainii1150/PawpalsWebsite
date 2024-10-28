@@ -99,11 +99,18 @@ const typeDefs = gql`
     pet_id: Int
     background: String
   }
-
-  type MutationResponse {
-    success: Boolean!
+  type UserSettings {
+    user_id: ID
+    selected_pet_id: Int
   }
 
+  type Mutation {
+    setSelectedPet(uid: ID!, pet_id: Int!): MutationResponse
+   }
+   type MutationResponse {
+    success: Boolean
+    message: String
+  }
   type Query {
     activity(uid: ID!): [CodingActivity]
     time(uid: String!): Float
@@ -115,6 +122,7 @@ const typeDefs = gql`
     getProgress(userId: ID!): [Progress]
     getUserDecorationItems(uid: ID!): UserDecorationItems
     filesByProject(projectName: String!, userId: ID!): [String]
+    getUserSettings(uid: ID!): UserSettings
   }
 `;
 
@@ -141,6 +149,9 @@ const resolvers = {
     filesByProject: async (_, { projectName, userId }) => {
       return UserModel.getFilesByProjectName(projectName, userId);
     },
+    getUserSettings: async (_, { uid }) => { 
+      return UserModel.getUserSettings(uid);
+    },
     userPets: async (_, { uid }) => {
       try {
         const pets = await UserModel.getUserPets(uid);
@@ -154,7 +165,6 @@ const resolvers = {
     getProgress: async (_, { userId }) => {
       return RewardProgressModel.getProgressByUser(userId);
     },
-    
     getUserDecorationItems: async (_, { uid }) => {
       const pets = await UserModel.getUserPets(uid);
       const backgrounds = await UserModel.getUserBackgrounds(uid);
@@ -164,14 +174,24 @@ const resolvers = {
       };
     },
   },
+  Mutation: { // ย้าย Mutation มาที่นี่แทนที่จะอยู่ภายใน Query
+    setSelectedPet: async (_, { uid, pet_id }) => {
+      try {
+        await UserModel.setSelectedPet(uid, pet_id); // ฟังก์ชันใน UserModel สำหรับการอัปเดตฐานข้อมูล
+        return { success: true, message: "Pet selected successfully" };
+      } catch (error) {
+        console.error('Error setting selected pet:', error);
+        throw new ApolloError('Failed to set selected pet');
+      }
+    },
+  },
 };
+
 
 async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });
-
   await server.start();
   server.applyMiddleware({ app });
-
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });

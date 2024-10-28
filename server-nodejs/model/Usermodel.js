@@ -48,16 +48,36 @@ const updateFirstLoginStatus = async (userId) => {
   }
 };
 
-const getResetpassemail = async (email) => {
-    try {
-        const result = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
-        return result.rows[0];
-    } catch (error) {
-        console.error(error);
-        throw new Error('Error getting user by email');
+async function setSelectedPet(uid, pet_id) {
+  try {
+    // ตรวจสอบว่ามีการตั้งค่าในตาราง user_settings สำหรับผู้ใช้นี้หรือไม่
+    const checkUserSettings = await pool.query(
+      'SELECT user_id FROM user_settings WHERE user_id = $1',
+      [uid]
+    );
+
+    if (checkUserSettings.rows.length === 0) {
+      // หากไม่มี ให้สร้างการตั้งค่าใหม่ใน user_settings
+      await pool.query(
+        'INSERT INTO user_settings (user_id, selected_pet_id) VALUES ($1, $2)',
+        [uid, pet_id]
+      );
+
+    } else {
+      // หากมีอยู่แล้ว ให้ทำการอัปเดต selected_pet_id
+      await pool.query(
+        'UPDATE user_settings SET selected_pet_id = $1 WHERE user_id = $2',
+        [pet_id, uid]
+      );
     }
-    
-};
+
+    console.log(`Selected pet for user ${uid} updated to pet ID: ${pet_id}`);
+  } catch (error) {
+    console.error('Error in setSelectedPet:', error);
+    throw new Error('Failed to set selected pet');
+  }
+}
+
 
 const findbyEmail = async (email) => {
     try {
@@ -104,8 +124,8 @@ const updateUserVerification = async (email) => {
         console.error(error);
         throw new Error('Failed to update user verification status');
     }
-
 };
+
 const getpasswordbyemail = async (email) => {
       try {
         const result = await pool.query('SELECT password FROM user_table WHERE email = $1', [email]);
@@ -138,7 +158,7 @@ const setBan = async (userId, banStatus) => {
       await pool.query('UPDATE user_table SET ban = $1 WHERE user_id = $2', [banStatus, userId]);
     } catch (error) {
       console.error(error);
-      throw error; // Re-throw the error to be handled in the controller
+      throw error; 
     }
 };
 
@@ -185,7 +205,6 @@ const getUserActivity = async (userId) => {
     throw new Error('Error getting activity data');
   }
 };
-
 
 const getUserActivityTime = async (uid) => {
     try {
@@ -242,11 +261,9 @@ const deductUserCoins = async (uid, amount) => {
       }
   
       const userCoins = userCoinsResult.rows[0].coins;
-  
       if (userCoins < amount) {
         throw new Error('Not enough coins');
       }
-  
       const newCoins = userCoins - amount;
       await client.query('UPDATE user_coins SET coins = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2', [newCoins, uid]);
   
@@ -259,6 +276,7 @@ const deductUserCoins = async (uid, amount) => {
       client.release();
     }
 };
+
 const getUserBackgrounds = async (uid) => {
   try {
     const result = await pool.query(`
@@ -290,8 +308,6 @@ const getTimeByLanguage = async (uid) => {
     throw new Error('Error getting time by language');
   }
 };
-
-
 
 const getUserPets = async (uid) => {
   try {
@@ -331,8 +347,16 @@ const getUserPets = async (uid) => {
     throw error;
   }
 };
-
+const getResetpassemail = async (email) => {
+  try {
+      const result = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);
+      return result.rows[0];
+  } catch (error) {
+      console.error(error);
+      throw new Error('Error getting user by email');
+  }
   
+};
 feedPet: async (userId, petId, foodValue) => {
   // อัปเดตข้อมูลสัตว์เลี้ยงในฐานข้อมูล (เช่น การลด hunger_level)
   const result = await pool.query(
@@ -343,9 +367,23 @@ feedPet: async (userId, petId, foodValue) => {
   return result.rows[0]; // ส่งคืนข้อมูลสัตว์เลี้ยงที่อัปเดตแล้ว
 },
 
+getUserSettings = async (uid) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM user_settings WHERE user_id = $1',
+      [uid]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error getting user settings:', error);
+    throw new Error('Error getting user settings');
+  }
+};
+
   
 module.exports = {
     createUser,
+    getUserSettings,
     getUserData,
     updateFirstLoginStatus,
     findRoleById,
@@ -355,6 +393,7 @@ module.exports = {
     getResetpassemail,
     findbyEmail,
     deleteUserById,
+    setSelectedPet,
     deleteUserInfo,
     updateUserInfo,
     getUserStorageItems,

@@ -11,6 +11,8 @@ import moment from 'moment';
 import { HttpClient } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 
+import html2pdf from 'html2pdf.js';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -18,14 +20,17 @@ import { TranslateService } from '@ngx-translate/core';
 })
 
 export class HomeComponent implements OnInit, AfterViewInit {
-  totalPages: number | undefined;
-  petPath: any;
-  selectedLanguage: string = 'en';
-  totalCoins: any;
+  pollIntervalId: any;
+  selectedPetId: any;
   toggleInfoModal() {
     this.showInfoModal = !this.showInfoModal;
   }
 
+  currentPetIndex = 0;
+  totalPages: number | undefined;
+  petPath: any;
+  selectedLanguage: string = 'en';
+  totalCoins: any;
   showActivity = false;
   showInventory = false;
   showStore = false;
@@ -33,7 +38,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   genres = ['All', 'Foods', 'Decoration'];
   selectedGenre = 'All';
   petName: String | undefined = 'David';
-  foodStatus: Number | undefined;
+  foodStatus: number = 0; 
   happinessStatus: Number | undefined = 40;
   exp: Number | undefined;
   todayCodeTime: number = 0;
@@ -51,27 +56,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
   selectedBackground: any;
   selectedMenu: string = 'pet';
   showInfoModal: boolean = false;
-  customOptions: OwlOptions = {
-    loop: true,
-    mouseDrag: true,
-    touchDrag: false,
-    pullDrag: false,
-    dots: false,
-    navSpeed: 700,
-    navText: ['', ''],
-    responsive: {
-      0: { items: 1 },
-      400: { items: 2 },
-      740: { items: 3 },
-      940: { items: 4 },
-    },
-    nav: true,
-  };
   currentPage = 1;
   rowsPerPage = 5;  // ค่าเริ่มต้น
   paginatedData: any[] = [];
   progress = [];
   progress_item_path: any;
+  
 
   constructor(
     private authService: AuthService,
@@ -108,7 +98,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.getUserPets();
     this.calculateTodayCompare();
     this.calculateMonthlyCompare();
+    this.getUserSettings(); 
   }
+
+  
   getActivityData(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
@@ -140,7 +133,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
                 Timestamp: this.cleanTimestamp(activity.Timestamp),
               }))
               .sort((a: any, b: any) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime()); // เรียงลำดับจากมากไปน้อย (ล่าสุดก่อน)
-  
+
             // แสดงข้อมูลที่เรียงแล้วในส่วนของ Recent Files
             this.displayRecentFiles();
           },
@@ -162,6 +155,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       });
     }
   }
+
   toggleActivity() {
     this.showActivity = !this.showActivity;
     this.showInventory = false;
@@ -195,7 +189,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   switchLanguage(language: string) {
     this.selectedLanguage = language;
-    this.translate.use(language);    
+    this.translate.use(language);
   }
 
   logout() {
@@ -266,24 +260,24 @@ export class HomeComponent implements OnInit, AfterViewInit {
           (response: any) => {
             this.activityData = response.data.activity.map((activity: any) => {
               let timestamp = activity.Timestamp;
-              
+
               if (typeof timestamp === 'string') {
                 timestamp = parseInt(timestamp, 10);
               }
-            
+
               if (timestamp < 10000000000) {
                 timestamp *= 1000; // ถ้า timestamp เป็นหน่วยวินาที คูณด้วย 1000
               }
-            
+
               const dateObj = moment(timestamp).toDate();
               console.log('Converted Date with moment:', dateObj);
-            
+
               return {
                 ...activity,
                 Timestamp: dateObj,
               };
             });
-            
+
             this.activityData.forEach((activity: any) => {
               console.log('Timestamp:', activity.Timestamp, 'Date Object:', new Date(activity.Timestamp));
             });
@@ -303,87 +297,85 @@ export class HomeComponent implements OnInit, AfterViewInit {
       console.error('Token not found in cookies');
     }
   }
-  
-  
+
+
   calculateMonthlyCompare() {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
-  
+
     const thisMonthTime = this.activityData
       .filter((activity) => {
         const activityDate = new Date(activity.Timestamp);
         return activityDate.getMonth() === currentMonth && activityDate.getFullYear() === currentYear;
       })
       .reduce((total, activity) => total + activity.time, 0);
-  
+
     const lastMonthTime = this.activityData
       .filter((activity) => {
         const activityDate = new Date(activity.Timestamp);
         return activityDate.getMonth() === currentMonth - 1 && activityDate.getFullYear() === currentYear;
       })
       .reduce((total, activity) => total + activity.time, 0);
-  
+
     console.log('This Month Time:', thisMonthTime);
     console.log('Last Month Time:', lastMonthTime);
-  
+
     this.monthlyCodeTime = thisMonthTime; // เก็บเวลาเขียนโค้ดเดือนนี้
-  
+
     const percentageChange = lastMonthTime
       ? ((thisMonthTime - lastMonthTime) / lastMonthTime) * 100
       : 0;
-  
+
     this.monthlyTimeCompare = Number(percentageChange.toFixed(2));
   }
-  
-  
-calculateTodayCompare() {
-  const todayTime = this.activityData
-    .filter((activity) => this.isSameDay(activity.Timestamp, new Date()))
-    .reduce((total, activity) => total + activity.time, 0);
 
-  const yesterdayTime = this.activityData
-    .filter((activity) => this.isSameDay(activity.Timestamp, new Date(Date.now() - 86400000)))
-    .reduce((total, activity) => total + activity.time, 0);
 
-  console.log('Today Time:', todayTime);
-  console.log('Yesterday Time:', yesterdayTime);
+  calculateTodayCompare() {
+    const todayTime = this.activityData
+      .filter((activity) => this.isSameDay(activity.Timestamp, new Date()))
+      .reduce((total, activity) => total + activity.time, 0);
 
-  this.todayCodeTime = todayTime; // เก็บเวลาเขียนโค้ดวันนี้
+    const yesterdayTime = this.activityData
+      .filter((activity) => this.isSameDay(activity.Timestamp, new Date(Date.now() - 86400000)))
+      .reduce((total, activity) => total + activity.time, 0);
 
-  const percentageChange = yesterdayTime
-    ? ((todayTime - yesterdayTime) / yesterdayTime) * 100
-    : 0;
+    console.log('Today Time:', todayTime);
+    console.log('Yesterday Time:', yesterdayTime);
 
-  this.todayTimeCompare = Number(percentageChange.toFixed(2));
-  console.log('Today Time Compare:', this.todayTimeCompare);
-}
+    this.todayCodeTime = todayTime; // เก็บเวลาเขียนโค้ดวันนี้
 
-  
+    const percentageChange = yesterdayTime
+      ? ((todayTime - yesterdayTime) / yesterdayTime) * 100
+      : 0;
+
+    this.todayTimeCompare = Number(percentageChange.toFixed(2));
+    console.log('Today Time Compare:', this.todayTimeCompare);
+  }
+
 
   isSameDay(timestamp: string | number, date: Date): boolean {
     const activityDate = new Date(timestamp);
-  
+
     // ปรับวันที่ให้เป็นค่า UTC เพื่อหลีกเลี่ยงปัญหาเขตเวลา
     const utcActivityDate = new Date(
       activityDate.getUTCFullYear(),
       activityDate.getUTCMonth(),
       activityDate.getUTCDate()
     );
-  
+
     const utcDate = new Date(
       date.getUTCFullYear(),
       date.getUTCMonth(),
       date.getUTCDate()
     );
-  
+
     return (
       utcActivityDate.getDate() === utcDate.getDate() &&
       utcActivityDate.getMonth() === utcDate.getMonth() &&
       utcActivityDate.getFullYear() === utcDate.getFullYear()
     );
   }
-  
-  
+
   saveDecoration(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
@@ -415,24 +407,6 @@ calculateTodayCompare() {
         text: 'User ID not found in cookies',
       });
     }
-  }
-
-  subscribeToTimeByLanguageUpdates(): void {
-    this.apollo
-      .subscribe({
-        query: gql`
-          subscription OnTimeByLanguageUpdated {
-            timeByLanguageUpdated {
-              language
-              total_time
-            }
-          }
-        `,
-      })
-      .subscribe((result: any) => {
-        this.timeByLanguage = result.data.timeByLanguageUpdated;
-        this.initializeChart(); // Re-render chart with updated data
-      });
   }
 
   getTimeByLanguage(): void {
@@ -556,8 +530,6 @@ calculateTodayCompare() {
     }
   }
 
-  
-  
   displayRecentFiles(): void {
     const recentFilesContainer = document.getElementById('recentFilesContainer');
     if (recentFilesContainer) {
@@ -572,6 +544,10 @@ calculateTodayCompare() {
         )
         .join('');
     }
+  }
+  isFiniteValue(value: number | undefined): boolean {
+    return typeof value === 'number' && isFinite(value);
+
   }
   
 
@@ -594,9 +570,8 @@ calculateTodayCompare() {
     const month = date.toLocaleString('default', { month: 'long' });
     const year = date.getFullYear();
 
-    return `${
-      hours % 12
-    }:${minutes}:${seconds} ${period}, ${month} ${day} ${year}`;
+    return `${hours % 12
+      }:${minutes}:${seconds} ${period}, ${month} ${day} ${year}`;
   }
 
   buyItem(item: any): void {
@@ -673,6 +648,8 @@ calculateTodayCompare() {
     }
   }
 
+
+
   getUserPets(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
@@ -691,16 +668,19 @@ calculateTodayCompare() {
             }
           `,
           variables: { uid: uid },
+          
           pollInterval: 3000000,
         })
         .valueChanges.subscribe(
+          
           (response: any) => {
-            const pet = response.data.userPets[0]; // สมมติว่าเราดึงสัตว์เลี้ยงตัวแรก
-            this.petName = pet.pet_name;
-            this.foodStatus = isFinite(pet.hunger_level) ? pet.hunger_level : 0; // ตรวจสอบว่าค่าเป็นตัวเลขที่ถูกต้อง
-            this.happinessStatus = isFinite(pet.happiness_level) ? pet.happiness_level : 0; // ตรวจสอบว่าค่าเป็นตัวเลขที่ถูกต้อง
-            this.exp = pet.exp;
-            this.petPath = pet.path;
+            console.log("Pets data fetched:", this.pets);
+            this.pets = response.data.userPets;
+            if (this.pets.length > 0) {
+              this.getUserSettings();
+              this.updateSelectedPet(this.pets[this.currentPetIndex].pet_id); // ใช้ฟังก์ชัน updateSelectedPet
+              this.foodStatus = this.pets[this.currentPetIndex].hunger_level ?? 0;
+            }
           },
           (error) => {
             console.error('Error getting user pets:', error);
@@ -715,13 +695,48 @@ calculateTodayCompare() {
       console.error('Token not found in cookies');
     }
   }
+  getUserSettings(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+        this.apollo
+            .watchQuery({
+                query: gql`
+                    query GetUserSettings($uid: ID!) {
+                        getUserSettings(uid: $uid) {
+                            selected_pet_id
+                        }
+                    }
+                `,
+                variables: { uid: uid },
+            })
+            .valueChanges.subscribe(
+                (response: any) => {
+                    const selectedPetId = response.data.getUserSettings.selected_pet_id;
+                    if (selectedPetId && this.pets.length > 0) {
+                        const petIndex = this.pets.findIndex((pet) => pet.pet_id === selectedPetId);
+                        if (petIndex !== -1) {
+                            this.currentPetIndex = petIndex;
+                            this.selectedPetId = selectedPetId;
+                            this.updateSelectedPet(this.selectedPetId); // อัปเดต UI
+                            this.foodStatus = this.pets[this.currentPetIndex].hunger_level || 0;
+                        }
+                    }
+                },
+                (error) => {
+                    console.error('Error getting user settings:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: `Failed to get user settings: ${error.message}`,
+                    });
+                }
+            );
+    } else {
+        console.error('Token not found in cookies');
+    }
+}
+
   
-
-  selectFoodItem(item: any) {
-    const petId = 1; // ตัวอย่าง petId
-    this.feedPet(petId, item.food_value, item.item_id);
-  }
-
   getUserPetExp(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
@@ -756,36 +771,155 @@ calculateTodayCompare() {
     }
   }
 
-  feedPet(petId: number, foodValue: number, itemId: number): void {
+  selectPet(petId: number): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
-      this.userService.feedPet(uid, petId, foodValue, itemId).subscribe(
-        (response: any) => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Pet fed successfully!',
-          });
-          this.getUserStorageItems();
-        },
-        (error: any) => {
-          console.error('Error feeding pet:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Failed to feed pet: ${error.message}`,
-          });
-        }
-      );
-    } else {
-      console.error('User ID not found in cookies');
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'User ID not found in cookies',
-      });
+        this.apollo.mutate({
+            mutation: gql`
+                mutation SetSelectedPet($uid: ID!, $pet_id: Int!) {
+                    setSelectedPet(uid: $uid, pet_id: $pet_id) {
+                        success
+                    }
+                }
+            `,
+            variables: { uid, pet_id: petId }
+        }).subscribe(
+            (response: any) => {
+                if (response.data.setSelectedPet.success) {
+                    Swal.fire('Success', 'Pet selected successfully!', 'success');
+                    const petIndex = this.pets.findIndex(pet => pet.pet_id === petId);
+                    if (petIndex !== -1) {
+                        this.currentPetIndex = petIndex;
+                        this.selectedPetId = petId;
+                        this.updateSelectedPet(this.selectedPetId);
+                        this.foodStatus = this.pets[this.currentPetIndex].hunger_level || 0;
+                    }
+                } else {
+                    Swal.fire('Error', 'Failed to select pet', 'error');
+                }
+            },
+            (error) => {
+                Swal.fire('Error', 'Failed to select pet', 'error');
+                console.error('Error selecting pet:', error);
+            }
+        );
+    }
+}
+
+
+  updateHungerLevel(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid && this.selectedPetId) {
+      this.apollo
+        .watchQuery({
+          query: gql`
+            query GetSelectedPetHunger($uid: String!, $pet_id: Int!) {
+              userPets(uid: $uid) {
+                pet_id
+                hunger_level
+              }
+            }
+          `,
+          variables: { uid: uid, pet_id: this.selectedPetId },
+          fetchPolicy: 'network-only' // ดึงข้อมูลใหม่ทุกครั้งที่เรียก
+        })
+        .valueChanges.subscribe(
+          (response: any) => {
+            const selectedPet = response.data.userPets.find((pet: any) => pet.pet_id === this.selectedPetId);
+            if (selectedPet) {
+              this.foodStatus = selectedPet.hunger_level;
+            }
+          },
+          (error) => {
+            console.error('Error getting selected pet hunger level:', error);
+          }
+        );
     }
   }
+  
+  prevPet() {
+  if (this.pets.length > 0) {
+    this.currentPetIndex = (this.currentPetIndex - 1 + this.pets.length) % this.pets.length;
+    this.selectPet(this.pets[this.currentPetIndex].pet_id);
+  }
+}
+
+  nextPet() {
+  if (this.pets.length > 0) {
+    this.currentPetIndex = (this.currentPetIndex + 1) % this.pets.length;
+    this.selectPet(this.pets[this.currentPetIndex].pet_id);
+  }
+}
+  updateSelectedPet(petId: number): void {
+    const selectedPet = this.pets.find(pet => pet.pet_id === petId);
+    if (selectedPet) {
+      this.petName = selectedPet.pet_name;
+      this.petPath = selectedPet.path;
+    } else {
+      console.warn(`Pet with id ${petId} not found`);
+    }
+  }
+
+ selectFoodItem(item: any) {
+    // ใช้ selectedPetId ที่ตั้งค่าไว้ในระบบแทนการใช้ petId เป็นตัวอย่าง
+    this.feedPet(item.food_value, item.item_id);
+}
+
+feedPet(foodValue: number, itemId: number): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+      const selectedPet = this.pets.find(pet => pet.pet_id === this.selectedPetId);
+      if (!selectedPet) {
+          Swal.fire({
+              icon: 'warning',
+              title: 'Warning',
+              text: 'Selected pet not found.',
+          });
+          return;
+      }
+
+      this.userService.feedPet(uid, this.selectedPetId, foodValue, itemId).subscribe(
+          (response: any) => {
+              Swal.fire({
+                  icon: 'success',
+                  title: 'Success',
+                  text: 'Pet fed successfully!',
+              });
+
+              // หักลบค่า hunger level ทันทีหลังการให้อาหาร
+              this.foodStatus = Math.max(0, this.foodStatus + foodValue);
+
+              // คัดลอก selectedPet และอัปเดต hunger_level
+              const updatedPet = { ...selectedPet, hunger_level: this.foodStatus };
+              
+              // อัปเดตใน this.pets โดยการแทนที่ selectedPet ด้วย updatedPet
+              this.pets = this.pets.map(pet => 
+                  pet.pet_id === this.selectedPetId ? updatedPet : pet
+              );
+
+              this.getUserStorageItems(); // ดึงข้อมูลไอเทมใน storage ใหม่
+          },
+          (error: any) => {
+              console.error('Error feeding pet:', error);
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: `Failed to feed pet: ${error.message}`,
+              });
+          }
+      );
+  } else {
+      console.error('User ID not found in cookies');
+      Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'User ID not found in cookies',
+      });
+  }
+}
+
+
+
 
   randomizePet(): void {
     const uid = this.cookieService.get('uid');
@@ -835,28 +969,23 @@ calculateTodayCompare() {
       );
     }
 
-    const formattedStartDate = `${startDate.getDate()}/${
-      startDate.getMonth() + 1
-    }/${startDate.getFullYear()}`;
-    const formattedEndDate = `${endDate.getDate()}/${
-      endDate.getMonth() + 1
-    }/${endDate.getFullYear()}`;
+    const formattedStartDate = `${startDate.getDate()}/${startDate.getMonth() + 1
+      }/${startDate.getFullYear()}`;
+    const formattedEndDate = `${endDate.getDate()}/${endDate.getMonth() + 1
+      }/${endDate.getFullYear()}`;
     return `${formattedStartDate} - ${formattedEndDate}`;
   }
 
   cleanTimestamp(timestamp: string | number | null | undefined): string {
-
     if (!timestamp) {
       console.log('Timestamp is null or undefined');
       return 'Invalid date';
     }
-
     // ตรวจสอบว่า timestamp เป็น string และเป็นตัวเลขหรือไม่
     if (typeof timestamp === 'string' && !/^\d+$/.test(timestamp)) {
       console.log('Timestamp is a string but not a valid number:', timestamp);
       return 'Invalid date';
     }
-
     // แปลงเป็นตัวเลขถ้าเป็น string
     const timestampNum =
       typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp;
@@ -865,7 +994,6 @@ calculateTodayCompare() {
       console.log('Invalid timestamp after parsing:', timestampNum);
       return 'Invalid date';
     }
-
     // แปลง Unix timestamp เป็น Date object
     const dateObj = new Date(timestampNum);
     if (isNaN(dateObj.getTime())) {
@@ -886,184 +1014,100 @@ calculateTodayCompare() {
   }
 
   generateReport(): void {
-    const uid = this.cookieService.get('uid');
-    this.apollo
-      .watchQuery({
-        query: gql`
-          query GetActivityWithFiles($uid: ID!) {
-            activity(uid: $uid) {
-              Languages
-              wordcount
-              coins
-              time
-              Timestamp
-              project_name
-              file_name
-            }
-          }
-        `,
-        variables: { uid: uid },
-      })
-      .valueChanges.subscribe((response: any) => {
-        const activityData = response.data.activity;
-
-        const aggregatedProjectsByName = activityData.reduce(
-          (acc: any, project: any) => {
-            const existingProject = acc.find(
-              (p: any) => p.project_name === project.project_name
-            );
-            if (existingProject) {
-              const existingFile = existingProject.files.find(
-                (f: any) => f.file_name === project.file_name
-              );
-              if (existingFile) {
-                existingFile.time += project.time;
-                existingFile.wordcount += project.wordcount;
-                existingFile.coins += project.coins;
-              } else {
-                existingProject.files.push({ ...project });
-              }
-            } else {
-              acc.push({
-                project_name: project.project_name,
-                files: [{ ...project }],
-              });
-            }
-            return acc;
-          },
-          []
-        );
-
-        Swal.fire({
-          title: 'Create Report',
-          html: `
-          <label for="name" class="label">Name</label>
-          <input id="name" class="input input-bordered w-full max-w-xs swal2-input" placeholder="Your Name">
+    const element = document.getElementById('pdf-content');
+    if (element) {
+      const options = {
+        margin: 1,
+        filename: 'activity-report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().from(element).set(options).save();
+    }
+  }
   
-          <div style="text-align: left; margin-top: 20px;">
-            <label class="label"><span class="label-text">Select project:</span></label><br>
-            ${aggregatedProjectsByName
-              .map(
-                (project: { project_name: any }, index: number) =>
-                  `<label class="label cursor-pointer">
-                  <span class="label-text">${project.project_name}</span>
-                  <input type="radio" name="project" id="project${index}" value="${index}" class="radio radio-primary" ${
-                    index === 0 ? 'checked' : ''
-                  }>
-                </label>`
-              )
-              .join('')}
-          </div>
+  createReportForProjectGroup(
+    name: string,
+    projectFiles: any[],
+    selectedDetails: any = {
+      totalTimeChecked: true,
+      wordCountChecked: true,
+      coinsEarnedChecked: true,
+      codeReferencesChecked: true,
+      pasteCountChecked: true,
+      timestampChecked: true,
+    }
+  ): void {
+    // Generate HTML for the report content
+    const reportHtml = `
+      <div id="pdf-content" style="padding: 20px; font-family: Arial, sans-serif;">
+        <h1 style="text-align: center; color: #FF6B6B;">Activity Report</h1>
+        <h2 style="text-align: center;">${name}</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              ${selectedDetails.timestampChecked ? `<th>Start Date</th><th>End Date</th>` : ''}
+              ${selectedDetails.totalTimeChecked ? `<th>Total Time (hours)</th>` : ''}
+              ${selectedDetails.wordCountChecked ? `<th>Word Count</th>` : ''}
+              ${selectedDetails.coinsEarnedChecked ? `<th>Coins Earned</th>` : ''}
+              ${selectedDetails.codeReferencesChecked ? `<th>Code References</th>` : ''}
+              ${selectedDetails.pasteCountChecked ? `<th>Paste Count</th>` : ''}
+            </tr>
+          </thead>
+          <tbody>
+            ${projectFiles.map(file => `
+              <tr>
+                <td>${file.file_name}</td>
+                ${selectedDetails.timestampChecked ? `<td>${this.formatDate(file.Timestamp)}</td><td>${this.formatDate(file.Timestamp + file.time * 60 * 1000)}</td>` : ''}
+                ${selectedDetails.totalTimeChecked ? `<td>${(file.time / 60).toFixed(2)}</td>` : ''}
+                ${selectedDetails.wordCountChecked ? `<td>${file.wordcount}</td>` : ''}
+                ${selectedDetails.coinsEarnedChecked ? `<td>${file.coins.toFixed(2)}</td>` : ''}
+                ${selectedDetails.codeReferencesChecked ? `<td>${file.code_references}</td>` : ''}
+                ${selectedDetails.pasteCountChecked ? `<td>${file.paste_count}</td>` : ''}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div style="margin-top: 20px;">
+          <h3>Summary</h3>
+          <p><strong>Total Time:</strong> ${projectFiles.reduce((sum, file) => sum + file.time, 0) / 60} hours</p>
+          <p><strong>Total Word Count:</strong> ${projectFiles.reduce((sum, file) => sum + file.wordcount, 0)}</p>
+          <p><strong>Total Coins Earned:</strong> ${projectFiles.reduce((sum, file) => sum + file.coins, 0).toFixed(2)}</p>
+          <p><strong>Total Code References:</strong> ${projectFiles.reduce((sum, file) => sum + file.code_references, 0)}</p>
+          <p><strong>Total Paste Count:</strong> ${projectFiles.reduce((sum, file) => sum + file.paste_count, 0)}</p>
+        </div>
+      </div>
+    `;
   
-          <div id="fileSelectionContainer" style="text-align: left; margin-top: 20px;"></div>
+    // Create a temporary element to contain the HTML content
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = reportHtml;
+    document.body.appendChild(tempDiv);
   
-          <div style="text-align: left; margin-top: 20px;">
-            <label class="label"><span class="label-text">Select details:</span></label><br>
-            <label class="label cursor-pointer">
-              <span class="label-text">Total Time</span>
-              <input type="checkbox" id="totalTime" value="totalTime" class="checkbox checkbox-primary" checked>
-            </label>
-            <label class="label cursor-pointer">
-              <span class="label-text">Word Count</span>
-              <input type="checkbox" id="wordCount" value="wordCount" class="checkbox checkbox-primary" checked>
-            </label>
-            <label class="label cursor-pointer">
-              <span class="label-text">Coins Earned</span>
-              <input type="checkbox" id="coinsEarned" value="coinsEarned" class="checkbox checkbox-primary" checked>
-            </label>
-            <label class="label cursor-pointer">
-              <span class="label-text">Timestamp</span>
-              <input type="checkbox" id="timestampChecked" value="timestampChecked" class="checkbox checkbox-primary" checked>
-            </label>
-          </div>
-        `,
-          showCancelButton: true,
-          confirmButtonText: 'Create Report',
-          didOpen: () => {
-            const projectRadios = document.querySelectorAll(
-              'input[name="project"]'
-            );
-            projectRadios.forEach((radio: any) => {
-              radio.addEventListener('change', () => {
-                const selectedProjectIndex = radio.value;
-                this.populateFileSelection(
-                  aggregatedProjectsByName[selectedProjectIndex].files
-                );
-              });
-            });
-
-            this.populateFileSelection(aggregatedProjectsByName[0].files);
-          },
-          preConfirm: () => {
-            const name = (document.getElementById('name') as HTMLInputElement)
-              .value;
-            const selectedProjectElement = document.querySelector(
-              'input[name="project"]:checked'
-            ) as HTMLInputElement;
-            const selectedProjectIndex = selectedProjectElement
-              ? selectedProjectElement.value
-              : undefined;
-
-            const totalTimeChecked = (
-              document.getElementById('totalTime') as HTMLInputElement
-            ).checked;
-            const wordCountChecked = (
-              document.getElementById('wordCount') as HTMLInputElement
-            ).checked;
-            const coinsEarnedChecked = (
-              document.getElementById('coinsEarned') as HTMLInputElement
-            ).checked;
-            const timestampChecked = (
-              document.getElementById('timestampChecked') as HTMLInputElement
-            ).checked;
-
-            const selectedFiles = Array.from(
-              document.querySelectorAll('input[name="file"]:checked')
-            ).map((checkbox: any) => checkbox.value);
-
-            if (!name) {
-              Swal.showValidationMessage('Please enter your name');
-              return;
-            }
-
-            if (selectedProjectIndex === undefined) {
-              Swal.showValidationMessage('Please select a project');
-              return;
-            }
-
-            if (selectedFiles.length === 0) {
-              Swal.showValidationMessage('Please select at least one file');
-              return;
-            }
-
-            return {
-              name,
-              selectedProjectIndex,
-              selectedFiles,
-              totalTimeChecked,
-              wordCountChecked,
-              coinsEarnedChecked,
-              timestampChecked,
-            };
-          },
-        }).then((result: any) => {
-          if (result.isConfirmed) {
-            const formData = result.value;
-            const selectedProject =
-              aggregatedProjectsByName[formData.selectedProjectIndex];
-
-            const selectedFilesData = selectedProject.files.filter(
-              (file: any) => formData.selectedFiles.includes(file.file_name)
-            );
-
-            this.createReportForProjectGroup(
-              formData.name,
-              selectedFilesData,
-              formData
-            );
-          }
-        });
-      });
+    // Use html2pdf to generate and download the report
+    const options = {
+      margin: 1,
+      filename: 'activity-report.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+  
+    html2pdf().from(tempDiv).set(options).save().then(() => {
+      document.body.removeChild(tempDiv); // Remove the temporary element after saving
+    });
+  }
+  
+  formatDate(timestamp: number): string {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
   }
 
   populateFileSelection(files: any[]): void {
@@ -1087,126 +1131,14 @@ calculateTodayCompare() {
             (file: any, index: number) =>
               `<label class="label cursor-pointer">
               <span class="label-text">${file.file_name}</span>
-              <input type="checkbox" name="file" value="${
-                file.file_name
-              }" class="checkbox checkbox-primary" ${
-                index === 0 ? 'checked' : ''
+              <input type="checkbox" name="file" value="${file.file_name
+              }" class="checkbox checkbox-primary" ${index === 0 ? 'checked' : ''
               }>
             </label>`
           )
           .join('')}
       `;
     }
-  }
-
-  createReportForProjectGroup(
-    name: string,
-    projectFiles: any[],
-    selectedDetails: any = {
-      totalTimeChecked: true,
-      wordCountChecked: true,
-      coinsEarnedChecked: true,
-      timestampChecked: true,
-    }
-  ): void {
-    let reportHtml = `
-      <div style="padding: 20px; font-family: Arial, sans-serif; border: 1px solid #ccc; border-radius: 10px; max-width: 800px; margin: 20px auto;">
-        <h1 style="color: #FF6B6B; text-align: center;">PawsPal</h1>
-        <h2 style="text-align: center; color: #333;">Activity Report</h2>
-        <h3 style="text-align: center; color: #555;">${name}</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-          <thead>
-            <tr style="background-color: #f8f8f8;">
-              <th style="padding: 10px; text-align: left;">File Name</th>
-              ${
-                selectedDetails.timestampChecked
-                  ? `<th style="padding: 10px; text-align: left;">Start Date</th><th style="padding: 10px; text-align: left;">End Date</th>`
-                  : ''
-              }
-              ${
-                selectedDetails.totalTimeChecked
-                  ? `<th style="padding: 10px; text-align: left;">Total Time</th>`
-                  : ''
-              }
-              ${
-                selectedDetails.wordCountChecked
-                  ? `<th style="padding: 10px; text-align: left;">Word Count</th>`
-                  : ''
-              }
-              ${
-                selectedDetails.coinsEarnedChecked
-                  ? `<th style="padding: 10px; text-align: left;">Coins Earned</th>`
-                  : ''
-              }
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    projectFiles.forEach((file) => {
-      const fileTimestamp = parseInt(file.Timestamp, 10);
-      const startDate = new Date(fileTimestamp); // กำหนด startDate จาก timestamp
-
-      // คำนวณ endDate โดยเพิ่มเวลาเท่ากับเวลาที่ใช้ทำงานของไฟล์นั้น ๆ (time)
-      const endDate = new Date(fileTimestamp + file.time * 60 * 1000); // time เป็นนาที แปลงเป็นมิลลิวินาที
-
-      reportHtml += `
-        <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #ddd;">${
-            file.file_name
-          }</td>
-          ${
-            selectedDetails.timestampChecked
-              ? `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${moment(
-                  startDate
-                ).format(
-                  'YYYY-MM-DD HH:mm:ss'
-                )}</td><td style="padding: 10px; border-bottom: 1px solid #ddd;">${moment(
-                  endDate
-                ).format('YYYY-MM-DD HH:mm:ss')}</td>`
-              : ''
-          }
-          ${
-            selectedDetails.totalTimeChecked
-              ? `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${(
-                  file.time / 60
-                ).toFixed(2)} hours</td>`
-              : ''
-          }
-          ${
-            selectedDetails.wordCountChecked
-              ? `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${file.wordcount}</td>`
-              : ''
-          }
-          ${
-            selectedDetails.coinsEarnedChecked
-              ? `<td style="padding: 10px; border-bottom: 1px solid #ddd;">${file.coins.toFixed(
-                  2
-                )}</td>`
-              : ''
-          }
-        </tr>
-      `;
-    });
-
-    reportHtml += `
-        </tbody>
-      </table>
-      <p style="text-align: right; margin-top: 20px;">SN:4815165sa561dsa</p>
-    </div>`;
-
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(reportHtml);
-      newWindow.document.close();
-    }
-  }
-
-  formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${day}/${month}/${year}`;
   }
 
   updateProjectOrFileSelection(data: any[], label: string): void {
@@ -1217,16 +1149,14 @@ calculateTodayCompare() {
           (item, index) => `
         <label class="label cursor-pointer">
           <span class="label-text">${item[label]}</span>
-          <input type="radio" name="projectOrFile" id="${label}${index}" value="${index}" class="radio radio-primary" ${
-            index === 0 ? 'checked' : ''
-          }>
+          <input type="radio" name="projectOrFile" id="${label}${index}" value="${index}" class="radio radio-primary" ${index === 0 ? 'checked' : ''
+            }>
         </label>`
         )
         .join('');
     }
   }
 
-  // ฟังก์ชันสำหรับดึงข้อมูล activityData จากเซิร์ฟเวอร์
   fetchActivityData(formData: any): void {
     const uid = this.cookieService.get('uid'); // ดึง user id จาก cookie
     if (!uid) {

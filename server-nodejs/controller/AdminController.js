@@ -6,7 +6,7 @@ const userModel = require('../model/Usermodel'); // Import userModel
 const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
 const UserPetsModel = require('../model/userPetsModel');
-const PetModel = require('../model/PetModel');;
+const PetModel = require('../model/PetModel');
 const UserCoinModel = require('../model/coinsModel');
 
 // Adds an item to storage or updates the quantity if it already exists.
