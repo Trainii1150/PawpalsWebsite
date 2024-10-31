@@ -30,7 +30,7 @@ const typeDefs = gql`
     total_time: Float
   }
 
-   type CodingActivity {
+  type CodingActivity {
     Languages: String
     wordcount: Int
     coins: Float
@@ -40,6 +40,22 @@ const typeDefs = gql`
     paste_count: Int
     project_name: String
     file_name: String
+  }
+
+  type ActivityReport {
+    report_id: ID!
+    user_id: ID!
+    report_name: String
+    selected_files: [String]
+    total_time: Float
+    word_count: Int
+    coins_earned: Float
+    timestamp: String
+    code_references: [String]
+    paste_count: Int
+    created_at: String
+    start_date: String   
+    end_date: String    
   }
 
   type UserStorageItem {
@@ -99,18 +115,49 @@ const typeDefs = gql`
     pet_id: Int
     background: String
   }
+
   type UserSettings {
     user_id: ID
     selected_pet_id: Int
   }
 
-  type Mutation {
-    setSelectedPet(uid: ID!, pet_id: Int!): MutationResponse
-   }
-   type MutationResponse {
-    success: Boolean
-    message: String
+  type ReportSN {
+    id: ID!
+    user_id: ID!
+    report_id: String!
+    created_at: String!
   }
+
+
+  type MutationResponse {
+  success: Boolean!
+  message: String!
+  reportId: ID  
+}
+
+
+input ReportInput {
+    reportId: ID
+    name: String!
+    selectedFiles: [String!]!
+    totalTime: Float
+    wordCount: Int
+    coinsEarned: Float
+    timestamp: String
+    codeReferences: [String]
+    pasteCount: Int
+    startDate: String   
+    endDate: String     }
+
+type Mutation {
+    setSelectedPet(uid: ID!, pet_id: Int!): MutationResponse
+    createReportSN(input: ReportInput!): MutationResponse 
+    deleteOldSNRecords: MutationResponse
+    saveActivityReport(uid: ID!, reportData: ReportInput!): MutationResponse
+    
+  }
+
+
   type Query {
     activity(uid: ID!): [CodingActivity]
     time(uid: String!): Float
@@ -123,6 +170,8 @@ const typeDefs = gql`
     getUserDecorationItems(uid: ID!): UserDecorationItems
     filesByProject(projectName: String!, userId: ID!): [String]
     getUserSettings(uid: ID!): UserSettings
+    getReportById(reportId: ID!): ActivityReport # เพิ่ม Query ที่นี่
+
   }
 `;
 
@@ -173,8 +222,16 @@ const resolvers = {
         backgrounds
       };
     },
+    getReportById: async (_, { reportId }) => {
+      try {
+        return await UserModel.getReportById(reportId);
+      } catch (error) {
+        console.error("Error fetching report:", error);
+        throw new Error("Failed to fetch report");
+      }
+    },
   },
-  Mutation: { // ย้าย Mutation มาที่นี่แทนที่จะอยู่ภายใน Query
+  Mutation: {
     setSelectedPet: async (_, { uid, pet_id }) => {
       try {
         await UserModel.setSelectedPet(uid, pet_id); // ฟังก์ชันใน UserModel สำหรับการอัปเดตฐานข้อมูล
@@ -184,9 +241,45 @@ const resolvers = {
         throw new ApolloError('Failed to set selected pet');
       }
     },
-  },
-};
 
+    saveActivityReport: async (_, { uid, reportData }) => {
+      try {
+        const {
+          reportId = uuidv4(),
+          name,
+          selectedFiles,
+          totalTime,
+          wordCount,
+          coinsEarned,
+          timestamp,
+          codeReferences,
+          pasteCount,
+          startDate,  // รับ startDate
+          endDate     // รับ endDate
+        } = reportData;
+
+        await UserModel.saveActivityReport(uid, {
+          reportId,
+          name,
+          selectedFiles,
+          totalTime,
+          wordCount,
+          coinsEarned,
+          timestamp,
+          codeReferences,
+          pasteCount,
+          startDate,  // ส่งค่า startDate ไปที่ UserModel
+          endDate     // ส่งค่า endDate ไปที่ UserModel
+        });
+
+        return { success: true, message: "Activity report saved successfully!", reportId };
+      } catch (error) {
+        console.error("Error saving activity report:", error);
+        return { success: false, message: "Failed to save activity report." };
+      }
+    }
+  }
+};
 
 async function startServer() {
   const server = new ApolloServer({ typeDefs, resolvers });

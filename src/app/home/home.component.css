@@ -20,7 +20,7 @@
   z-index: 5;
 }
 .background-text {
-  color: white;
+  color: #ffffff;
   font-size: 2rem;
   font-weight: bold;
   z-index: 3;
@@ -56,7 +56,7 @@
 }
 
 .inventory-header h2 {
-  color: white;
+  color: #ffffff;
   margin: 0;
 }
 
@@ -73,7 +73,7 @@
   border-radius: 5px;
   cursor: pointer;
   background-color: #007acc;
-  color: white;
+  color: #ffffff;
   font-size: 1em;
 }
 
@@ -103,7 +103,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: white;
+  background-color: #ffffff;
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -129,7 +129,7 @@
 }
 
 .pet-details h3 {
-  color: white;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -148,7 +148,7 @@
 }
 
 .pet-item-slot {
-  background-color: white;
+  background-color: #ffffff;
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -185,7 +185,7 @@
 
 .status-bar span {
   width: 100px;
-  color: white;
+  color: #ffffff;
 }
 
 .status-bar-fill {
@@ -203,7 +203,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: white;
+  background-color: #ffffff;
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -231,7 +231,7 @@
 
 .coins-display {
   background-color: #ffcc00;
-  color: white;
+  color: #ffffff;
   padding: 10px 20px;
   border-radius: 4px;
   font-weight: bold;
@@ -273,7 +273,7 @@
 
 .store-item button {
   background-color: #4CAF50;
-  color: white;
+  color: #ffffff;
   padding: 8px 12px;
   border: none;
   border-radius: 4px;

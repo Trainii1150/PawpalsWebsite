@@ -3,6 +3,7 @@ const pool = require('../config/database'); // Use require instead of import
 const ItemStorageModel = require('./ItemstorageModel'); // ตรวจสอบให้แน่ใจว่าได้ import ไฟล์นี้ถูกต้อง
 const PetModel = require('./PetModel'); // ตรวจสอบให้แน่ใจว่าได้ import ไฟล์นี้ถูกต้อง
 const saltRounds = 10;
+const { v4: uuidv4 } = require('uuid'); // ใช้ UUID เพื่อสร้าง Serial Number
 
 const createUser = async (username, email, hashedPassword) => {
     try {
@@ -380,9 +381,64 @@ getUserSettings = async (uid) => {
   }
 };
 
-  
+const getReportById = async (reportId) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM activity_reports WHERE report_id = $1`, [reportId]
+    );
+    return result.rows[0];  // ตรวจสอบว่ามีการคืนค่าอย่างถูกต้อง
+  } catch (error) {
+    console.error('Error fetching report:', error);
+    throw new Error('Failed to fetch report');
+  }
+};
+
+
+const saveActivityReport = async (uid, reportData) => {
+  try {
+    const {
+      reportId,           // ใช้ reportId ที่ถูกส่งมาจาก reportData
+      name,
+      selectedFiles,
+      totalTime,
+      wordCount,
+      coinsEarned,
+      timestamp,
+      codeReferences,
+      pasteCount
+    } = reportData;
+
+    const reportIdQuery = `INSERT INTO activity_reports (
+      report_id, user_id, report_name, selected_files, total_time, word_count, coins_earned, "timestamp", code_references, paste_count
+    ) VALUES ($1, $2, $3, $4::text[], $5, $6, $7, $8, $9::text[], $10)`;
+
+    const values = [
+      reportId,               // ใช้ reportId จาก reportData
+      uid,                    // user_id
+      name,                   // report_name
+      selectedFiles,          // selected_files
+      totalTime,              // total_time
+      wordCount,              // word_count
+      coinsEarned,            // coins_earned
+      timestamp,              // timestamp
+      codeReferences,         // code_references
+      pasteCount              // paste_count
+    ];
+
+    await pool.query(reportIdQuery, values);
+
+    return { success: true, message: "Activity report saved successfully!", reportId };
+  } catch (error) {
+    console.error("Error saving activity report:", error);
+    throw new Error("Failed to save activity report");
+  }
+};
+
+
 module.exports = {
     createUser,
+    saveActivityReport,
+    getReportById,
     getUserSettings,
     getUserData,
     updateFirstLoginStatus,

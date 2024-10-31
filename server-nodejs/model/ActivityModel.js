@@ -1,6 +1,5 @@
 const pool = require('../config/database');
 
-
 // ฟังก์ชั่นเพื่อเพิ่มข้อมูลกิจกรรมใหม่
 const addActivity = async (activity) => {
     const { ActivityCode_ID, Languages, wordcount, coins, time, Timestamp, user_id } = activity;
@@ -52,21 +51,26 @@ const deleteActivity = async (ActivityCode_ID) => {
     }
 };
 
+
+
+  
+
 const getTimeByLanguage = async (uid) => {
     try {
-      const result = await pool.query(`
-        SELECT "Languages", SUM("time") as total_time
-        FROM public.coding_activity
-        WHERE user_id = $1
-        GROUP BY "Languages"
-      `, [uid]);
-  
-      return result.rows;
+        const result = await pool.query(`
+            SELECT "Languages", SUM("time") as total_time
+            FROM public.coding_activity
+            WHERE user_id = $1
+            GROUP BY "Languages"
+        `, [uid]);
+
+        return result.rows;
     } catch (error) {
-      console.error('Error getting time by language:', error);
-      throw new Error('Error getting time by language');
+        console.error('Error getting time by language:', error);
+        throw new Error('Error getting time by language');
     }
-  };
+};
+
 module.exports = {
     addActivity,
     updateActivity,

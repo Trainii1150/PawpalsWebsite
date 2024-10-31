@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css" />
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
 </head>
 
 <body [class.lang-th]="selectedLanguage === 'th'" [class.lang-en]="selectedLanguage === 'en'"
@@ -144,7 +146,7 @@
           <div class="flex justify-center mt-4">
             <!-- Button to trigger PDF download -->
             <div class="flex justify-center mt-4">
-              <button class="btn btn-primary" (click)="generateReport()">
+              <button id="projectOrFileSelection" class="btn btn-primary" (click)="generateReport()">
                 Download PDF
               </button>
             </div>
@@ -220,15 +222,22 @@
           <div class="space-y-2" id="recentFilesContainer"></div>
         </div>
 
-        <div class="flex flex-col bg-white shadow rounded-2xl p-4">
-          <button (click)="randomizePet()">
-            {{ "RANDOMIZE_PET" | translate }}
-          </button>
-          <div class="flex items-center justify-center">
-            <img class="w-16 h-16 object-contain" src="./assets/Treasure_Chest_(item).png" alt="Coupon image" />
+
+
+        <div class="flex flex-col bg-green-100 shadow rounded-2xl p-4">
+          <div class="mt-4">
+            <input class="bg-metal"
+              type="text"
+              [(ngModel)]="snInput" 
+              placeholder="Enter SN"
+              class="input input-bordered w-full"
+            />
+            <button (click)="checkSN()" class="btn bg-bermuda btn-primary mt-2">Search Report</button>
+          </div>
+
           </div>
         </div>
-      </div>
+        
 
       <!-- Menu -->
       <ul
@@ -441,6 +450,11 @@
       </div>
     </div>
   </div>
+  <div id="pdf-content" style="display: none;">
+    <h1>รายงานกิจกรรม</h1>
+    <p>นี่คือเนื้อหาของ PDF ที่คุณต้องการดาวน์โหลด.</p>
+    <!-- เพิ่มข้อมูลที่คุณต้องการใน PDF -->
+  </div>
+  
 </body>
-
 </html>
