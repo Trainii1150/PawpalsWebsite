@@ -140,6 +140,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   toggleActivity() {
+    console.log('Toggle Activity button clicked');
+
     this.showActivity = !this.showActivity;
     this.showInventory = false;
     this.showStore = false;
@@ -556,7 +558,85 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return `${hours % 12
       }:${minutes}:${seconds} ${period}, ${month} ${day} ${year}`;
   }
-  
+  // GraphQL mutation สำหรับเปลี่ยนชื่อสัตว์เลี้ยง
+changePetName(petId: number, newName: string): void {
+  const uid = this.cookieService.get('uid');
+  if (uid) {
+    this.apollo.mutate({
+      mutation: gql`
+        mutation ChangePetName($uid: ID!, $petId: Int!, $newName: String!) {
+          changePetName(uid: $uid, petId: $petId, newName: $newName) {
+            success
+            message
+          }
+        }
+      `,
+      variables: { uid, petId, newName }
+    }).subscribe(
+      (response: any) => {
+        if (response.data.changePetName.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Pet name changed successfully!',
+          });
+          // อัปเดตชื่อสัตว์เลี้ยงในแอป
+          const pet = this.pets.find(p => p.pet_id === petId);
+          if (pet) pet.pet_name = newName;
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: response.data.changePetName.message,
+          });
+        }
+      },
+      (error) => {
+        console.error('Error changing pet name:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to change pet name.',
+        });
+      }
+    );
+  } else {
+    console.error('User ID not found in cookies');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'User ID not found in cookies',
+    });
+  }
+}
+// ฟังก์ชันสำหรับเปิด Prompt ให้ผู้ใช้กรอกชื่อใหม่
+promptForPetNameChange(): void {
+  Swal.fire({
+    title: 'Change Pet Name',
+    input: 'text',
+    inputLabel: 'Enter new pet name',
+    inputPlaceholder: 'Enter name',
+    showCancelButton: true,
+  }).then((result) => {
+    if (result.isConfirmed && result.value) {
+      this.changeNameOfSelectedPet(result.value);
+    }
+  });
+}
+
+// เรียกใช้ฟังก์ชัน changePetName
+changeNameOfSelectedPet(newName: string): void {
+  if (this.selectedPetId) {
+    this.changePetName(this.selectedPetId, newName);
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No pet selected for name change.',
+    });
+  }
+}
+
   randomizePet(): void {
     const uid = this.cookieService.get('uid');
     if (uid) {
