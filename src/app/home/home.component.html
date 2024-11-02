@@ -61,6 +61,8 @@
   <!-- Content Section -->
   <section class="p-9 content-section">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-screen-xl mx-auto">
+      
+
       <!-- Top Row with Stats -->
       <div class="col-span-3 flex gap-4 justify-center">
         <!-- Static Box 1: Today Coding Time -->
@@ -238,223 +240,70 @@
           </div>
         </div>
         
+  <!-- Menu -->
+  <ul class="flex flex-col shadow menu bg-error h-full rounded-box p-4 space-y-2 w-full">
+    <li>
+      <a>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <button (click)="toggleStore()" class="store-button font-bold text-white">
+          {{ "STORE" | translate }}
+        </button>
+      </a>
+    </li>
+    <li>
+      <a>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <button (click)="toggleInventory()" class="font-bold text-white">
+          {{ "INVENTORY" | translate }}
+        </button>
+      </a>
+    </li>
+    <li>
+      <a>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <button (click)="toggleActivity()" class="font-bold text-white">
+          {{ "ACTIVITIES" | translate }}
+        </button>
+      </a>
+    </li>
+    <li>
+      <a>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <button (click)="toggleDecoration()" class="font-bold text-white">
+          {{ "DECORATION" | translate }}
+        </button>
+      </a>
+    </li>
+  </ul>
 
-      <!-- Menu -->
-      <ul
-        class="col-span-3 lg:col-span-1 flex-col flex-grow md:flex-none shadow menu bg-error md:h-full rounded-box w-56 mt-8 mx-auto">
-        <li>
-          <a>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <button (click)="toggleStore()" class="store-button font-bold text-white">
-              {{ "STORE" | translate }}
-            </button>
-          </a>
-        </li>
-        <li>
-          <a>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <button (click)="toggleInventory()" class="font-bold text-white">
-              {{ "INVENTORY" | translate }}
-            </button>
-          </a>
-        </li>
-        <li>
-          <a>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <button (click)="toggleActivity()" class="font-bold text-white">
-              {{ "ACTIVITIES" | translate }}
-            </button>
-          </a>
-        </li>
-        <li>
-          <a>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="white">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <button (click)="toggleDecoration()" class="font-bold text-white">
-              {{ "DECORATION" | translate }}
-            </button>
-          </a>
-        </li>
-      </ul>
+  <!-- Randomize Pet Option -->
+  <div class="lg:col-start-2 bg-white shadow rounded-2xl p-6 mt-8 lg:mt-0 lg:ml-4">
+    <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4 text-center">Randomize Pet</h5>
+    <p class="text-sm text-gray-700 text-center mb-4">Use 10,000 coins to randomize a pet.</p>
+    <button
+      (click)="randomizePet()"
+      [disabled]="userCoins < 10000" 
+      class="bg-blue-500 text-white py-2 px-4 rounded-full w-full font-semibold"
+    >
+      Randomize Pet
+    </button>
+  </div>
+      
     </div>
   </section>
 
-  <!-- Menu Static box -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-screen-xl mx-auto">
-    <!-- Store -->
-    <div *ngIf="showStore" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
-      <div class="overflow-x-auto">
-        <div class="shop-header flex justify-between items-center p-4">
-          <h2 class="font-bold text-lg">Store</h2>
-          <div class="coins-display font-bold">{{ userCoins }} COINS</div>
-        </div>
-        <div class="store-items-container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-          <div *ngFor="let item of storeItems" class="store-item border p-4 rounded-lg shadow-md">
-            <img [src]="item.path" [alt]="item.item_name" class="w-full h-32 object-cover mb-2" />
-            <h3 class="font-semibold text-md mb-1">{{ item.item_name }}</h3>
-            <p class="text-sm mb-2">{{ item.price }} COIN</p>
-            <button (click)="buyItem(item)" class="bg-blue-500 text-white py-1 px-2 rounded">
-              Buy
-            </button>
-          </div>
-        </div>
-        <div class="pet-display flex justify-center p-4">
-          <img [src]="'../assets/pets/ducky_3_idle.gif'" alt="Pet image" class="w-24 h-24 object-contain" />
-        </div>
-      </div>
-    </div>
-    <!-- Inventory -->
-    <div *ngIf="showInventory" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
-      <div class="overflow-x-auto">
-        <div class="inventory-header">
-          <h2 class="font-bold">Inventory</h2>
-        </div>
-        <div class="inventory-items-container">
-          <div *ngFor="let item of userStorageItems" class="inventory-item">
-            <img [src]="item.path" [alt]="item.item_name" />
-            <h3>{{ item.item_name }}</h3>
-            <p>Quantity: {{ item.quantity }}</p>
-            <p>{{ item.description }}</p>
-            <button (click)="selectFoodItem(item)">Feed Pet</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div *ngIf="showActivity" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
-      <div class="overflow-x-auto p-8">
-        <table class="min-w-full divide-y divide-gray-200 table-auto">
-          <thead class="bg-gray-50">
-            <tr class="bg-green-100">
-              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                Word Count
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                Coins
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                Languages
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                Timestamp
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let activity of paginatedData">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {{ activity.wordcount }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ activity.coins }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ activity.Languages }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ activity.Timestamp }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <div id="paginationSection" class="mt-4 flex items-center justify-between">
-          <div class="flex">
-            <button id="prevPageButton" (click)="prevPage()" class="bg-yellow-100 text-gray-600 px-4 py-2 rounded-l-md">
-              Previous
-            </button>
-            <span class="bg-yellow-200 px-4 py-2">Page {{ currentPage }} of {{ totalPages }}</span>
-            <button id="nextPageButton" (click)="nextPage()" class="bg-yellow-100 text-gray-600 px-4 py-2 rounded-r-md">
-              Next
-            </button>
-          </div>
-
-          <!-- Select number of rows -->
-          <div>
-            <label for="rowsPerPage" class="text-gray-700">Rows per page:</label>
-            <select id="rowsPerPage" [(ngModel)]="rowsPerPage" (change)="updatePagination()"
-              class="ml-2 bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-md">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Decoration -->
-    <div *ngIf="showDecoration" class="col-span-3 lg:col-span-3 bg-white shadow rounded-2xl p-6">
-      <div class="decoration-menu grid grid-cols-3 gap-4">
-        <!-- Menu buttons -->
-        <div class="col-span-1 flex flex-col space-y-2">
-          <button class="btn btn-warning w-full" (click)="selectedMenu = 'pet'">
-            Change Pet
-          </button>
-          <button class="btn btn-warning w-full" (click)="selectedMenu = 'background'">
-            Change Background
-          </button>
-          <button class="btn btn-success w-full" (click)="saveDecoration()">
-            Save Decoration
-          </button>
-        </div>
-
-        <!-- List and Preview -->
-        <div class="col-span-2 grid grid-cols-3 gap-4">
-          <!-- List of pets or backgrounds -->
-          <div class="col-span-1 bg-yellow-100 p-2 rounded-md">
-            <h3 class="font-bold text-lg">
-              {{ selectedMenu === "pet" ? "Pet List" : "Background List" }}
-            </h3>
-            <div class="list-container max-h-64 overflow-y-auto">
-              <div *ngIf="selectedMenu === 'pet'">
-                <div *ngFor="let pet of pets" (click)="selectedPet = pet" [class.selected]="selectedPet === pet"
-                  class="p-2 mb-1 bg-white rounded-md cursor-pointer">
-                  {{ pet.pet_name }}
-                </div>
-              </div>
-              <div *ngIf="selectedMenu === 'background'">
-                <div *ngFor="let background of backgrounds" (click)="selectedBackground = background"
-                  [class.selected]="selectedBackground === background"
-                  class="p-2 mb-1 bg-white rounded-md cursor-pointer">
-                  {{ background.item_name }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Preview -->
-          <div class="col-span-2 bg-gray-100 p-4 rounded-md">
-            <h3 class="font-bold text-lg mb-2">Preview</h3>
-            <div class="preview-container relative">
-              <div class="background-container" *ngIf="selectedBackground">
-                <img [src]="selectedBackground?.path" class="background-image" />
-              </div>
-              <img [src]="selectedPet?.path" class="pet-image" *ngIf="selectedPet" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div id="pdf-content" style="display: none;">
-    <h1>รายงานกิจกรรม</h1>
-    <p>นี่คือเนื้อหาของ PDF ที่คุณต้องการดาวน์โหลด.</p>
-    <!-- เพิ่มข้อมูลที่คุณต้องการใน PDF -->
-  </div>
-  
 </body>
 </html>

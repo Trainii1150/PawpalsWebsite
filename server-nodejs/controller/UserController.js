@@ -129,23 +129,33 @@ const generateRandomNewUserPet = async (uid) => {
 };
 
 const randomizePet = async (req, res) => {
-    const { uid } = req.body;
+  const { uid } = req.body;
 
-    try {
-        const pets = await PetModel.getAllPets(); // เพิ่ม await ที่นี่
-        if (pets.length === 0) {
-            return res.status(400).json({ error: 'No pets available' });
-        }
-        // Select a random pet
-        const randomPet = pets[Math.floor(Math.random() * pets.length)];
-        const newuserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name, randomPet.path);
-        res.status(200).json(newuserPet);
+  try {
+      const pets = await PetModel.getAllPets(); // ดึงสัตว์เลี้ยงทั้งหมด
+      const userPets = await UserModel.getUserPets(uid); // ดึงสัตว์เลี้ยงที่ผู้ใช้มีแล้ว
 
-    } catch (error) {
-        console.error('Error randomizing pet:', error.message);
-        res.status(500).json({ error: error.message });
-    }
+
+      const availablePets = pets.filter(pet => 
+          !userPets.some(userPet => userPet.pet_id === pet.pet_id)
+      );
+
+      if (availablePets.length === 0) {
+          return res.status(400).json({ error: 'User already owns all pets.' });
+      }
+
+      const randomPet = availablePets[Math.floor(Math.random() * availablePets.length)];
+      
+      const newuserPet = await UserPetsModel.createUserPet(uid, randomPet.pet_id, randomPet.pet_name, randomPet.path);
+
+      res.status(200).json(newuserPet);
+
+  } catch (error) {
+      console.error('Error randomizing pet:', error.message);
+      res.status(500).json({ error: error.message });
+  }
 };
+
   
   
 const feedPet = async (req, res) => {

@@ -1,10 +1,10 @@
 const pool = require('../config/database');
 
-const createUserPet = async (userId, petId, petName, path) => {
+const createUserPet = async (userId, petId, petName) => {
     try {
         const result = await pool.query(
-            'INSERT INTO user_pets (user_id, pet_id, pet_name, hunger_level, last_fed, path) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [userId, petId, petName, 100, new Date(), path]
+            'INSERT INTO user_pets (user_id, pet_id, pet_name, hunger_level, last_fed) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [userId, petId, petName, 100, new Date()]
         );
         return result.rows[0];
     } catch (error) {
@@ -64,7 +64,6 @@ const updateUserPetExp = async (userId, exp) => {
         );
         return result.rows[0];
     } catch (error) {
-        console.error('Error updating user pet exp:', error);
         throw new Error('Error updating user pet exp');
     }
 };

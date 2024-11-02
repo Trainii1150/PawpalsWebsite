@@ -164,30 +164,32 @@ const setBan = async (userId, banStatus) => {
 };
 
 const getUserStorageItems = async (uid) => {
-    try {
-      const result = await pool.query(`
-        SELECT us.storage_id, us.item_id, us.quantity,us.created_at,
-               i.item_name, i.description, i.path, i.food_value
-        FROM public.user_storage us
-        JOIN public.items i ON us.item_id = i.item_id
-        WHERE us.user_id = $1
-      `, [uid]);
-  
-      return result.rows.map(row => ({
-        storage_id: row.storage_id,
-        item_id: row.item_id,
-        item_name: row.item_name,
-        description: row.description,
-        path: row.path,
-        food_value: row.food_value,
-        created_at: row.created_at.toISOString(),
-        quantity: row.quantity
-      }));
-    } catch (error) {
-      console.error('Error getting user storage items from database:', error);
-      throw new Error('Error getting user storage items from database');
-    }
+  try {
+    const result = await pool.query(`
+      SELECT us.storage_id, us.item_id, us.quantity, us.created_at,
+             i.item_name, i.description, i.path, i.food_value, i.item_type  -- เพิ่ม item_type
+      FROM public.user_storage us
+      JOIN public.items i ON us.item_id = i.item_id
+      WHERE us.user_id = $1
+    `, [uid]);
+
+    return result.rows.map(row => ({
+      storage_id: row.storage_id,
+      item_id: row.item_id,
+      item_name: row.item_name,
+      description: row.description,
+      path: row.path,
+      food_value: row.food_value,
+      created_at: row.created_at.toISOString(),
+      quantity: row.quantity,
+      item_type: row.item_type  // เพิ่ม item_type ในการตอบกลับ
+    }));
+  } catch (error) {
+    console.error('Error getting user storage items from database:', error);
+    throw new Error('Error getting user storage items from database');
+  }
 };
+
 
 const getUserActivity = async (userId) => {
   try {
@@ -197,8 +199,6 @@ const getUserActivity = async (userId) => {
       WHERE user_id = $1
       ORDER BY "Timestamp" DESC
     `, [userId]);
-
-    console.log('User Activity Data:', result.rows); // ตรวจสอบข้อมูลที่ดึงมา
 
     return result.rows;
   } catch (error) {
@@ -302,7 +302,6 @@ const getTimeByLanguage = async (uid) => {
       WHERE user_id = $1
       GROUP BY "Languages"
     `, [uid]);
-
     return result.rows;
   } catch (error) {
     console.error('Error getting time by language:', error);
@@ -358,6 +357,7 @@ const getResetpassemail = async (email) => {
   }
   
 };
+
 feedPet: async (userId, petId, foodValue) => {
   // อัปเดตข้อมูลสัตว์เลี้ยงในฐานข้อมูล (เช่น การลด hunger_level)
   const result = await pool.query(
@@ -397,7 +397,7 @@ const getReportById = async (reportId) => {
 const saveActivityReport = async (uid, reportData) => {
   try {
     const {
-      reportId,           // ใช้ reportId ที่ถูกส่งมาจาก reportData
+      reportId,
       name,
       selectedFiles,
       totalTime,
@@ -405,34 +405,43 @@ const saveActivityReport = async (uid, reportData) => {
       coinsEarned,
       timestamp,
       codeReferences,
-      pasteCount
+      pasteCount,
+      startDate,
+      endDate
     } = reportData;
 
+    console.log("Inserting data:", reportData); // Log data before insertion
+
     const reportIdQuery = `INSERT INTO activity_reports (
-      report_id, user_id, report_name, selected_files, total_time, word_count, coins_earned, "timestamp", code_references, paste_count
-    ) VALUES ($1, $2, $3, $4::text[], $5, $6, $7, $8, $9::text[], $10)`;
+      report_id, user_id, report_name, selected_files, total_time, word_count, coins_earned, "timestamp", code_references, paste_count, start_date, end_date
+    ) VALUES (
+      $1, $2, $3, $4::text[], $5::numeric[], $6::integer[], $7::numeric[], $8::timestamp[], $9::text[], $10::integer[], $11::timestamp[], $12::timestamp[]
+    )`;
 
     const values = [
-      reportId,               // ใช้ reportId จาก reportData
-      uid,                    // user_id
-      name,                   // report_name
-      selectedFiles,          // selected_files
-      totalTime,              // total_time
-      wordCount,              // word_count
-      coinsEarned,            // coins_earned
-      timestamp,              // timestamp
-      codeReferences,         // code_references
-      pasteCount              // paste_count
+      reportId,
+      uid,
+      name,
+      selectedFiles,
+      totalTime,
+      wordCount,
+      coinsEarned,
+      timestamp,
+      codeReferences,
+      pasteCount,
+      startDate,
+      endDate
     ];
 
     await pool.query(reportIdQuery, values);
 
     return { success: true, message: "Activity report saved successfully!", reportId };
   } catch (error) {
-    console.error("Error saving activity report:", error);
-    throw new Error("Failed to save activity report");
+    console.error("Error saving activity report:", error); // Log detailed error
+    return { success: false, message: "Failed to save activity report." };
   }
 };
+
 
 
 module.exports = {

@@ -44,18 +44,18 @@ const typeDefs = gql`
 
   type ActivityReport {
     report_id: ID!
-    user_id: ID!
-    report_name: String
-    selected_files: [String]
-    total_time: Float
-    word_count: Int
-    coins_earned: Float
-    timestamp: String
-    code_references: [String]
-    paste_count: Int
-    created_at: String
-    start_date: String   
-    end_date: String    
+  user_id: ID!
+  report_name: String!
+  selected_files: [String!]!
+  total_time: [Float]       
+  word_count: [Int]         
+  coins_earned: [Float]      
+  timestamp: [String]       
+  code_references: [String]
+  paste_count: [Int]         
+  start_date: [String]       
+  end_date: [String]         
+  created_at: String 
   }
 
   type UserStorageItem {
@@ -67,6 +67,7 @@ const typeDefs = gql`
     food_value: Int
     created_at: String
     quantity: Int
+    item_type: String 
   }
 
   type StoreItem {
@@ -137,17 +138,20 @@ const typeDefs = gql`
 
 
 input ReportInput {
-    reportId: ID
-    name: String!
-    selectedFiles: [String!]!
-    totalTime: Float
-    wordCount: Int
-    coinsEarned: Float
-    timestamp: String
-    codeReferences: [String]
-    pasteCount: Int
-    startDate: String   
-    endDate: String     }
+  reportId: ID!
+  name: String!
+  selectedFiles: [String!]!
+  totalTime: [Float]     
+  wordCount: [Int]       
+  coinsEarned: [Float]   
+  timestamp: [String]     
+  codeReferences: [String]
+  pasteCount: [Int]       
+  startDate: [String]    
+  endDate: [String]      
+}
+
+
 
 type Mutation {
     setSelectedPet(uid: ID!, pet_id: Int!): MutationResponse
@@ -204,7 +208,6 @@ const resolvers = {
     userPets: async (_, { uid }) => {
       try {
         const pets = await UserModel.getUserPets(uid);
-        console.log('Pets fetched:', pets); 
         return pets;
       } catch (error) {
         console.error('Error in resolver:', error);

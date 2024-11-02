@@ -25,7 +25,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   toggleInfoModal() {
     this.showInfoModal = !this.showInfoModal;
   }
-
+  userStorageItems: any[] = []; 
+  filteredItems: any[] = []; 
+  selectedCategory: string = 'all'; 
   currentPetIndex = 0;
   totalPages: number | undefined;
   petPath: any;
@@ -47,7 +49,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
   monthlyTimeCompare: number = 0;
   activityData: any[] = [];
   storeItems: any[] = [];
-  userStorageItems: any[] = [];
   userCoins: number = 0;
   timeByLanguage: any[] = [];
   pets: any[] = [];
@@ -472,22 +473,24 @@ export class HomeComponent implements OnInit, AfterViewInit {
             query GetUserStorageItems($uid: ID!) {
               userStorageItems(uid: $uid) {
                 storage_id
+                item_id   
                 item_name
                 description
                 path
                 food_value
                 created_at
                 quantity
+                item_type 
               }
             }
           `,
-          variables: {
-            uid: uid,
-          },
+          variables: { uid },
         })
         .valueChanges.subscribe(
           (response: any) => {
             this.userStorageItems = response.data.userStorageItems;
+            this.filteredItems = this.userStorageItems; // กำหนดค่าเริ่มต้นให้กับ filteredItems
+            console.log('User Storage Items:', this.userStorageItems); // ตรวจสอบข้อมูลที่ดึงมา
           },
           (error: any) => {
             console.error('Error getting user storage items:', error);
@@ -507,6 +510,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
       });
     }
   }
+  
+  
 
   displayRecentFiles(): void {
     const recentFilesContainer = document.getElementById('recentFilesContainer');
@@ -551,9 +556,57 @@ export class HomeComponent implements OnInit, AfterViewInit {
     return `${hours % 12
       }:${minutes}:${seconds} ${period}, ${month} ${day} ${year}`;
   }
+  
+  randomizePet(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+      this.userService.randomizePet(uid)
+        .subscribe(
+          (response: any) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Pet randomized successfully!',
+            });
+          },
+          (error: any) => {
+            console.error('Error randomizing pet:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: `Failed to randomize pet: ${error.message}`,
+            });
+          }
+        );
+    } else {
+      console.error('User ID not found in cookies');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'User ID not found in cookies',
+      });
+    }
+  }
+
 
   buyItem(item: any): void {
     const uid = this.cookieService.get('uid');
+  
+    // ตรวจสอบว่าผู้ใช้มี background นี้อยู่หรือไม่ โดยตรวจสอบ item_id และ item_type ให้ตรงกัน
+    const existingBackground = this.userStorageItems.find(
+      (userItem) => userItem.item_id === item.item_id && userItem.item_type === 'background'
+    );
+  
+    if (existingBackground) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Item Already Owned',
+        text: 'You already own this background.',
+      });
+      return; // หยุดการทำงานถ้าผู้ใช้มี background นี้อยู่แล้ว
+    }
+  
+    // ถ้ายังไม่มี background นี้ ให้ทำการซื้อ
     if (uid) {
       this.userService.buyItem(uid, item.item_id).subscribe(
         (response: any) => {
@@ -562,7 +615,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
             title: 'Success',
             text: 'Item bought successfully!',
           });
-          this.getUserStorageItems();
+          this.getUserStorageItems(); // อัปเดตข้อมูล item ที่ผู้ใช้มี
           const itemPrice = item.price;
           if (this.userCoins !== undefined && itemPrice !== undefined) {
             this.userCoins = (this.userCoins as number) - itemPrice;
@@ -586,6 +639,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       });
     }
   }
+  
 
   getUserCoins(): void {
     const uid = this.cookieService.get('uid');
@@ -761,7 +815,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
         }).subscribe(
             (response: any) => {
                 if (response.data.setSelectedPet.success) {
-                    Swal.fire('Success', 'Pet selected successfully!', 'success');
                     const petIndex = this.pets.findIndex(pet => pet.pet_id === petId);
                     if (petIndex !== -1) {
                         this.currentPetIndex = petIndex;
@@ -770,12 +823,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
                         this.foodStatus = this.pets[this.currentPetIndex].hunger_level || 0;
                     }
                 } else {
-                    Swal.fire('Error', 'Failed to select pet', 'error');
+                    Swal.fire('Error', 'You need to get a pet first');
                 }
             },
             (error) => {
-                Swal.fire('Error', 'Failed to select pet', 'error');
-                console.error('Error selecting pet:', error);
+                Swal.fire('You need to get a pet first');
             }
         );
     }
@@ -835,8 +887,17 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
   }
 
+  filterItems(category: string): void {
+    this.selectedCategory = category;
+    if (category === 'all') {
+      this.filteredItems = this.userStorageItems;
+    } else {
+      this.filteredItems = this.userStorageItems.filter(item => item.item_type === category);
+    }
+  }
+  
+
  selectFoodItem(item: any) {
-    // ใช้ selectedPetId ที่ตั้งค่าไว้ในระบบแทนการใช้ petId เป็นตัวอย่าง
     this.feedPet(item.food_value, item.item_id);
 }
 
@@ -1184,24 +1245,25 @@ createReportForProjectGroup(
   const startDate = new Date(Math.min(...fileTimestamps)).toISOString(); // เริ่มจากเวลาต่ำสุด
   const endDate = new Date(Math.max(...fileTimestamps)).toISOString();   // สิ้นสุดที่เวลาสูงสุด
 
-  // ข้อมูลสำหรับส่งไปยัง mutation
   const reportData = {
-    reportId,  // เพิ่ม reportId ที่สร้าง
+    reportId,
     name,
-    selectedFiles: projectFiles.map((file: any) => file.file_name),
-    totalTime: selectedDetails.totalTimeChecked ? totalTime : null,
-    wordCount: selectedDetails.wordCountChecked ? wordCount : null,
-    coinsEarned: selectedDetails.coinsEarnedChecked ? coinsEarned : null,
-    timestamp: selectedDetails.timestampChecked ? timestamp : null,
+    selectedFiles: projectFiles.map((file) => file.file_name),
+    totalTime: selectedDetails.totalTimeChecked ? projectFiles.map((file) => file.time) : null,
+    wordCount: selectedDetails.wordCountChecked ? projectFiles.map((file) => file.wordcount) : null,
+    coinsEarned: selectedDetails.coinsEarnedChecked ? projectFiles.map((file) => file.coins) : null,
+    timestamp: selectedDetails.timestampChecked ? projectFiles.map((file) => new Date().toISOString()) : null,
     codeReferences: selectedDetails.codeReferencesChecked ? codeReferences : null,
-    pasteCount: selectedDetails.pasteCountChecked ? pasteCount : null,
-    startDate,
-    endDate
+    pasteCount: selectedDetails.pasteCountChecked ? projectFiles.map((file) => file.paste_count) : null,
+    startDate: projectFiles.map((file) => new Date(parseInt(file.Timestamp, 10)).toISOString()), // array ของ startDate
+    endDate: projectFiles.map((file) => {
+      const startTimestamp = parseInt(file.Timestamp, 10);
+      return new Date(startTimestamp + file.time * 60 * 1000).toISOString(); // array ของ endDate
+    })
   };
 
   console.log('Preparing to create report with calculated data:', reportData);
 
-  // เรียก mutation เพื่อบันทึกข้อมูล
   this.apollo.mutate({
     mutation: gql`
       mutation SaveActivityReport($uid: ID!, $reportData: ReportInput!) {
@@ -1572,6 +1634,29 @@ checkSN(): void {
     Swal.fire('Error', 'User ID not found in cookies', 'error');
     return;
   }
+
+  const formatDateToUTC = (timestamp: string | number) => {
+    if (!timestamp) return 'N/A';
+  
+    const numericTimestamp = typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp;
+    const date = new Date(numericTimestamp + 25200000);
+  
+    if (isNaN(date.getTime())) {
+      console.error("Invalid date for timestamp:", numericTimestamp);
+      return 'Invalid Date';
+    }
+  
+    const year = date.getUTCFullYear();
+    const month = ('0' + (date.getUTCMonth() + 1)).slice(-2);
+    const day = ('0' + date.getUTCDate()).slice(-2);
+    const hours = ('0' + date.getUTCHours()).slice(-2);
+    const minutes = ('0' + date.getUTCMinutes()).slice(-2);
+    const seconds = ('0' + date.getUTCSeconds()).slice(-2);
+    const milliseconds = ('00' + date.getUTCMilliseconds()).slice(-3);
+  
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+  };
+  
   this.apollo
     .query({
       query: gql`
@@ -1588,6 +1673,8 @@ checkSN(): void {
             code_references
             paste_count
             timestamp
+            start_date
+            end_date
           }
         }
       `,
@@ -1600,7 +1687,7 @@ checkSN(): void {
         const reportData = response.data.getReportById;
 
         if (reportData) {
-          const createdDate = new Date(parseInt(reportData.created_at, 10)).toLocaleString();
+          const createdDate = formatDateToUTC(reportData.created_at);
           
           const newWindow = window.open('', '_blank', 'width=800,height=600');
           if (newWindow) {
@@ -1627,19 +1714,24 @@ checkSN(): void {
             `;
 
             reportData.selected_files.forEach((file: string, index: number) => {
-              const startDate = new Date(parseInt(reportData.timestamp, 10));
-              const endDate = new Date(startDate.getTime() + reportData.total_time * 60 * 1000);
+              const startDate = reportData.start_date && reportData.start_date[index] ? formatDateToUTC(reportData.start_date[index]) : 'N/A';
+              const endDate = reportData.end_date && reportData.end_date[index] ? formatDateToUTC(reportData.end_date[index]) : 'N/A';
+              const totalTime = reportData.total_time && reportData.total_time[index];
+              const wordCount = reportData.word_count && reportData.word_count[index];
+              const coinsEarned = reportData.coins_earned && reportData.coins_earned[index];
+              const codeReference = reportData.code_references && reportData.code_references[index];
+              const pasteCount = reportData.paste_count && reportData.paste_count[index];
 
               reportHtml += `
                 <tr>
                   <td style="padding: 10px; border-bottom: 1px solid #ddd;">${file}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${startDate.toISOString().slice(0, 19).replace('T', ' ')}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${endDate.toISOString().slice(0, 19).replace('T', ' ')}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${(reportData.total_time / 60).toFixed(2)} hours</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${reportData.word_count || 'N/A'}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${reportData.coins_earned || 'N/A'}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${reportData.code_references[index] || 'N/A'}</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${reportData.paste_count || 'N/A'}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${startDate}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${endDate}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${(totalTime / 60).toFixed(2)} hours</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${wordCount || 'N/A'}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${coinsEarned || 'N/A'}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${codeReference || 'N/A'}</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #ddd;">${pasteCount || 'N/A'}</td>
                 </tr>
               `;
             });
