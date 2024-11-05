@@ -91,6 +91,7 @@ const updateFoodQuantity = async (storageId, newQuantity) => {
   `, [newQuantity, storageId]);
 };
 
+
 module.exports = {
   createStorageItem,
   updateStorageItem,

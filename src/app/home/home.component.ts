@@ -8,6 +8,7 @@ import { Chart } from 'chart.js/auto';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
 import { v4 as uuidv4 } from 'uuid';
+import { interval, switchMap } from 'rxjs';
 import moment from 'moment';
 import { HttpClient } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
@@ -62,7 +63,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
   paginatedData: any[] = [];
   progress = [];
   progress_item_path: any;
-  
+  countdown: string = ''; // ตัวแปรเก็บเวลานับถอยหลัง
+  cooldownEndTime: number | null = null; // ตัวแปรเก็บเวลาสิ้นสุดคูลดาวน์
+  currentProgress: number = 0;
+  remainingCooldownTime: number = 0;
+
 
   constructor(
     private authService: AuthService,
@@ -72,9 +77,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
     private cookieService: CookieService,
     private http: HttpClient,
     private translate: TranslateService
+    
   ) {
     this.translate.addLangs(['en', 'th']);
     this.translate.setDefaultLang(this.selectedLanguage);
+    this.checkProgress(); 
+    this.startCountdown(); 
   }
 
   ngAfterViewInit(): void {
@@ -87,6 +95,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.initializeCooldown()  
     this.displayTableData();
     this.initializeChart();
     this.getTime();
@@ -100,6 +109,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.calculateTodayCompare();
     this.calculateMonthlyCompare();
     this.getUserSettings(); 
+    this.loadProgressData();
   }
 
   getActivityData(): void {
@@ -213,12 +223,140 @@ export class HomeComponent implements OnInit, AfterViewInit {
       this.scrollToPagination();
     }
   }
-  // ฟังก์ชันสำหรับอัพเดต Pagination
   updatePagination() {
     this.currentPage = 1; // รีเซ็ตไปที่หน้าที่ 1 เมื่อมีการเปลี่ยนจำนวนแถว
     this.displayTableData();
     this.scrollToPagination();
   }
+
+ checkProgress(): void {
+  const uid = this.cookieService.get('uid');
+  if (!uid) {
+    console.error('User ID not found in cookies');
+    return;
+  }
+  interval(300000) // กำหนดให้เกิดทุก 5 นาที
+    .pipe(
+      switchMap(() =>
+        this.apollo.watchQuery({
+          query: gql`
+            query GetUserProgress($userId: ID!) {
+              getProgress(userId: $userId) {
+                progress
+              }
+            }
+          `,
+          variables: { userId: uid } // ส่ง userId ให้ตรงกับ query ที่กำหนดไว้
+        }).valueChanges
+      )
+    )
+    .subscribe(
+      (result: any) => {
+        this.currentProgress = result.data.getProgress.progress;
+        console.log("Current progress:", this.currentProgress);
+        
+        if (this.currentProgress >= 100) {
+          this.rewardUser(); // เรียกฟังก์ชันเมื่อ Progress ถึง 100
+        }
+      },
+      (error) => {
+        console.error('Error getting progress data:', error);
+      }
+    );
+}
+
+
+  rewardUser() {
+    Swal.fire({
+      title: 'Congratulations!',
+      text: 'You have unlocked a new item!',
+      icon: 'success',
+    });
+    // ทำการ reset progress และสุ่ม item_id ใหม่
+    this.resetProgressAndRandomizeItem();
+  }
+
+  loadProgressData(): void {
+    const uid = this.cookieService.get('uid');
+    if (uid) {
+      this.apollo
+        .watchQuery({
+          query: gql`
+            query GetUserProgress($userId: ID!) {
+              getProgress(userId: $userId) {
+                progress
+                item_path
+              }
+            }
+          `,
+          variables: { userId: uid },
+        })
+        .valueChanges.subscribe(
+          (response: any) => {
+            this.progress = response.data.getProgress.progress;
+            this.progress_item_path = response.data.getProgress.item_path;
+            console.log("Progress path is "+this.progress_item_path);
+            console.log("Progress is "+this.progress);
+
+          },
+          (error) => {
+            console.error('Error getting progress data:', error);
+          }
+        );
+    } else {
+      console.error('User ID not found in cookies');
+    }
+  }
+  
+  resetProgressAndRandomizeItem() {
+    this.apollo
+      .mutate({
+        mutation: gql`
+          mutation ResetProgress($userId: ID!) {
+            resetProgress(userId: $userId) {
+              success
+              message
+            }
+          }
+        `,
+        variables: { userId: 'USER_ID' },
+      })
+      .subscribe(
+        () => {
+          this.currentProgress = 0; // รีเซ็ต progress หลังจากมอบรางวัล
+          this.randomizePet(); // สุ่ม item_id ใหม่
+        },
+        (error) => {
+          console.error('Error resetting progress:', error);
+        }
+      );
+  }
+  
+  randomizeItem() {
+    this.apollo
+      .mutate({
+        mutation: gql`
+          mutation RandomizeItem($userId: ID!) {
+            randomizeItem(userId: $userId) {
+              item_name
+            }
+          }
+        `,
+        variables: { userId: 'USER_ID' },
+      })
+      .subscribe(
+        (result: any) => {
+          const newItem = result.data.randomizeItem;
+          Swal.fire({
+            title: 'New Item Unlocked!',
+            text: `You received: ${newItem.item_name}`,
+            icon: 'success',
+          });
+        },
+        (error) => {
+          console.error('Error randomizing item:', error);
+        }
+      );}
 
   getTime(): void {
     const uid = this.cookieService.get('uid');
@@ -637,42 +775,52 @@ changeNameOfSelectedPet(newName: string): void {
   }
 }
 
-  randomizePet(): void {
-    const uid = this.cookieService.get('uid');
-    if (uid) {
-      this.userService.randomizePet(uid)
-        .subscribe(
-          (response: any) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Pet randomized successfully!',
-            });
-          },
-          (error: any) => {
-            console.error('Error randomizing pet:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: `Failed to randomize pet: ${error.message}`,
-            });
-          }
-        );
-    } else {
-      console.error('User ID not found in cookies');
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'User ID not found in cookies',
-      });
+randomizePet(): void {
+  const cooldownDuration = 24 * 60 * 60 * 1000; // คูลดาวน์ 24 ชั่วโมงใน milliseconds
+  this.cooldownEndTime = Date.now() + cooldownDuration; // กำหนดเวลาสิ้นสุดคูลดาวน์
+  localStorage.setItem('cooldownEndTime', this.cooldownEndTime.toString()); // บันทึกเวลาสิ้นสุดคูลดาวน์ใน localStorage
+  this.startCountdown(); 
+
+  Swal.fire({
+    icon: 'info',
+    title: 'You got new pet!!',
+    text: 'You have 24-hour cooldown for random new pets.',
+  });
+}
+
+
+resetCooldown(): void {
+  this.countdown = '';
+  this.cooldownEndTime = null;
+  localStorage.removeItem('cooldownEndTime'); // ลบเวลาสิ้นสุดคูลดาวน์ออกจาก localStorage
+}
+
+startCountdown(): void {
+  interval(1000).subscribe(() => {
+    if (this.cooldownEndTime) {
+      const timeLeft = this.cooldownEndTime - Date.now(); // คำนวณเวลาที่เหลือ
+      if (timeLeft > 0) {
+        const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+        const seconds = Math.floor((timeLeft / 1000) % 60);
+        this.countdown = `${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        this.resetCooldown(); // รีเซ็ตคูลดาวน์เมื่อหมดเวลา
+      }
     }
+  });
+}
+initializeCooldown(): void {
+  const storedEndTime = localStorage.getItem('cooldownEndTime');
+  if (storedEndTime) {
+    this.cooldownEndTime = parseInt(storedEndTime, 10);
+    this.startCountdown();
   }
+}
 
 
   buyItem(item: any): void {
     const uid = this.cookieService.get('uid');
-  
-    // ตรวจสอบว่าผู้ใช้มี background นี้อยู่หรือไม่ โดยตรวจสอบ item_id และ item_type ให้ตรงกัน
     const existingBackground = this.userStorageItems.find(
       (userItem) => userItem.item_id === item.item_id && userItem.item_type === 'background'
     );
@@ -683,10 +831,9 @@ changeNameOfSelectedPet(newName: string): void {
         title: 'Item Already Owned',
         text: 'You already own this background.',
       });
-      return; // หยุดการทำงานถ้าผู้ใช้มี background นี้อยู่แล้ว
+      return;
     }
   
-    // ถ้ายังไม่มี background นี้ ให้ทำการซื้อ
     if (uid) {
       this.userService.buyItem(uid, item.item_id).subscribe(
         (response: any) => {
@@ -695,7 +842,7 @@ changeNameOfSelectedPet(newName: string): void {
             title: 'Success',
             text: 'Item bought successfully!',
           });
-          this.getUserStorageItems(); // อัปเดตข้อมูล item ที่ผู้ใช้มี
+          this.getUserStorageItems(); 
           const itemPrice = item.price;
           if (this.userCoins !== undefined && itemPrice !== undefined) {
             this.userCoins = (this.userCoins as number) - itemPrice;
@@ -983,56 +1130,62 @@ changeNameOfSelectedPet(newName: string): void {
 
 feedPet(foodValue: number, itemId: number): void {
   const uid = this.cookieService.get('uid');
-  if (uid) {
-      const selectedPet = this.pets.find(pet => pet.pet_id === this.selectedPetId);
-      if (!selectedPet) {
-          Swal.fire({
-              icon: 'warning',
-              title: 'Warning',
-              text: 'Selected pet not found.',
-          });
-          return;
-      }
-
-      this.userService.feedPet(uid, this.selectedPetId, foodValue, itemId).subscribe(
-          (response: any) => {
-              Swal.fire({
-                  icon: 'success',
-                  title: 'Success',
-                  text: 'Pet fed successfully!',
-              });
-
-              // หักลบค่า hunger level ทันทีหลังการให้อาหาร
-              this.foodStatus = Math.max(0, this.foodStatus + foodValue);
-
-              // คัดลอก selectedPet และอัปเดต hunger_level
-              const updatedPet = { ...selectedPet, hunger_level: this.foodStatus };
-              
-              // อัปเดตใน this.pets โดยการแทนที่ selectedPet ด้วย updatedPet
-              this.pets = this.pets.map(pet => 
-                  pet.pet_id === this.selectedPetId ? updatedPet : pet
-              );
-
-              this.getUserStorageItems(); // ดึงข้อมูลไอเทมใน storage ใหม่
-          },
-          (error: any) => {
-              console.error('Error feeding pet:', error);
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: `Failed to feed pet: ${error.message}`,
-              });
-          }
-      );
-  } else {
+  if (!uid) {
       console.error('User ID not found in cookies');
       Swal.fire({
           icon: 'error',
           title: 'Error',
           text: 'User ID not found in cookies',
       });
+      return;
   }
+
+  // ตรวจสอบว่า itemId มีค่าเป็นจริงก่อนที่จะส่งคำขอ
+  if (!itemId) {
+      console.error('Item ID is missing');
+      Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Item ID is missing. Please select food item.',
+      });
+      return;
+  }
+
+  const selectedPet = this.pets.find(pet => pet.pet_id === this.selectedPetId);
+  if (!selectedPet) {
+      Swal.fire({
+          icon: 'warning',
+          title: 'Warning',
+          text: 'Selected pet not found.',
+      });
+      return;
+  }
+
+  this.userService.feedPet(uid, this.selectedPetId, foodValue, itemId).subscribe(
+      (response: any) => {
+          Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Pet fed successfully!',
+          });
+
+          this.foodStatus = Math.max(0, this.foodStatus + foodValue);
+          const updatedPet = { ...selectedPet, hunger_level: this.foodStatus };
+          this.pets = this.pets.map(pet => pet.pet_id === this.selectedPetId ? updatedPet : pet);
+
+          this.getUserStorageItems(); // ดึงข้อมูลไอเทมใน storage ใหม่
+      },
+      (error: any) => {
+          console.error('Error feeding pet:', error);
+          Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: `Failed to feed pet: ${error.message}`,
+          });
+      }
+  );
 }
+
 
 
 generateReport(): void {

@@ -1,59 +1,57 @@
 const pool = require('../config/database');
-const ItemStorageModel = require('./ItemstorageModel');
 
-const getRandomFoodItem = async () => {
-    try {
-        const result = await pool.query(
-            'SELECT item_id FROM public.items WHERE item_type = $1 ORDER BY RANDOM() LIMIT 1',
-            ['food']
-        );
-        return result.rows[0];
-    } catch (error) {
-        console.error('Error getting random food item:', error);
-        throw new Error('Error getting random food item');
+// ฟังก์ชันสำหรับดึงข้อมูล progress ของผู้ใช้
+const getProgressByUser = async (userId) => {
+    const result = await pool.query(
+      `SELECT rp.progress, rp.item_id, i.path as item_path
+       FROM public.reward_progress rp
+       JOIN public.items i ON rp.item_id = i.item_id
+       WHERE rp.user_id = $1`,
+      [userId]
+    );
+    
+    // ตรวจสอบและแสดงผลลัพธ์การ query
+    if (result.rows.length > 0) {
+      console.log("Query Result:", result.rows[0]); // แสดงผลการ query เพื่อตรวจสอบค่า path
+      return result.rows[0];
+    } else {
+      console.log("No progress data found for userId:", userId);
+      return null;
     }
+  };
+  
+  
+
+// ฟังก์ชันสำหรับรีเซ็ต progress ของผู้ใช้
+const resetProgress = async (userId) => {
+  await pool.query(
+    'UPDATE public.reward_progress SET progress = 0 WHERE user_id = $1',
+    [userId]
+  );
 };
 
-const checkAndRewardUser = async (userId) => {
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
+// ฟังก์ชันสำหรับสุ่ม item โดยไม่รวม item ที่เป็น background
+const getRandomItemExcludingBackground = async () => {
+  const result = await pool.query(
+    `SELECT item_id, item_name, path FROM public.items WHERE item_type != 'background' ORDER BY RANDOM() LIMIT 1`
+  );
+  return result.rows[0];
+};
 
-        // ตรวจสอบคะแนนรวมในวันนี้
-        const result = await client.query(`
-            SELECT SUM(time) as total_time
-            FROM public.coding_activity
-            WHERE user_id = $1 AND DATE("Timestamp") = CURRENT_DATE
-        `, [userId]);
+// ฟังก์ชันสำหรับอัปเดต progress ของผู้ใช้และสุ่ม item ใหม่
+const updateUserProgress = async (userId) => {
+  const randomItem = await getRandomItemExcludingBackground();
+  await pool.query(
+    'UPDATE public.reward_progress SET item_id = $1, progress = 0 WHERE user_id = $2',
+    [randomItem.item_id, userId]
+  );
 
-        const total_time = result.rows[0].total_time || 0;
-
-        if (total_time > 2500) {
-            // สุ่มไอเท็มประเภท food
-            const foodItem = await getRandomFoodItem();
-
-            // ตรวจสอบว่าไอเท็มนี้มีอยู่ใน storage หรือไม่
-            const existingItem = await ItemStorageModel.checkItemInStorageItem(userId, foodItem.item_id);
-
-            if (existingItem) {
-                // ถ้ามีอยู่แล้ว ให้เพิ่มจำนวน
-                await ItemStorageModel.updateStorageItem(existingItem.storage_id, userId, foodItem.item_id, existingItem.quantity + 1);
-            } else {
-                // ถ้าไม่มี ให้สร้างใหม่
-                await ItemStorageModel.createStorageItem(userId, foodItem.item_id, 1);
-            }
-        }
-
-        await client.query('COMMIT');
-    } catch (error) {
-        await client.query('ROLLBACK');
-        console.error('Error rewarding user:', error);
-        throw new Error('Error rewarding user');
-    } finally {
-        client.release();
-    }
+  return randomItem;
 };
 
 module.exports = {
-    checkAndRewardUser,
+  getProgressByUser,
+  resetProgress,
+  updateUserProgress,
+  getRandomItemExcludingBackground,
 };

@@ -18,13 +18,22 @@ export class DashboardComponent implements OnInit {
   storageItems: any[] = [];
   selectedFile: File | null = null;
   imagePreviewUrl: string | ArrayBuffer | null = null;
-
+  storeItems: any[] = [];
+  showStoreItemForm: boolean = false;
+  storeItemFormTitle: string = 'Add Store Item';
+  newStoreItem: any = { item_id: '', price: '' };
+  selectedStoreItem: any = null;
   newUser: any = { username: '', email: '', role: '' };
   newItem: any = { item_name: '', description: '', item_type: '', path: '' };
   newPet: any = { petName: '', description: '', petType: '' , path: ''};
   newuserPet: any = {userpet_id: '',petName: '', petId: '', userId: '',path: ''}
   newStorageItem: any = { userId: '', itemId: '', quantity: 0 };
+  activities: any[] = []; // เก็บข้อมูลกิจกรรมทั้งหมด
+  newActivity: any = { ActivityCode_ID: '', Languages: '', wordcount: 0, coins: 0, time: 0, Timestamp: new Date(), user_id: '' }; // สำหรับเพิ่มข้อมูลใหม่
+  selectedActivity: any = null; // เก็บข้อมูลที่เลือกสำหรับการแก้ไข
 
+  showCreateForm: boolean = false;
+  showUpdateForm: boolean = false;
   selectedUser: any = null;
   selectedItem: any = null;
   selectedPet: any = null;
@@ -33,13 +42,15 @@ export class DashboardComponent implements OnInit {
   selectedUserPet: any = null;
   selectedStorageItem: any = null;
   showForm: boolean = false;
-  showCreateForm: boolean = false;
-
+  purchaseLogs: any[] = [];
+  feedLogs: any[] = [];
 
   constructor(private adminService: AdminService,  private authService: AuthService,private router: Router) {} // Inject Router
 
   ngOnInit() {
     this.fetchUsers();
+    this.fetchStoreItems();
+
   }
 
   navigateTo(section: string) {
@@ -61,6 +72,14 @@ export class DashboardComponent implements OnInit {
       case 'manage-storage':
         this.fetchStorageItems();
         break;
+        case 'manage-activities':
+          this.fetchActivities(); 
+          break;
+          case 'manage-logs':
+            this.fetchPurchaseLogs(); 
+            this.fetchFeedLogs(); 
+            break;
+
       default:
         this.router.navigate(['/admin/dashboard']); // Ensure it stays in the dashboard
         break;
@@ -70,8 +89,43 @@ export class DashboardComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-
-
+  // Fetch store items
+  fetchStoreItems() {
+    this.adminService.getStoreItems().subscribe(data => {
+      this.storeItems = data;
+    });
+  }
+  submitStoreItemForm() {
+    if (this.selectedStoreItem) {
+      // Update existing item
+      this.adminService.updateStoreItem(this.newStoreItem.store_item_id, this.newStoreItem.item_id, this.newStoreItem.price).subscribe(() => {
+        Swal.fire('Success', 'Store Item updated successfully', 'success');
+        this.fetchStoreItems();
+        this.showStoreItemForm = false;
+      });
+    } else {
+      // Add new item
+      this.adminService.addStoreItem(this.newStoreItem.item_id, this.newStoreItem.price).subscribe(() => {
+        Swal.fire('Success', 'Store Item added successfully', 'success');
+        this.fetchStoreItems();
+        this.showStoreItemForm = false;
+      });
+    }
+  }
+  showCreateStoreItemForm() {
+    this.storeItemFormTitle = 'Add Store Item';
+    this.newStoreItem = { item_id: '', price: '' };
+    this.showStoreItemForm = true;
+    this.selectedStoreItem = null;
+  }
+    // Populate form with selected store item for editing
+    populateStoreItemForm(storeItem: any) {
+      this.storeItemFormTitle = 'Update Store Item';
+      this.newStoreItem = { ...storeItem };
+      this.showStoreItemForm = true;
+      this.selectedStoreItem = storeItem;
+    }
+  
   // User Management Functions
   fetchUsers() {
     this.adminService.getAllUsers().subscribe(data => {
@@ -86,7 +140,29 @@ export class DashboardComponent implements OnInit {
       this.newUser = { username: '', email: '', role: '' };
     });
   }*/
-
+    fetchPurchaseLogs() {
+      this.adminService.getPurchaseLogs().subscribe(
+        (logs) => {
+          this.purchaseLogs = logs;
+          console.log('Purchase Logs:', logs);
+        },
+        (error) => {
+          console.error('Error fetching purchase logs:', error);
+        }
+      );
+    }
+  
+    fetchFeedLogs() {
+      this.adminService.getFeedLogs().subscribe(
+        (logs) => {
+          this.feedLogs = logs;
+          console.log('Feed Logs:', logs);
+        },
+        (error) => {
+          console.error('Error fetching feed logs:', error);
+        }
+      );
+    }
   updateUser() {
     this.adminService.updateUser(this.selectedUser.user_id, this.selectedUser.username, this.selectedUser.email, this.selectedUser.role, this.selectedUser.coins).subscribe(() => {
       this.fetchUsers();
@@ -197,6 +273,74 @@ export class DashboardComponent implements OnInit {
         }
     }
   }
+    // Update selected activity
+    updateActivity() {
+      this.adminService.updateActivity(this.selectedActivity.ActivityCode_ID, this.selectedActivity).subscribe(() => {
+        Swal.fire('Success', 'Activity updated successfully', 'success');
+        this.fetchActivities();
+        this.showUpdateForm = false;
+      });
+    }
+
+    fetchActivities() {
+      this.adminService.getActivities().subscribe(
+        (data) => {
+          this.activities = data;
+        },
+        (error) => {
+          console.error('Failed to fetch activities:', error);
+        }
+      );
+    }
+    
+  showCreateActivityForm() {
+    this.showCreateForm = true;
+    this.showUpdateForm = false;
+    this.newActivity = { Languages: '', wordcount: 0, coins: 0, time: 0 };
+  }
+  // Create a new activity
+  createActivity() {
+    this.adminService.addActivity(this.newActivity).subscribe(() => {
+      Swal.fire('Success', 'Activity created successfully', 'success');
+      this.fetchActivities();
+      this.showCreateForm = false;
+    });
+  }
+  // Populate form with selected activity for editing
+  populateActivityForm(activity: any) {
+    this.selectedActivity = { ...activity };
+    this.showUpdateForm = true;
+    this.showCreateForm = false;
+  }
+  // ฟังก์ชันสำหรับเพิ่มกิจกรรมใหม่
+  addActivity() {
+    this.adminService.addActivity(this.newActivity).subscribe(() => {
+      Swal.fire('Success', 'Activity added successfully', 'success');
+      this.fetchActivities();
+      this.newActivity = { ActivityCode_ID: '', Languages: '', wordcount: 0, coins: 0, time: 0, Timestamp: new Date(), user_id: '' };
+    }, error => {
+      Swal.fire('Error', 'Failed to add activity', 'error');
+    });
+  }
+
+  // ฟังก์ชันสำหรับลบกิจกรรมที่เลือก
+  deleteActivity(activityId: string) {
+    const id = parseInt(activityId, 10); // แปลง activityId เป็น number
+    this.adminService.deleteActivity(id).subscribe(() => {
+      // ดำเนินการหลังจากลบสำเร็จ
+    });
+  }
+
+  // ฟังก์ชันสำหรับเลือกกิจกรรมสำหรับแก้ไข
+  selectActivity(activity: any) {
+    this.selectedActivity = { ...activity };
+  }
+
+  // ฟังก์ชันสำหรับยกเลิกการแก้ไข
+  cancelEditActivity() {
+    this.selectedActivity = null;
+  }
+
   // Method to update the selected pet details when a pet is selected in the dropdown
   updateSelectedPet(selectedPetId : any) {
     if (this.selectedPetId !== null) {
@@ -549,4 +693,59 @@ export class DashboardComponent implements OnInit {
   populateStorageForm(storage: any) {
     this.selectedStorageItem = { ...storage };
   }
+
+
+
+  updateStoreItem() {
+    this.adminService.updateStoreItem(this.selectedItem.store_item_id, this.selectedItem.item_id, this.selectedItem.price).subscribe(() => {
+      this.fetchItems();
+      Swal.fire({
+        icon: 'success',
+        title: 'Item Updated',
+        text: 'The item has been successfully updated.',
+      });
+    }, (error) => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update the item. Please try again.',
+      });
+    });
+  }
+  
+  addStoreItem() {
+    this.adminService.addStoreItem(this.newItem.item_id, this.newItem.price).subscribe(() => {
+      this.fetchItems();
+      Swal.fire({
+        icon: 'success',
+        title: 'Item Added',
+        text: 'The item has been successfully added.',
+      });
+    }, (error) => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to add the item. Please try again.',
+      });
+    });
+  }
+  deleteStoreItem(itemId: number) {
+  this.adminService.deleteStoreItem(itemId).subscribe(() => {
+    this.fetchItems();
+    Swal.fire({
+      icon: 'success',
+      title: 'Item Deleted',
+      text: 'The item has been successfully deleted.',
+    });
+  }, (error) => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to delete the item. Please try again.',
+    });
+  });
+}
+
+
+  
 }

@@ -13,15 +13,16 @@ const createUserPet = async (userId, petId, petName) => {
     }
 };
 
-const updateUserPet = async (userPetId, petId, petName, hungerLevel, path) => {
+const updateUserPet = async (userPetId, petId, petName, hungerLevel) => {
     try {
         const result = await pool.query(
-            'UPDATE user_pets SET pet_id = $2, pet_name = $3, hunger_level = $4, last_fed = NOW(), path = $5 WHERE user_pet_id = $1 RETURNING *',
-            [userPetId, petId, petName, hungerLevel, path]
+            'UPDATE user_pets SET pet_id = $2, pet_name = $3, hunger_level = $4, last_fed = NOW() WHERE user_pet_id = $1 RETURNING *',
+            [userPetId, petId, petName, hungerLevel]
         );
         return result.rows[0]; // Return the updated pet details
     } catch (error) {
-        console.error(error);
+        console.error('Error updating user pet:', error);
+        throw new Error('Error updating user pet');
     }
 };
 

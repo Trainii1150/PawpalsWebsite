@@ -51,29 +51,69 @@ const deleteActivity = async (ActivityCode_ID) => {
     }
 };
 
-
-
-  
-
-const getTimeByLanguage = async (uid) => {
+// ฟังก์ชั่นเพื่อดึงข้อมูลกิจกรรมทั้งหมดตาม user_id
+const getActivitiesByUserId = async (user_id) => {
     try {
         const result = await pool.query(`
-            SELECT "Languages", SUM("time") as total_time
-            FROM public.coding_activity
+            SELECT * FROM public.coding_activity
             WHERE user_id = $1
-            GROUP BY "Languages"
-        `, [uid]);
+            ORDER BY "Timestamp" DESC
+        `, [user_id]);
 
         return result.rows;
     } catch (error) {
-        console.error('Error getting time by language:', error);
-        throw new Error('Error getting time by language');
+        console.error('Error getting activities by user ID:', error);
+        throw new Error('Error getting activities by user ID');
+    }
+};
+const getAllActivities = async () => {
+    try {
+      const result = await pool.query('SELECT * FROM coding_activity');
+      return result.rows;
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      throw new Error('Error fetching activities');
+    }
+  };
+// ฟังก์ชั่นเพื่อคำนวณเวลาทั้งหมดของกิจกรรมที่ทำโดยผู้ใช้ในแต่ละภาษา
+const getTotalTimeByLanguage = async (user_id) => {
+    try {
+        const result = await pool.query(`
+            SELECT "Languages", SUM("time") AS total_time
+            FROM public.coding_activity
+            WHERE user_id = $1
+            GROUP BY "Languages"
+        `, [user_id]);
+
+        return result.rows;
+    } catch (error) {
+        console.error('Error getting total time by language:', error);
+        throw new Error('Error getting total time by language');
+    }
+};
+
+// ฟังก์ชั่นเพื่อดึงข้อมูลเวลารวมทั้งหมดของผู้ใช้
+const getTotalActivityTime = async (user_id) => {
+    try {
+        const result = await pool.query(`
+            SELECT SUM("time") AS total_time
+            FROM public.coding_activity
+            WHERE user_id = $1
+        `, [user_id]);
+
+        return result.rows[0].total_time || 0; // Return 0 if no activities found
+    } catch (error) {
+        console.error('Error getting total activity time:', error);
+        throw new Error('Error getting total activity time');
     }
 };
 
 module.exports = {
+    getAllActivities,
     addActivity,
     updateActivity,
     deleteActivity,
-    getTimeByLanguage,
+    getActivitiesByUserId,
+    getTotalTimeByLanguage,
+    getTotalActivityTime,
 };

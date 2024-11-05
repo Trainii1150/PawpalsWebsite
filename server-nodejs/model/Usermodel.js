@@ -347,6 +347,7 @@ const getUserPets = async (uid) => {
     throw error;
   }
 };
+
 const getResetpassemail = async (email) => {
   try {
       const result = await pool.query('SELECT email FROM user_table WHERE email = $1', [email]);

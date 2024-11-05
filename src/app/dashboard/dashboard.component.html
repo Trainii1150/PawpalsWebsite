@@ -1,423 +1,1085 @@
 <div class="dashboard-container flex bg-white h-screen">
-    <!-- Sidebar -->
-    <div class="sidebar w-1/6 p-4">
-        <div class="sidebar-menu flex flex-col space-y-4">
-            <a (click)="navigateTo('manage-users')" class="sidebar-item flex items-center space-x-2">
-                <span>Manage Users</span>
-            </a>
-            <a (click)="navigateTo('manage-user-pets')" class="sidebar-item flex items-center space-x-2">
-                <span>Manage User Pets</span>
-            </a>
-            <a (click)="navigateTo('manage-items')" class="sidebar-item flex items-center space-x-2">
-                <span>Manage Items</span>
-            </a>
-            <a (click)="navigateTo('manage-pets')" class="sidebar-item flex items-center space-x-2">
-                <span>Manage Pets</span>
-            </a>
-            <!-- <a (click)="navigateTo('manage-storage')" class="sidebar-item flex items-center space-x-2">
-                <span>Manage Storage</span>
-            </a> -->
+  <!-- Sidebar -->
+  <div class="sidebar w-1/6 p-4">
+    <div class="sidebar-menu flex flex-col space-y-4">
+      <a
+        (click)="navigateTo('manage-users')"
+        class="sidebar-item flex items-center space-x-2"
+      >
+        <span>Manage Users</span>
+      </a>
+      <a
+        (click)="navigateTo('manage-user-pets')"
+        class="sidebar-item flex items-center space-x-2"
+      >
+        <span>Manage User Pets</span>
+      </a>
+      <a
+        (click)="navigateTo('manage-items')"
+        class="sidebar-item flex items-center space-x-2"
+      >
+        <span>Manage Items</span>
+      </a>
+      <a
+        (click)="navigateTo('manage-pets')"
+        class="sidebar-item flex items-center space-x-2"
+      >
+        <span>Manage Pets</span>
+      </a>
+      <a
+        (click)="navigateTo('manage-storage')"
+        class="sidebar-item flex items-center space-x-2"
+      >
+        <span>Manage Storage</span>
+      </a>
+      <a
+        (click)="navigateTo('manage-store-items')"
+        class="sidebar-item flex items-center space-x-2"
+      >
+        <span>Manage Store Items</span>
+      </a>
+      <a
+        (click)="navigateTo('manage-activities')"
+        class="sidebar-item flex items-center space-x-2"
+      >
+        <span>Manage Activities</span>
+      </a>
+      <a (click)="navigateTo('manage-logs')" class="sidebar-item flex items-center space-x-2">
+        <span>Manage Logs</span>
+    </a>
+    </div>
+  </div>
 
-        </div>
+  <!-- Main Content -->
+  <div class="main-content flex-1 p-6">
+    <div class="header flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
+      <button
+        (click)="logout()"
+        class="flex items-center space-x-2 btn-danger p-2 rounded mt-4"
+      >
+        <span>Logout</span>
+      </button>
+    </div>
+    <div *ngIf="currentSection === 'manage-users'">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Users</h2>
+      <div class="header flex justify-between items-center mb-4">
+        <button class="btn btn-primary" (click)="fetchUsers()">
+          Fetch Users
+        </button>
+      </div>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">ID</th>
+            <th class="px-4 py-2 text-gray-800">Username</th>
+            <th class="px-4 py-2 text-gray-800">Email</th>
+            <th class="px-4 py-2 text-gray-800">Role</th>
+            <th class="px-4 py-2 text-gray-800">Coins</th>
+            <th class="px-4 py-2 text-gray-800">Status</th>
+            <th class="px-4 py-2 text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">{{ user.user_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ user.username }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ user.email }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ user.role }}</td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ user.coins | number : "1.2-2" }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ user.ban ? "Banned" : "Active" }}
+            </td>
+            <td class="border px-4 py-2">
+              <button
+                *ngIf="!user.ban"
+                class="btn btn-warning mr-2"
+                (click)="banUser(user.user_id, true)"
+              >
+                Ban
+              </button>
+              <button
+                *ngIf="user.ban"
+                class="btn btn-success mr-2"
+                (click)="banUser(user.user_id, false)"
+              >
+                Unban
+              </button>
+              <button
+                class="btn btn-secondary mr-2"
+                (click)="populateUserForm(user)"
+              >
+                Update
+              </button>
+              <button class="btn btn-danger" (click)="deleteUser(user.user_id)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="showForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Update User</h3>
+        <form (submit)="updateUser()">
+          <input
+            type="hidden"
+            [(ngModel)]="selectedUser.user_id"
+            name="userId"
+          />
+          <div class="mb-4">
+            <label class="block text-gray-700">Username</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedUser.username"
+              name="username"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Email</label>
+            <input
+              type="email"
+              [(ngModel)]="selectedUser.email"
+              name="email"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Role</label>
+            <select
+              [(ngModel)]="selectedUser.role"
+              name="role"
+              class="form-select mt-1 block w-full border-gray-300"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Coins</label>
+            <input
+              type="number"
+              [(ngModel)]="selectedUser.coins"
+              name="coins"
+              class="form-input mt-1 block w-full border-gray-300"
+              min="0"
+              step="0.01"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Update User</button>
+        </form>
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content flex-1 p-6">
-        <div class="header flex items-center justify-between mb-4">
-            <h1 class="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
-            <button (click)="logout()" class="flex items-center space-x-2 btn-danger p-2 rounded mt-4">
-                <span>Logout</span>
-            </button>
-        </div>
-        <div *ngIf="currentSection === 'manage-users'">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Users</h2>
-            <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Users</button>
-            </div>
-            <table class="table-auto w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-gray-800">ID</th>
-                        <th class="px-4 py-2 text-gray-800">Username</th>
-                        <th class="px-4 py-2 text-gray-800">Email</th>
-                        <th class="px-4 py-2 text-gray-800">Role</th>
-                        <th class="px-4 py-2 text-gray-800">Coins</th>
-                        <th class="px-4 py-2 text-gray-800">Status</th>
-                        <th class="px-4 py-2 text-gray-800">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let user of users" class="hover:bg-gray-50">
-                        <td class="border px-4 py-2 text-gray-700">{{ user.user_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ user.username }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ user.email }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ user.role }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ user.coins | number: '1.2-2' }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ user.ban ? 'Banned' : 'Active' }}</td>
-                        <td class="border px-4 py-2">
-                            <button *ngIf="!user.ban" class="btn btn-warning mr-2" (click)="banUser(user.user_id, true)">Ban</button>
-                            <button *ngIf="user.ban" class="btn btn-success mr-2" (click)="banUser(user.user_id, false)">Unban</button>
-                            <button class="btn btn-secondary mr-2" (click)="populateUserForm(user)">Update</button>
-                            <button class="btn btn-danger" (click)="deleteUser(user.user_id)">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div *ngIf="showForm" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Update User</h3>
-                <form (submit)="updateUser()">
-                    <input type="hidden" [(ngModel)]="selectedUser.user_id" name="userId">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Username</label>
-                        <input type="text" [(ngModel)]="selectedUser.username" name="username" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Email</label>
-                        <input type="email" [(ngModel)]="selectedUser.email" name="email" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Role</label>
-                        <select [(ngModel)]="selectedUser.role" name="role" class="form-select mt-1 block w-full border-gray-300">
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Coins</label>
-                        <input type="number" [(ngModel)]="selectedUser.coins" name="coins" class="form-input mt-1 block w-full border-gray-300" min="0" step="0.01">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update User</button>
-                </form>
-            </div>
-        </div>
+    <div *ngIf="currentSection === 'manage-user-pets'">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage User Pets</h2>
+      <div class="header flex justify-between items-center mb-4">
+        <button class="btn btn-primary" (click)="showCreateUserPetForm()">
+          Create User Pet
+        </button>
+        <button class="btn btn-primary" (click)="fetchUserPets()">
+          Fetch User Pets
+        </button>
+      </div>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">User Pet ID</th>
+            <th class="px-4 py-2 text-gray-800">User ID</th>
+            <th class="px-4 py-2 text-gray-800">Pet ID</th>
+            <th class="px-4 py-2 text-gray-800">Pet Name</th>
+            <th class="px-4 py-2 text-gray-800">Hunger Level</th>
+            <th class="px-4 py-2 text-gray-800">Last Feed</th>
+            <th class="px-4 py-2 text-gray-800">Pet Image</th>
+            <th class="px-4 py-2 text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let userPet of userPets" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">
+              {{ userPet.user_pet_id }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ userPet.user_id }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">{{ userPet.pet_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ userPet.pet_name }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ userPet.hunger_level }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ userPet.last_fed }}
+            </td>
+            <td>
+              <img
+                [src]="userPet.path"
+                alt="Pet Image"
+                class="preview-image"
+                style="max-width: 100px; max-height: 100px"
+              />
+            </td>
+            <td class="border px-4 py-2">
+              <button
+                class="btn btn-secondary mr-2"
+                (click)="populateUserPetForm(userPet)"
+              >
+                Update
+              </button>
+              <button
+                class="btn btn-danger"
+                (click)="
+                  deleteUserPet(
+                    userPet.user_pet_id,
+                    userPet.user_id,
+                    userPet.pet_id
+                  )
+                "
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-        <div *ngIf="currentSection === 'manage-user-pets'">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage User Pets</h2>
-            <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="showCreateUserPetForm()">Create User Pet</button>
-                <button class="btn btn-primary" (click)="fetchUserPets()">Fetch User Pets</button>
-            </div>
-            <table class="table-auto w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-gray-800">User Pet ID</th>
-                        <th class="px-4 py-2 text-gray-800">User ID</th>
-                        <th class="px-4 py-2 text-gray-800">Pet ID</th>
-                        <th class="px-4 py-2 text-gray-800">Pet Name</th>
-                        <th class="px-4 py-2 text-gray-800">Hunger Level</th>
-                        <th class="px-4 py-2 text-gray-800">Last Feed</th>
-                        <th class="px-4 py-2 text-gray-800">Pet Image</th>
-                        <th class="px-4 py-2 text-gray-800">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let userPet of userPets" class="hover:bg-gray-50">
-                        <td class="border px-4 py-2 text-gray-700">{{ userPet.user_pet_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ userPet.user_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ userPet.pet_id}}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ userPet.pet_name }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ userPet.hunger_level }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ userPet.last_fed}}</td>
-                        <td>
-                            <img [src]="userPet.path" alt="Pet Image" class="preview-image" style="max-width: 100px; max-height: 100px;">
-                        </td>
-                        <td class="border px-4 py-2">
-                            <button class="btn btn-secondary mr-2" (click)="populateUserPetForm(userPet)">Update</button>
-                            <button class="btn btn-danger" (click)="deleteUserPet(userPet.user_pet_id,userPet.user_id ,userPet.pet_id)">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        
-             <!-- Create User Pet Form -->
-            <div *ngIf="showCreateForm" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Create User Pet</h3>
-                <form (submit)="createUserPet()">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Select User</label>
-                        <select [(ngModel)]="selectedUserId" name="user_id" class="form-select mt-1 block w-full border-gray-300" (change)="updateSelectedUser()">
-                            <option *ngFor="let user of users" [value]="user.user_id">{{ user.user_id }} ({{ user.username }})</option>
-                        </select>
-                    </div>
+      <!-- Create User Pet Form -->
+      <div *ngIf="showCreateForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Create User Pet</h3>
+        <form (submit)="createUserPet()">
+          <div class="mb-4">
+            <label class="block text-gray-700">Select User</label>
+            <select
+              [(ngModel)]="selectedUserId"
+              name="user_id"
+              class="form-select mt-1 block w-full border-gray-300"
+              (change)="updateSelectedUser()"
+            >
+              <option *ngFor="let user of users" [value]="user.user_id">
+                {{ user.user_id }} ({{ user.username }})
+              </option>
+            </select>
+          </div>
 
-                    <div *ngIf="selectedUser" class="mb-4">
-                        <p><strong>User ID:</strong> {{ selectedUser.user_id }}</p>
-                        <p><strong>Username:</strong> {{ selectedUser.username }}</p>
-                    </div>
+          <div *ngIf="selectedUser" class="mb-4">
+            <p><strong>User ID:</strong> {{ selectedUser.user_id }}</p>
+            <p><strong>Username:</strong> {{ selectedUser.username }}</p>
+          </div>
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Select Pet</label>
-                        <select [(ngModel)]="selectedPetId" name="pet_id" class="form-select mt-1 block w-full border-gray-300" (change)="updateSelectedPet(selectedPetId)">
-                            <option *ngFor="let pet of pets" [value]="pet.pet_id">{{ pet.pet_name }}</option>
-                        </select>
-                    </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Select Pet</label>
+            <select
+              [(ngModel)]="selectedPetId"
+              name="pet_id"
+              class="form-select mt-1 block w-full border-gray-300"
+              (change)="updateSelectedPet(selectedPetId)"
+            >
+              <option *ngFor="let pet of pets" [value]="pet.pet_id">
+                {{ pet.pet_name }}
+              </option>
+            </select>
+          </div>
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Selected Pet Image</label>
-                        <img [src]="selectedPet?.path" alt="Pet Image" class="preview-image" style="max-width: 200px; max-height: 200px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create User Pet</button>
-                </form>
-            </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Selected Pet Image</label>
+            <img
+              [src]="selectedPet?.path"
+              alt="Pet Image"
+              class="preview-image"
+              style="max-width: 200px; max-height: 200px"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Create User Pet</button>
+        </form>
+      </div>
 
-            <!-- Update User Pet Form -->
-            <div *ngIf="showForm" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Update User Pet</h3>
-                <form (submit)="updateUserPet()">
-                    <input type="hidden" [(ngModel)]="selectedUserPet.user_pet_id" name="user_pet_id">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">User ID</label>
-                        <input type="text" [(ngModel)]="selectedUserPet.user_id" name="user_id" class="form-input mt-1 block w-full border-gray-300" readonly>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Select Pet</label>
-                        <select [(ngModel)]="selectedUserPet.pet_id" name="pet_id" class="form-select mt-1 block w-full border-gray-300">
-                            <option *ngFor="let pet of pets" [value]="pet.pet_id">{{ pet.pet_name }}</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Hunger Level</label>
-                        <input type="number" [(ngModel)]="selectedUserPet.hunger_level" name="hunger_level" class="form-input mt-1 block w-full border-gray-300" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Selected Pet Image</label>
-                        <img [src]="selectedUserPet.path" alt="Pet Image" class="preview-image" style="max-width: 200px; max-height: 200px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update User Pet</button>
-                </form>
-            </div>
-        </div>
-        
-
-        <div *ngIf="currentSection === 'manage-items'">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Items</h2>
-            <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="showCreateItemForm()">Create Items</button>
-                <button class="btn btn-primary" (click)="fetchItems()">Fetch Items</button>
-            </div>
-            <table class="table-auto w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-gray-800">ID</th>
-                        <th class="px-4 py-2 text-gray-800">Item Name</th>
-                        <th class="px-4 py-2 text-gray-800">Description</th>
-                        <th class="px-4 py-2 text-gray-800">Item Type</th>
-                        <th class="px-4 py-2 text-gray-800">Current Image</th>
-                        <th class="px-4 py-2 text-gray-800">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let item of items" class="hover:bg-gray-50">
-                        <td class="border px-4 py-2 text-gray-700">{{ item.item_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ item.item_name }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ item.description }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ item.item_type }}</td>
-                        <td>
-                            <img [src]="item.path" alt="Pet Image" class="preview-image" style="max-width: 100px; max-height: 100px;">
-                          </td>
-                        <td class="border px-4 py-2">
-                            <button class="btn btn-secondary mr-2" (click)="populateItemForm(item)">Update</button>
-                            <button class="btn btn-danger" (click)="deleteItem(item.item_id)">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-             <!-- Create Item Form -->
-            <div *ngIf="showCreateForm" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Create Item</h3>
-                <form (submit)="createItem()">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Item Name</label>
-                        <input type="text" [(ngModel)]="newItem.item_name" name="item_name" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Description</label>
-                        <input type="text" [(ngModel)]="newItem.description" name="description" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Item Type</label>
-                        <input type="text" [(ngModel)]="newItem.item_type" name="item_type" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Upload Image</label>
-                        <input type="file" (change)="onFileSelectedItemimg($event)" accept="image/*" class="mt-1">
-                    </div>
-                    <div class="mb-4">
-                        <p>Image Preview:</p>
-                        <img [src]="imagePreviewUrl" *ngIf="imagePreviewUrl" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Item</button>
-                </form>
-            </div>
-
-            <div *ngIf="showForm" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Update Item</h3>
-                <form (submit)="updateItem()">
-                    <input type="hidden" [(ngModel)]="selectedItem.item_id" name="itemId">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Item Name</label>
-                        <input type="text" [(ngModel)]="selectedItem.item_name" name="item_name" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Description</label>
-                        <input type="text" [(ngModel)]="selectedItem.description" name="description" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Item Type</label>
-                        <input type="text" [(ngModel)]="selectedItem.item_type" name="item_type" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                      <div class="mb-4">
-                        <label class="block text-gray-700">Upload Image</label>
-                        <input type="file" (change)="onFileSelectedItemimg($event)" accept="image/*" class="mt-1">
-                    </div>
-                    <div class="mb-4">
-                        <p>Image Preview:</p>
-                        <img [src]="imagePreviewUrl || selectedItem.path" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Item</button>
-                </form>
-            </div>
-        </div>
-
-        <div *ngIf="currentSection === 'manage-pets'">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Pets</h2>
-            <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="showCreatePetForm()">Create Pets</button>
-                <button class="btn btn-primary" (click)="fetchPets()">Fetch Pets</button>
-            </div>
-            <table class="table-auto w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-gray-800">ID</th>
-                        <th class="px-4 py-2 text-gray-800">Pet Name</th>
-                        <th class="px-4 py-2 text-gray-800">Description</th>
-                        <th class="px-4 py-2 text-gray-800">Pet Type</th>
-                        <th class="px-4 py-2 text-gray-800">Current Image</th>
-                        <th class="px-4 py-2 text-gray-800">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let pet of pets" class="hover:bg-gray-50">
-                        <td class="border px-4 py-2 text-gray-700">{{ pet.pet_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ pet.pet_name }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ pet.description }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ pet.pet_type }}</td>
-                        <td>
-                            <img [src]="pet.path" alt="Pet Image" class="preview-image" style="max-width: 100px; max-height: 100px;">
-                          </td>
-                        <td class="border px-4 py-2">
-                            <button class="btn btn-secondary mr-2" (click)="populatePetForm(pet)">Update</button>
-                            <button class="btn btn-danger" (click)="deletePet(pet.pet_id)">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
-             <!-- Create Pet Form -->
-            <div *ngIf="showCreateForm" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Create Pet</h3>
-                <form (submit)="createPet()">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Pet Name</label>
-                        <input type="text" [(ngModel)]="newPet.pet_name" name="pet_name" class="form-input mt-1 block w-full border-gray-300" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Description</label>
-                        <input type="text" [(ngModel)]="newPet.description" name="description" class="form-input mt-1 block w-full border-gray-300" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Pet Type</label>
-                        <input type="text" [(ngModel)]="newPet.pet_type" name="pet_type" class="form-input mt-1 block w-full border-gray-300" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Upload Image</label>
-                        <input type="file" (change)="onFileSelectedPetimg($event)" accept="image/gif" class="mt-1">
-                    </div>
-                    <div class="mb-4">
-                        <p>Image Preview:</p>
-                        <img [src]="imagePreviewUrl || newPet.path" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Pet</button>
-                </form>
-            </div>
-
-            <div *ngIf="showForm" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Update Pet</h3>
-                <form (submit)="updatePet()">
-                    <input type="hidden" [(ngModel)]="selectedPet.pet_id" name="petId">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Pet Name</label>
-                        <input type="text" [(ngModel)]="selectedPet.pet_name" name="pet_name" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Description</label>
-                        <input type="text" [(ngModel)]="selectedPet.description" name="description" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Pet Type</label>
-                        <input type="text" [(ngModel)]="selectedPet.pet_type" name="pet_type" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Upload Image</label>
-                        <input type="file" (change)="onFileSelectedPetimg($event)" accept="image/*" class="mt-1">
-                    </div>
-                    <div class="mb-4">
-                        <p>Image Preview:</p>
-                        <img [src]="imagePreviewUrl || selectedPet.path" alt="Image Preview" class="preview-image mt-2" style="max-width: 200px; max-height: 200px;">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Pet</button>
-                </form>
-            </div>
-        </div>
-
-        <div *ngIf="currentSection === 'manage-storage'">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Storage</h2>
-            <div class="header flex justify-between items-center mb-4">
-                <button class="btn btn-primary" (click)="fetchUsers()">Fetch Storage Items</button>
-            </div>
-            <table class="table-auto w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-gray-800">Storage ID</th>
-                        <th class="px-4 py-2 text-gray-800">User ID</th>
-                        <th class="px-4 py-2 text-gray-800">Item ID</th>
-                        <th class="px-4 py-2 text-gray-800">Quantity</th>
-                        <th class="px-4 py-2 text-gray-800">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let storage of storageItems" class="hover:bg-gray-50">
-                        <td class="border px-4 py-2 text-gray-700">{{ storage.storage_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ storage.user_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ storage.item_id }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ storage.quantity }}</td>
-                        <td class="border px-4 py-2">
-                            <button class="btn btn-secondary mr-2" (click)="populateStorageForm(storage)">Update</button>
-                            <button class="btn btn-danger" (click)="deleteStorageItem(storage.storage_id, storage.user_id, storage.item_id)">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div *ngIf="selectedStorageItem" class="mt-4">
-                <h3 class="text-lg font-semibold text-gray-800">Update Storage Item</h3>
-                <form (submit)="updateStorageItem()">
-                    <input type="hidden" [(ngModel)]="selectedStorageItem.storage_id" name="storageId">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">User ID</label>
-                        <input type="text" [(ngModel)]="selectedStorageItem.user_id" name="userId" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Item ID</label>
-                        <input type="text" [(ngModel)]="selectedStorageItem.item_id" name="itemId" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Quantity</label>
-                        <input type="number" [(ngModel)]="selectedStorageItem.quantity" name="quantity" class="form-input mt-1 block w-full border-gray-300">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Storage Item</button>
-                </form>
-            </div>
-        </div>
+      <!-- Update User Pet Form -->
+      <div *ngIf="showForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Update User Pet</h3>
+        <form (submit)="updateUserPet()">
+          <input
+            type="hidden"
+            [(ngModel)]="selectedUserPet.user_pet_id"
+            name="user_pet_id"
+          />
+          <div class="mb-4">
+            <label class="block text-gray-700">User ID</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedUserPet.user_id"
+              name="user_id"
+              class="form-input mt-1 block w-full border-gray-300"
+              readonly
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Select Pet</label>
+            <select
+              [(ngModel)]="selectedUserPet.pet_id"
+              name="pet_id"
+              class="form-select mt-1 block w-full border-gray-300"
+            >
+              <option *ngFor="let pet of pets" [value]="pet.pet_id">
+                {{ pet.pet_name }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Hunger Level</label>
+            <input
+              type="number"
+              [(ngModel)]="selectedUserPet.hunger_level"
+              name="hunger_level"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Selected Pet Image</label>
+            <img
+              [src]="selectedUserPet.path"
+              alt="Pet Image"
+              class="preview-image"
+              style="max-width: 200px; max-height: 200px"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Update User Pet</button>
+        </form>
+      </div>
     </div>
+
+    <div *ngIf="currentSection === 'manage-items'">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Items</h2>
+      <div class="header flex justify-between items-center mb-4">
+        <button class="btn btn-primary" (click)="showCreateItemForm()">
+          Create Items
+        </button>
+        <button class="btn btn-primary" (click)="fetchItems()">
+          Fetch Items
+        </button>
+      </div>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">ID</th>
+            <th class="px-4 py-2 text-gray-800">Item Name</th>
+            <th class="px-4 py-2 text-gray-800">Description</th>
+            <th class="px-4 py-2 text-gray-800">Item Type</th>
+            <th class="px-4 py-2 text-gray-800">Current Image</th>
+            <th class="px-4 py-2 text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">{{ item.item_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ item.item_name }}</td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ item.description }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">{{ item.item_type }}</td>
+            <td>
+              <img
+                [src]="item.path"
+                alt="Pet Image"
+                class="preview-image"
+                style="max-width: 100px; max-height: 100px"
+              />
+            </td>
+            <td class="border px-4 py-2">
+              <button
+                class="btn btn-secondary mr-2"
+                (click)="populateItemForm(item)"
+              >
+                Update
+              </button>
+              <button class="btn btn-danger" (click)="deleteItem(item.item_id)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Create Item Form -->
+      <div *ngIf="showCreateForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Create Item</h3>
+        <form (submit)="createItem()">
+          <div class="mb-4">
+            <label class="block text-gray-700">Item Name</label>
+            <input
+              type="text"
+              [(ngModel)]="newItem.item_name"
+              name="item_name"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Description</label>
+            <input
+              type="text"
+              [(ngModel)]="newItem.description"
+              name="description"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Item Type</label>
+            <input
+              type="text"
+              [(ngModel)]="newItem.item_type"
+              name="item_type"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Upload Image</label>
+            <input
+              type="file"
+              (change)="onFileSelectedItemimg($event)"
+              accept="image/*"
+              class="mt-1"
+            />
+          </div>
+          <div class="mb-4">
+            <p>Image Preview:</p>
+            <img
+              [src]="imagePreviewUrl"
+              *ngIf="imagePreviewUrl"
+              alt="Image Preview"
+              class="preview-image mt-2"
+              style="max-width: 200px; max-height: 200px"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Item</button>
+        </form>
+      </div>
+
+      <div *ngIf="showForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Update Item</h3>
+        <form (submit)="updateItem()">
+          <input
+            type="hidden"
+            [(ngModel)]="selectedItem.item_id"
+            name="itemId"
+          />
+          <div class="mb-4">
+            <label class="block text-gray-700">Item Name</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedItem.item_name"
+              name="item_name"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Description</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedItem.description"
+              name="description"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Item Type</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedItem.item_type"
+              name="item_type"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Upload Image</label>
+            <input
+              type="file"
+              (change)="onFileSelectedItemimg($event)"
+              accept="image/*"
+              class="mt-1"
+            />
+          </div>
+          <div class="mb-4">
+            <p>Image Preview:</p>
+            <img
+              [src]="imagePreviewUrl || selectedItem.path"
+              alt="Image Preview"
+              class="preview-image mt-2"
+              style="max-width: 200px; max-height: 200px"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Update Item</button>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="currentSection === 'manage-pets'">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Pets</h2>
+      <div class="header flex justify-between items-center mb-4">
+        <button class="btn btn-primary" (click)="showCreatePetForm()">
+          Create Pets
+        </button>
+        <button class="btn btn-primary" (click)="fetchPets()">
+          Fetch Pets
+        </button>
+      </div>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">ID</th>
+            <th class="px-4 py-2 text-gray-800">Pet Name</th>
+            <th class="px-4 py-2 text-gray-800">Description</th>
+            <th class="px-4 py-2 text-gray-800">Pet Type</th>
+            <th class="px-4 py-2 text-gray-800">Current Image</th>
+            <th class="px-4 py-2 text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pet of pets" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">{{ pet.pet_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ pet.pet_name }}</td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ pet.description }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">{{ pet.pet_type }}</td>
+            <td>
+              <img
+                [src]="pet.path"
+                alt="Pet Image"
+                class="preview-image"
+                style="max-width: 100px; max-height: 100px"
+              />
+            </td>
+            <td class="border px-4 py-2">
+              <button
+                class="btn btn-secondary mr-2"
+                (click)="populatePetForm(pet)"
+              >
+                Update
+              </button>
+              <button class="btn btn-danger" (click)="deletePet(pet.pet_id)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Create Pet Form -->
+      <div *ngIf="showCreateForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Create Pet</h3>
+        <form (submit)="createPet()">
+          <div class="mb-4">
+            <label class="block text-gray-700">Pet Name</label>
+            <input
+              type="text"
+              [(ngModel)]="newPet.pet_name"
+              name="pet_name"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Description</label>
+            <input
+              type="text"
+              [(ngModel)]="newPet.description"
+              name="description"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Pet Type</label>
+            <input
+              type="text"
+              [(ngModel)]="newPet.pet_type"
+              name="pet_type"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Upload Image</label>
+            <input
+              type="file"
+              (change)="onFileSelectedPetimg($event)"
+              accept="image/gif"
+              class="mt-1"
+            />
+          </div>
+          <div class="mb-4">
+            <p>Image Preview:</p>
+            <img
+              [src]="imagePreviewUrl || newPet.path"
+              alt="Image Preview"
+              class="preview-image mt-2"
+              style="max-width: 200px; max-height: 200px"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Pet</button>
+        </form>
+      </div>
+
+      <div *ngIf="showForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Update Pet</h3>
+        <form (submit)="updatePet()">
+          <input type="hidden" [(ngModel)]="selectedPet.pet_id" name="petId" />
+          <div class="mb-4">
+            <label class="block text-gray-700">Pet Name</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedPet.pet_name"
+              name="pet_name"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Description</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedPet.description"
+              name="description"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Pet Type</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedPet.pet_type"
+              name="pet_type"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Upload Image</label>
+            <input
+              type="file"
+              (change)="onFileSelectedPetimg($event)"
+              accept="image/*"
+              class="mt-1"
+            />
+          </div>
+          <div class="mb-4">
+            <p>Image Preview:</p>
+            <img
+              [src]="imagePreviewUrl || selectedPet.path"
+              alt="Image Preview"
+              class="preview-image mt-2"
+              style="max-width: 200px; max-height: 200px"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Update Pet</button>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="currentSection === 'manage-storage'">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Storage</h2>
+      <div class="header flex justify-between items-center mb-4">
+        <button class="btn btn-primary" (click)="fetchUsers()">
+          Fetch Storage Items
+        </button>
+      </div>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">Storage ID</th>
+            <th class="px-4 py-2 text-gray-800">User ID</th>
+            <th class="px-4 py-2 text-gray-800">Item ID</th>
+            <th class="px-4 py-2 text-gray-800">Quantity</th>
+            <th class="px-4 py-2 text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let storage of storageItems" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storage.storage_id }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storage.user_id }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storage.item_id }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storage.quantity }}
+            </td>
+            <td class="border px-4 py-2">
+              <button
+                class="btn btn-secondary mr-2"
+                (click)="populateStorageForm(storage)"
+              >
+                Update
+              </button>
+              <button
+                class="btn btn-danger"
+                (click)="
+                  deleteStorageItem(
+                    storage.storage_id,
+                    storage.user_id,
+                    storage.item_id
+                  )
+                "
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="selectedStorageItem" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Update Storage Item</h3>
+        <form (submit)="updateStorageItem()">
+          <input
+            type="hidden"
+            [(ngModel)]="selectedStorageItem.storage_id"
+            name="storageId"
+          />
+          <div class="mb-4">
+            <label class="block text-gray-700">User ID</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedStorageItem.user_id"
+              name="userId"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Item ID</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedStorageItem.item_id"
+              name="itemId"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Quantity</label>
+            <input
+              type="number"
+              [(ngModel)]="selectedStorageItem.quantity"
+              name="quantity"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Update Storage Item
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="currentSection === 'manage-activities'">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">
+        Manage Activities
+      </h2>
+
+      <div class="header flex justify-between items-center mb-4">
+        <button class="btn btn-primary" (click)="showCreateActivityForm()">
+          Add Activity
+        </button>
+        <button class="btn btn-primary" (click)="fetchActivities()">
+          Fetch Activities
+        </button>
+      </div>
+
+      <!-- Activity Table -->
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">Activity ID</th>
+            <th class="px-4 py-2 text-gray-800">Language</th>
+            <th class="px-4 py-2 text-gray-800">Word Count</th>
+            <th class="px-4 py-2 text-gray-800">Coins</th>
+            <th class="px-4 py-2 text-gray-800">Time</th>
+            <th class="px-4 py-2 text-gray-800">Timestamp</th>
+            <th class="px-4 py-2 text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let activity of activities" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">
+              {{ activity.ActivityCode_ID }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ activity.Languages }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ activity.wordcount }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">{{ activity.coins }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ activity.time }}</td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ activity.Timestamp }}
+            </td>
+            <td class="border px-4 py-2">
+              <button
+                class="btn btn-secondary mr-2"
+                (click)="populateActivityForm(activity)"
+              >
+                Update
+              </button>
+              <button
+                class="btn btn-danger"
+                (click)="deleteActivity(activity.ActivityCode_ID)"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Create Activity Form -->
+      <div *ngIf="showCreateForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Create Activity</h3>
+        <form (submit)="createActivity()">
+          <div class="mb-4">
+            <label class="block text-gray-700">Language</label>
+            <input
+              type="text"
+              [(ngModel)]="newActivity.Languages"
+              name="Languages"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Word Count</label>
+            <input
+              type="number"
+              [(ngModel)]="newActivity.wordcount"
+              name="wordcount"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Coins</label>
+            <input
+              type="number"
+              [(ngModel)]="newActivity.coins"
+              name="coins"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Time</label>
+            <input
+              type="number"
+              [(ngModel)]="newActivity.time"
+              name="time"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Create Activity</button>
+        </form>
+      </div>
+
+      <!-- Update Activity Form -->
+      <div *ngIf="showUpdateForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">Update Activity</h3>
+        <form (submit)="updateActivity()">
+          <input
+            type="hidden"
+            [(ngModel)]="selectedActivity.ActivityCode_ID"
+            name="ActivityCode_ID"
+          />
+          <div class="mb-4">
+            <label class="block text-gray-700">Language</label>
+            <input
+              type="text"
+              [(ngModel)]="selectedActivity.Languages"
+              name="Languages"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Word Count</label>
+            <input
+              type="number"
+              [(ngModel)]="selectedActivity.wordcount"
+              name="wordcount"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Coins</label>
+            <input
+              type="number"
+              [(ngModel)]="selectedActivity.coins"
+              name="coins"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Time</label>
+            <input
+              type="number"
+              [(ngModel)]="selectedActivity.time"
+              name="time"
+              class="form-input mt-1 block w-full border-gray-300"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Update Activity</button>
+        </form>
+      </div>
+    </div>
+    
+   <!-- Manage Logs Section -->
+   <div *ngIf="currentSection === 'manage-logs'">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">Manage Logs</h2>
+    <div class="mb-6">
+      <button (click)="fetchPurchaseLogs()" class="btn btn-primary mr-2">Fetch Purchase Logs</button>
+      <button (click)="fetchFeedLogs()" class="btn btn-primary">Fetch Feed Logs</button>
+    </div>
+    <!-- Purchase Logs Table -->
+    <div *ngIf="purchaseLogs.length > 0">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Purchase Logs</h2>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">Log ID</th>
+            <th class="px-4 py-2 text-gray-800">User ID</th>
+            <th class="px-4 py-2 text-gray-800">Item ID</th>
+            <th class="px-4 py-2 text-gray-800">Quantity</th>
+            <th class="px-4 py-2 text-gray-800">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of purchaseLogs" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">{{ log.log_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.user_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.item_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.quantity }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.timestamp }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Feed Logs Table -->
+    <div *ngIf="feedLogs.length > 0" class="mt-6">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Feed Logs</h2>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">Log ID</th>
+            <th class="px-4 py-2 text-gray-800">User ID</th>
+            <th class="px-4 py-2 text-gray-800">Pet ID</th>
+            <th class="px-4 py-2 text-gray-800">Item ID</th>
+            <th class="px-4 py-2 text-gray-800">Food Value</th>
+            <th class="px-4 py-2 text-gray-800">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of feedLogs" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">{{ log.log_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.user_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.pet_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.item_id }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.food_value }}</td>
+            <td class="border px-4 py-2 text-gray-700">{{ log.timestamp }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+    <div *ngIf="currentSection === 'manage-store-items'">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">
+        Manage Store Items
+      </h2>
+      <div class="header flex justify-between items-center mb-4">
+        <button class="btn btn-primary" (click)="showCreateStoreItemForm()">
+          Add Store Item
+        </button>
+        <button class="btn btn-primary" (click)="fetchStoreItems()">
+          Fetch Store Items
+        </button>
+      </div>
+      <table class="table-auto w-full bg-white border border-gray-200">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 text-gray-800">Store Item ID</th>
+            <th class="px-4 py-2 text-gray-800">Item ID</th>
+            <th class="px-4 py-2 text-gray-800">Item Name</th>
+            <th class="px-4 py-2 text-gray-800">Price</th>
+            <th class="px-4 py-2 text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let storeItem of storeItems" class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storeItem.store_item_id }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storeItem.item_id }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storeItem.item_name }}
+            </td>
+            <td class="border px-4 py-2 text-gray-700">
+              {{ storeItem.price | currency }}
+            </td>
+            <td class="border px-4 py-2">
+              <button
+                class="btn btn-secondary mr-2"
+                (click)="populateStoreItemForm(storeItem)"
+              >
+                Update
+              </button>
+              <button
+                class="btn btn-danger"
+                (click)="deleteStoreItem(storeItem.store_item_id)"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Form for Creating or Updating Store Items -->
+      <div *ngIf="showStoreItemForm" class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-800">
+          {{ storeItemFormTitle }}
+        </h3>
+        <form (submit)="submitStoreItemForm()">
+          <div class="mb-4">
+            <label class="block text-gray-700">Item ID</label>
+            <input
+              type="text"
+              [(ngModel)]="newStoreItem.item_id"
+              name="item_id"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700">Price</label>
+            <input
+              type="number"
+              [(ngModel)]="newStoreItem.price"
+              name="price"
+              class="form-input mt-1 block w-full border-gray-300"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            {{ storeItemFormTitle }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

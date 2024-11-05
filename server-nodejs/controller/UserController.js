@@ -4,6 +4,8 @@ const UserPetsModel = require('../model/userPetsModel');
 const ItemStorageModel = require('../model/ItemstorageModel');
 const DecorationModel = require('../model/DecorationModel');
 const CoinsModel = require('../model/coinsModel');
+const LogModel = require('../model/LogModel');
+
 const jwt = require("jsonwebtoken");
 
 const tokenExtensionsGenerate = (req, res) => {
@@ -20,7 +22,6 @@ const tokenExtensionsGenerate = (req, res) => {
 
 const buyItem = async (req, res) => {
   const { uid, item_id } = req.body;
-
   console.log('Buying item:', { uid, item_id });
 
   if (!uid || !item_id) {
@@ -34,9 +35,11 @@ const buyItem = async (req, res) => {
     const existingItem = await ItemStorageModel.checkItemInStorageItem(uid, item_id);
     if (existingItem) {
       const updatedItem = await ItemStorageModel.updateStorageItem(existingItem.storage_id, uid, item_id, existingItem.quantity + 1);
+      await LogModel.logPurchase(uid, item_id, 1, itemPrice); // Logging purchase
       return res.status(200).json({ message: 'Item updated successfully' });
     } else {
       const newItem = await ItemStorageModel.createStorageItem(uid, item_id, 1);
+      await LogModel.logPurchase(uid, item_id, 1, itemPrice); // Logging purchase
       return res.status(201).json({ message: 'Item bought successfully' });
     }
   } catch (error) {
@@ -44,7 +47,6 @@ const buyItem = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
-
   
 const deleteItemfromStorage = async (req, res) => {
     const { storageId, userId, itemId } = req.body;
@@ -159,33 +161,23 @@ const randomizePet = async (req, res) => {
   
   
 const feedPet = async (req, res) => {
-    const { uid, petId, foodValue} = req.body;
+  const { uid, petId, foodValue, itemId } = req.body;
   
-    try {
-      // Check if the food item exists in the user's storage
-      const foodItem = await ItemStorageModel.getFoodItem(uid, foodValue);
-      if (!foodItem || foodItem.quantity === 0) {
-        return res.status(400).json({ error: 'Food item not found or quantity is zero' });
-      }
-  
-      // Update the pet's hunger level
-      await PetModel.updateHungerLevel(petId, foodValue);
-  
-      // Update the quantity of food in storage
-      const newQuantity = foodItem.quantity - 1;
-      await ItemStorageModel.updateFoodQuantity(foodItem.storage_id, newQuantity);
-  
-      // Delete the food item if the quantity is zero
-      if (newQuantity === 0) {
-        await ItemStorageModel.deleteFoodItem(foodItem.storage_id);
-      }
-  
+  if (!itemId) {
+      return res.status(400).json({ error: 'Item ID is required' });
+  }
+
+  try {
+      await LogModel.logFeedPet(uid, petId, itemId, 1);
       res.status(200).json({ message: 'Pet fed successfully' });
-    } catch (error) {
+  } catch (error) {
       console.error('Error feeding pet:', error);
       res.status(500).json({ error: 'An error occurred while feeding the pet' });
-    }
+  }
 };
+
+
+
 
 const updateProgress = async (req, res) => {
   const { userId, itemId, progress } = req.body;

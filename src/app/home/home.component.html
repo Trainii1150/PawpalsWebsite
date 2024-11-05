@@ -168,9 +168,6 @@
   <!-- Pet Name and Rename Button -->
   <div class="flex items-center space-x-2 mt-4">
     <h5 class="text-2xl font-bold">{{ petName }}</h5>
-    <button class="text-blue-500 underline text-sm" (click)="promptForPetNameChange()">
-      Change Name
-    </button>
   </div>
 
   <!-- Pet Image and Navigation Arrows -->
@@ -196,31 +193,38 @@
     </div>
   </div>
 
-  <!-- Info Modal -->
-  <div *ngIf="showInfoModal" class="w-full mt-4">
-    <div class="bg-white rounded-lg p-4 shadow-lg text-black">
-      <h2 class="text-2xl font-bold mb-4">Pet Info</h2>
-      <p><strong>Name:</strong> {{ petName }}</p>
-      <p><strong>Food Status:</strong> {{ foodStatus }}</p>
-      <p><strong>Happiness Status:</strong> {{ happinessStatus }}</p>
-      <p><strong>Experience (Exp):</strong> {{ exp }}</p>
-    </div>
+<!-- Info Modal -->
+<div *ngIf="showInfoModal" class="w-full mt-4">
+  <div class="bg-white rounded-lg p-4 shadow-lg text-black">
+    <h2 class="text-2xl font-bold mb-4">Pet Info</h2>
+    
+    <!-- Pet Name with Edit Icon Button -->
+    <p class="flex items-center">
+      <strong>Name:</strong> {{ petName }}
+      <button (click)="promptForPetNameChange()" class="ml-2 text-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l3 3L5 20H2v-3l7-7z" />
+        </svg>
+      </button>
+    </p>
+    <p><strong>Food Status:</strong> {{ foodStatus }}</p>
+    <p><strong>Experience (Exp):</strong> {{ exp }}</p>
   </div>
+</div>
+
 </div>
 
 
       <!-- Recent Files and Other Widgets -->
       <div class="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div class="flex flex-col bg-white shadow rounded-2xl p-4">
+          
           <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4">
             {{ "UNLOCK_NEW_ITEMS" | translate }}
           </h5>
           <div class="flex items-center">
             <div class="flex-1">
-              <div class="text-3xl font-bold">{{ progress }}</div>
-              <div class="text-sm text-gray-500">
-                {{ progress_item_path }}
-              </div>
+              <progress class="progress w-full" [value]="progress" max="100"></progress>
             </div>
             <img class="w-16 h-16 object-contain" [src]="progress_item_path" alt="food image" />
           </div>
@@ -290,18 +294,26 @@
 </ul>
 
 
-  <!-- Randomize Pet Option -->
-  <div class="lg:col-start-2 bg-white shadow rounded-2xl p-6 mt-8 lg:mt-0 lg:ml-4">
-    <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4 text-center">Randomize Pet</h5>
-    <p class="text-sm text-gray-700 text-center mb-4">Use 10,000 coins to randomize a pet.</p>
-    <button
-      (click)="randomizePet()"
-      [disabled]="userCoins < 10000" 
-      class="bg-blue-500 text-white py-2 px-4 rounded-full w-full font-semibold"
-    >
-      Randomize Pet
-    </button>
+<!-- Randomize Pet Option -->
+<div class="lg:col-start-2 bg-white shadow rounded-2xl p-6 mt-8 lg:mt-0 lg:ml-4">
+  <h5 class="text-xl font-bold text-gray-900 dark:text-black mb-4 text-center">Randomize Pet</h5>
+  <p class="text-sm text-gray-700 text-center mb-4">You can only randomize a pet 1 in 24 hour.</p> 
+
+  <button
+    (click)="randomizePet()"
+    [disabled]="countdown" 
+    class="bg-blue-500 text-white py-2 px-4 rounded-full w-full font-semibold"
+  >
+    Randomize Pet
+  </button>
+
+  <!-- แสดงเวลานับถอยหลัง -->
+  <div *ngIf="countdown" class="text-center text-sm mt-2">
+    Cooldown: {{ countdown }}
   </div>
+</div>
+
+  
      
     </div>
   </section>

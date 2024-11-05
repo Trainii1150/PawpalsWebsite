@@ -2,12 +2,16 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const axios = require('axios');
 const path = require('path');
-const userModel = require('../model/Usermodel'); // Import userModel
+const userModel = require('../model/Usermodel'); 
 const StorageItemModel = require('../model/ItemstorageModel');
 const itemModel = require('../model/ItemModel');
 const UserPetsModel = require('../model/userPetsModel');
 const PetModel = require('../model/PetModel');
 const UserCoinModel = require('../model/coinsModel');
+const StoreModel = require('../model/StoreModel'); 
+const ActivityModel = require('../model/ActivityModel'); 
+const LogModel = require('../model/LogModel');
+
 
 // Adds an item to storage or updates the quantity if it already exists.
 const addItemToStorage = async (req, res) => {
@@ -359,7 +363,125 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const getStoreItems = async (req, res) => {
+    try {
+        const storeItems = await StoreModel.getStoreItems();
+        res.status(200).json(storeItems);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch store items', error: error.message });
+    }
+};
+
+const addStoreItem = async (req, res) => {
+    const { itemId, price } = req.body;
+    try {
+        const newStoreItem = await StoreModel.addStoreItem(itemId, price);
+        res.status(201).json({ message: 'Store item added successfully', storeItem: newStoreItem });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to add store item', error: error.message });
+    }
+};
+
+const updateStoreItem = async (req, res) => {
+    const { storeItemId, itemId, price } = req.body;
+    try {
+        const updatedStoreItem = await StoreModel.updateStoreItem(storeItemId, itemId, price);
+        res.status(200).json({ message: 'Store item updated successfully', storeItem: updatedStoreItem });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update store item', error: error.message });
+    }
+};
+
+const deleteStoreItem = async (req, res) => {
+    const { storeItemId } = req.body;
+    try {
+        await StoreModel.deleteStoreItem(storeItemId);
+        res.status(200).json({ message: 'Store item deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete store item', error: error.message });
+    }
+};
+
+// Get all activities
+const getActivities = async (req, res) => {
+    try {
+      const activities = await ActivityModel.getAllActivities();
+      res.status(200).json(activities);
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+      res.status(500).json({ message: 'Failed to fetch activities', error: error.message });
+    }
+  };
+  
+  // Add a new activity
+  const addActivity = async (req, res) => {
+    try {
+      const activity = req.body;
+      const newActivity = await ActivityModel.addActivity(activity);
+      res.status(201).json(newActivity);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to add activity', error: error.message });
+    }
+  };
+  
+  // Update an existing activity by ActivityCode_ID
+  const updateActivity = async (req, res) => {
+    try {
+      const { ActivityCode_ID } = req.params;
+      const updatedData = req.body;
+      const updatedActivity = await ActivityModel.updateActivity(ActivityCode_ID, updatedData);
+      res.status(200).json(updatedActivity);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update activity', error: error.message });
+    }
+  };
+  
+  // Delete an activity by ActivityCode_ID
+  const deleteActivity = async (req, res) => {
+    try {
+      const { ActivityCode_ID } = req.params;
+      await ActivityModel.deleteActivity(ActivityCode_ID);
+      res.status(200).json({ message: 'Activity deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete activity', error: error.message });
+    }
+  };
+  const getPurchaseLogs = async (req, res) => {
+    try {
+        const purchaseLogs = await LogModel.getPurchaseLogs();
+        res.status(200).json(purchaseLogs);
+    } catch (error) {
+        console.error('Error fetching purchase logs:', error);
+        res.status(500).json({ message: 'Failed to fetch purchase logs', error: error.message });
+    }
+};
+
+// ฟังก์ชันดึง log การให้อาหารสัตว์เลี้ยง
+const getFeedLogs = async (req, res) => {
+    try {
+        const feedLogs = await LogModel.getFeedLogs();
+        res.status(200).json(feedLogs);
+    } catch (error) {
+        console.error('Error fetching feed logs:', error);
+        res.status(500).json({ message: 'Failed to fetch feed logs', error: error.message });
+    }
+};
+
 module.exports = {
+    getFeedLogs,
+    getPurchaseLogs,
+    getActivities,
+    addActivity,
+    updateActivity,
+    deleteActivity,
+    getStoreItems,
+    addStoreItem,
+    updateStoreItem,
+    deleteStoreItem,
+    getStoreItems,
+    addStoreItem,
+    updateStoreItem,
+    deleteStoreItem,
     addItemToStorage,
     updateStorageItem,
     deleteItemFromStorage,
